@@ -1,0 +1,24 @@
+{
+  "version": 1,
+  "components": {
+    "GoButton": {
+      "purpose": "Trigger a user-initiated action.",
+      "props": {
+        "label": { "type": "string", "required": true, "description": "Visible, localized action label." },
+        "onPress": { "type": "() => void", "required": true, "description": "Callback supplied by the app." },
+        "disabled": { "type": "boolean", "required": false, "default": false }
+      },
+      "states": ["default", "pressed", "disabled"],
+      "accessibility": { "role": "button", "minimumTarget": 44 },
+      "usage": "Use an action verb. Keep navigation and domain behavior in the app callback."
+    },
+    "GoCard": {
+      "purpose": "Group related content in a themed surface.",
+      "props": {
+        "children": { "type": "ReactNode", "required": true }
+      },
+      "states": ["default"],
+      "usage": "Put a labeled control inside the card when the content needs an action."
+    }
+  }
+}

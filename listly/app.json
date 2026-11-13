@@ -1,0 +1,13 @@
+{
+  "expo": {
+    "name": "Listly",
+    "slug": "listly",
+    "version": "0.1.0",
+    "userInterfaceStyle": "automatic",
+    "platforms": [
+      "ios",
+      "android",
+      "web"
+    ]
+  }
+}
