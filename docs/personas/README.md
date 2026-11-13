@@ -1,6 +1,6 @@
 # GO Commerce Personas
 
-Proto-personas for **Listly** (built first) and **SellerStudio** (built second). They are hypotheses built from the PRDs and secondary market research and need validating with 10–15 seller interviews.
+Proto-personas for **Listly**, including its photo-cleanup step (formerly the separate SellerStudio app; folded into Listly's Reseller mode on 2026-11-13). They are hypotheses built from the PRDs and secondary market research and need validating with 10–15 seller interviews.
 
 | Persona | File | Listly mode | Role |
 |---|---|---|---|
@@ -15,9 +15,9 @@ Proto-personas for **Listly** (built first) and **SellerStudio** (built second).
 
 ## Build order
 
-**Simple mode (Maya) ships first**, decided 2026-11-13. Reseller mode (Dre) follows. The data model supports both from day one, so Reseller mode adds interface rather than requiring a migration.
+**Simple mode (Maya) ships first**, decided 2026-11-13, as the free front door. Reseller mode (Dre) follows as a **paid beta about 45 days after launch**, and that's where paying sellers are expected to come from (updated 2026-11-13 after the [strategy review](../strategy/strategy-review-2026-11.md)). The data model supports both from day one, so Reseller mode adds interface rather than requiring a migration.
 
 ## Not yet covered
 
-- **Makers and artists** (Etsy and own-shop sellers of originals). Planned as the next persona, mostly for SellerStudio and brand-voice features.
+- **Makers and artists** (Etsy and own-shop sellers of originals). Planned as the next persona, mostly for photo editing and brand-voice features. Interviews with this group should also test whether anyone would pay for photo editing as a separate app.
 - **Small shops with repeat SKUs.** Out of scope until marketplace API access exists.

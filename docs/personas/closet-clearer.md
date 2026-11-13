@@ -87,7 +87,7 @@ She does four more items. Listly keeps the rest in a "Still to list" tray with t
 1. **Photo → paste-ready listing in under 2 minutes**, without leaving the flow.
 2. **Two or three plain-language questions** to capture brand, size and flaws. Nothing made up by the AI.
 3. **One marketplace, one tap to copy.** Formatted for the app she uses.
-4. **A price suggestion** (validate the data source; see open questions).
+4. **A price suggestion.** MVP 1 shows an AI estimate clearly labeled as a guess. A suggestion based on sold prices waits until the data source is confirmed.
 5. **A "Still to list" tray** so her half-finished clear-outs survive.
 6. **A light sense of progress:** items listed, items sold, money made.
 7. **Help selling several items to one buyer.** Bundle-friendly listing copy, a reminder to turn on the marketplace's bundle discount, and a quick way to mark a bundle as sold with one total.

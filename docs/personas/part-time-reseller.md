@@ -2,7 +2,7 @@
 
 > **Status:** Proto-persona (hypothesis). Built from the Listly PRD v0.2 and secondary market research, not from interviews with sellers. Validate it before treating it as fact. See "Research gaps" at the end.
 >
-> **App:** Listly, "Reseller" mode (later also SellerStudio)
+> **App:** Listly, "Reseller" mode (paid beta about 45 days after launch), including the "fix photo" step that replaces the separate SellerStudio app
 > **Role in the product:** The paying core. Uses the app weekly or daily, feels the double-sale pain, and already pays for tools.
 
 ---
@@ -91,7 +91,8 @@ Thursday at lunch his phone buzzes: the band tee sold on Poshmark. He forwards t
 4. **A "sold, remove it everywhere else" alarm** with deep links, without needing marketplace APIs (manual tap or forwarded sale email in MVP).
 5. **A stale-inventory view** of items to reprice or relist.
 6. **Bin and location tracking** (later release: QR labels).
-7. **Later:** automatic delisting via approved APIs or a desktop/browser companion; SellerStudio photos attached to the same item.
+7. **A "fix photo" step** in the listing flow (crop, straighten, brighten, optional background) that never hides condition evidence. This replaces the separate SellerStudio app.
+8. **Later:** automatic delisting via approved APIs. A browser extension is on hold until a marketplace terms-of-service review, because the architecture rules out browser automation.
 
 ## Design implications
 
@@ -99,8 +100,8 @@ Thursday at lunch his phone buzzes: the band tee sold on Poshmark. He forwards t
 - **The double-sale alarm is the hero feature.** It must be impossible to miss, act within seconds and never claim an item was delisted until he confirms (PRD principle: honest status). In MVP, Listly *tells him what to do*; it doesn't do it for him.
 - **Built for speed and repetition.** Voice input for measurements, "same as last item" defaults, quick switching between marketplaces, minimal confirmation dialogs for non-destructive steps.
 - **Accuracy beats polish.** Condition and measurements are verified fields, clearly marked. Generated copy must never describe an item better than it is.
-- **The mobile app must stand alone.** He shouldn't need a laptop for the core loop. A desktop or browser companion is a later accelerator for bulk crosslisting, and the interviews should decide how soon.
-- **Monetization:** subscription in the range of about $9.99–19.99/mo (PRD: Creator and Seller Pro tiers), priced against crosslisters. Free trial long enough to catch one double sale.
+- **The mobile app must stand alone.** He shouldn't need a laptop for the core loop. A **web companion** from the same Expo codebase (ledger view, bulk copy, CSV export) ships with the Reseller beta for desk work.
+- **Monetization (proposed):** subscription of about $9.99–12.99/mo, priced against crosslisters such as Flyp (about $9/mo) and Vendoo (about $14.99/mo), which delist automatically. Free trial of 30 days, long enough to catch one double sale. Confirm after the AI cost test and a legal check of US web-checkout rules.
 - **Data he can take with him.** CSV export of his inventory. Trust matters to people running a business on the tool.
 
 ## What success looks like for him
@@ -114,7 +115,7 @@ Thursday at lunch his phone buzzes: the band tee sold on Poshmark. He forwards t
 
 - **Strong existing tools.** Crosslisters already do automated posting; without APIs, Listly's MVP is more manual. The pitch has to be phone-first, accurate and protecting items from double sales, not "posts for you."
 - **The ledger only works if he keeps it up to date.** If recording sales feels like extra work, he'll stop and the ledger will be wrong. Forwarding sale emails is the key test.
-- **Desktop pull.** If interviews show he does bulk crosslisting at a desk, the desktop or browser companion moves earlier in the roadmap.
+- **Desktop pull.** If interviews show he does bulk crosslisting at a desk, the web companion needs more than a ledger view and bulk copy, and the case for a browser extension (subject to a terms-of-service review) gets stronger.
 - **Marketplace terms.** Deep links and email parsing are fine; automating marketplace websites may break their terms. Needs a review before any automation.
 
 ## Research gaps

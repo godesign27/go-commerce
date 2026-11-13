@@ -1,21 +1,30 @@
 # GO Commerce
 
-AI seller tools for people who sell secondhand and handmade goods online. Two apps share one backend:
+AI seller tools for people who sell secondhand and handmade goods online.
 
-| App | What it does | Status |
+| Product | What it does | Status |
 |---|---|---|
-| **Listly** | Turns photos and a few plain answers into honest, paste-ready marketplace listings, and tracks what's listed and sold. | **Building first.** Simple mode MVP 1 is defined; the Expo scaffold and design system exist. |
-| **SellerStudio** | Conversational product-photo editing that never misrepresents the item. | Second. PRD only. |
+| **Listly** | Keeps one honest record of everything you're selling, wherever you sell it, from your phone. Photos and a few plain answers become paste-ready marketplace listings, and Listly tracks what's listed and sold. | **Building.** Simple mode MVP 1 is defined; the Expo scaffold and design system exist. |
+| **SellerStudio** | Product-photo cleanup that never misrepresents the item. | **Now a Listly Reseller-mode feature** ("fix photo" step), not a separate app. Its PRD is kept for principles. |
 
 ## Where things stand (2026-11-13)
 
-- **Platform:** Listly is one **Expo (React Native) app for iOS and Android**. Desktop or web comes later if research supports it. This **supersedes** the "SwiftUI, iPhone-first" choice in the planning docs.
+Updated after the [strategy review](docs/strategy/strategy-review-2026-11.md) on 2026-11-13.
+
+- **Platform:** Listly is one **Expo (React Native) app for iOS and Android**, mobile-first. This **supersedes** the "SwiftUI, iPhone-first" choice in the planning docs. A **web companion** built from the same Expo codebase ships with the Reseller beta: a ledger view, bulk copy and CSV export. A browser extension is on hold (see open decisions).
 - **One app, two modes:** at signup, users pick how they sell.
-  - **Simple mode** is for Maya, the closet clearer. **It ships first.**
-  - **Reseller mode** is for Dre, the part-time reseller. It comes next.
+  - **Simple mode** is for Maya, the closet clearer. **It ships first** as the free front door.
+  - **Reseller mode** is for Dre, the part-time reseller. A **paid Reseller beta opens about 45 days after launch** for 20–50 hand-recruited resellers: multi-marketplace copy, an inventory ledger and the "Sold → still live on X, Y" checklist. It adds screens, not new AI.
   - Both modes share one data model: a canonical product with many marketplace listings.
+- **Positioning:** every target marketplace now drafts listings from a photo for free in its own app, so listing generation is the input to Listly, not the product. The product is the honest, phone-first record of what's listed where.
 - **No marketplace API access yet.** MVP 1 hands listings off by copy and paste. Buyer bundles are supported around the marketplaces, not inside them.
-- **Success target:** paying sellers within 90 days of launch.
+- **Success target:** paying sellers within 90 days of launch, **from the Reseller beta**. Simple mode's 90-day target is activation and return rate, not revenue (see the [one-pager](docs/ideas/listly.md)).
+
+### Open decisions
+
+- **Pricing:** proposed Reseller subscription of about $9.99–$12.99 a month with a 30-day trial, sold through a US web checkout where the rules allow it. Confirm after 30 days of measured AI cost and a legal check of the current Apple and Google link-out terms.
+- **Browser automation:** the architecture rules it out, which also rules out automatic delisting. Decide after a marketplace terms-of-service review and the reseller survey.
+- **Architecture size for MVP 1:** the review recommends one generation call plus a validator, deferring the lead agent and specialists. Engineering to confirm.
 
 ## Repository map
 
@@ -30,6 +39,8 @@ go-commerce/
 │   │   └── GO_Commerce_Shared_Services.md
 │   ├── ideas/
 │   │   └── listly.md          Current Listly Simple-mode MVP 1 one-pager
+│   ├── strategy/
+│   │   └── strategy-review-2026-11.md  Independent strategy review (2026-11-13)
 │   └── personas/
 │       ├── README.md          One app, two modes; build order
 │       ├── closet-clearer.md  Maya: Simple mode, top of funnel
@@ -43,8 +54,9 @@ go-commerce/
 
 The documents were written at different times. When they disagree, use this order:
 
-1. **`docs/ideas/listly.md`** and **`docs/personas/`**: the latest decisions.
-2. **`docs/planning/`**: the original PRDs and architecture. They're still the reference for principles, the data model, agent architecture, security and later phases. Their platform choice (SwiftUI) and MVP scope are out of date.
+1. **This README**, **`docs/ideas/listly.md`** and **`docs/personas/`**: the latest decisions.
+2. **`docs/strategy/`**: the reasoning and evidence behind the 2026-11-13 changes. It's a review, not a decision record; where it and the docs above disagree, the docs above win.
+3. **`docs/planning/`**: the original PRDs and architecture. They're still the reference for principles, the data model, security and later phases. Their platform choice (SwiftUI), MVP scope, SellerStudio-as-a-separate-app plan and MVP agent architecture are out of date.
 
 ## Running Listly
 
@@ -63,6 +75,12 @@ See [listly/README.md](listly/README.md) for the acceptance checks.
 
 ## Next steps
 
-- Validate the personas with 10–15 seller interviews, and test a clickable prototype with 6–8 closet clearers.
-- Write the Listly Simple-mode PRD and stories from the one-pager.
-- Run an independent strategy review. Its output goes to `docs/strategy/`.
+Run these tests in the next 2–4 weeks, before more production code. The strategy review (§7) has the details and the signals that would change the plan.
+
+1. **Listly against the marketplaces' own free AI:** a clickable prototype with 8 closet clearers and 5 resellers, each listing 3 items both ways on their own phone.
+2. **Founding-reseller pre-sale:** a landing page with a refundable pre-sale, promoted in 3 reseller communities.
+3. **Manual ledger diary:** 6–8 resellers for 2 weeks, using a shared sheet and a forward-your-sale-email address processed by hand.
+4. **Reseller survey (100 responses):** marketplaces used, tools used, double sales in the last 30 days, tool spend, phone versus desk.
+5. **Copy-and-paste timing** on 4 marketplace apps, an accuracy evaluation set of 30 items with known flaws, an AI cost check on 50 items, and a "Listly" name clearance.
+
+Then write the Listly Simple-mode PRD and stories from the one-pager, and the Reseller beta scope.
