@@ -711,7 +711,7 @@ const screens = {
     </div>
     <div class="scr-foot">${gobtn('tryOtherBtn','Try another way','data-act="toSignIn"')}${sec('createInsteadBtn','Create a new account','data-act="createFromSignIn"')}</div>`; },
   signInLoading(){ return `<div class="scr" aria-busy="true">
-      <div class="spin" aria-hidden="true" data-mf="Gap / Spinner" data-mf-props="not in GO · indeterminate · still under reduced motion"></div>
+      <div class="spin" aria-hidden="true" data-mf="Gap / Progress" data-mf-props="not in GO · C-9, spinner form, indeterminate · still under reduced motion"></div>
       <h2 class="t" style="text-align:center">Getting your items…</h2>
       <p class="small muted" style="text-align:center">Your items, listings and plan are saved to your account.</p>
     </div>`; },
@@ -992,7 +992,7 @@ const screens = {
   profile(){ const pass = isPass(), tr = isTrial(); return `<div class="scr">
       <h2 class="t">Profile</h2>
       <section class="pset" aria-labelledby="pAcc" data-mf="Gap / SettingsGroup" data-mf-props="not in GO"><h3 class="t" id="pAcc">Account</h3>
-        <div class="mrow"><span>k7x2pq@privaterelay.appleid.com</span><span class="small muted">Apple</span></div><p class="small muted" data-mf="Gap / HelperText" data-mf-props="not in GO · DD-35">Hidden by Apple — emails still reach you.</p>${link('Sign out','data-act="signOut"')}</section>
+        <div class="mrow"><span>k7x2pq@privaterelay.appleid.com</span><span class="small muted">Apple</span></div><p class="small muted">Hidden by Apple — emails still reach you.</p>${link('Sign out','data-act="signOut"')}</section>
       <section class="pset" aria-labelledby="pPlan" data-mf="Gap / SettingsGroup" data-mf-props="not in GO"><h3 class="t" id="pPlan">Plan</h3>
         ${tr ? `<div class="mrow"><span>Free trial</span><span>${S.freeLeft} of 3 free listings left</span></div>${sec('profPlans','See plans','data-act="toPaywallTrial"')}`
         : pass ? `<div class="mrow"><span>Clear-out Pass</span><span>${S.passEnded?'Ended Nov 12':'26 days left'}</span></div><div class="mrow"><span>Listings used</span><span>3 of 100</span></div>${sec('profUpgrade','See the Reseller plan','data-act="toUpgrade"')}`
