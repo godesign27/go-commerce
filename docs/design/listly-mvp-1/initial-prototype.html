@@ -9,7 +9,9 @@ author: ux-lead (initial-prototype)
 created: 2026-11-13
 updated: 2026-11-14 (v3: brought up to PRD v8 — item detail and Flow 9, Undo, shipping choice, cost entry, Save photos, R-9 editing,
   reminders and notification permission, locked trial items, return to the haul, Pass checklist, bin, condition, grouping failed, step n of 4;
-  see docs/design/listly-mvp-1/ux-listly-mvp-1-design.md for DD-nn decisions)
+  see docs/design/listly-mvp-1/ux-listly-mvp-1-design.md for DD-nn decisions;
+  v3.1: onboarding, sign-in and setup for every path — camera and mic prompts with four outcomes, email link and code, sign in on a
+  new phone, restore purchases, photo-first test variant, Finish setting up, plan welcome; DD-31 to DD-43, Flows 10 to 12)
 source: [docs/prd/listly-mvp-1.md (v8), docs/stories/listly-mvp-1-stories.md, docs/ideas/listly.md, docs/strategy/listly-recommendation-2026-11.md, docs/personas/part-time-reseller.md, docs/personas/closet-clearer.md]
 design_system: GO Mobile Design System 0.1.0 (listly/packages/go-mobile-design-system) — GoButton, GoCard, light theme tokens
 published: []
@@ -265,6 +267,11 @@ textarea.input{min-height:96px;resize:vertical;font:inherit}
 .lockscreen{flex:1;background:var(--go-color);color:var(--go-bg);display:flex;flex-direction:column;align-items:center;padding:var(--go-space-5) var(--go-space-4);gap:var(--go-space-4)}
 .lockscreen .clock{font-size:48px;line-height:56px;font-weight:var(--go-w-3)} /* GAP: no display size in GO */
 .notif{width:100%;background:var(--go-bg);color:var(--go-color);border-radius:var(--go-radius-3);padding:var(--go-space-3);display:flex;flex-direction:column;gap:var(--go-space-1);text-align:left;border:0;font:inherit;cursor:pointer}
+.sysbtn-apple{display:flex;align-items:center;justify-content:center;min-height:var(--go-size-5);width:100%;border-radius:var(--go-radius-3);border:0;background:var(--go-color);color:var(--go-bg);font:inherit;font-weight:var(--go-w-3);cursor:pointer} /* System / AppleSignInButton: Apple's own style, not GoButton */
+.spin{width:32px;height:32px;border-radius:50%;border:3px solid var(--go-surface);border-top-color:var(--go-action-bg);animation:spin 1s linear infinite;align-self:center;margin-top:var(--go-space-6)}
+@keyframes spin{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion: reduce){.spin{animation:none}}
+.done-tag{font-weight:var(--go-w-3)}
 .variant{font-size:12px;line-height:16px;border:1px dashed var(--go-border);border-radius:var(--go-radius-1);padding:2px 6px;align-self:flex-start}
 
 </style>
@@ -359,8 +366,22 @@ body:not(.show-record) #record{display:none}
       <span class="pm-help">The AI draft step fails after the wait</span></label>
     <label class="pm-check"><input type="checkbox" id="simPayFail"> Purchase fails
       <span class="pm-help">The App Store purchase doesn't go through</span></label>
-    <label class="pm-check"><input type="checkbox" id="simDenied"> Camera and mic access denied
-      <span class="pm-help">The user says no to the system prompts during onboarding</span></label>
+    <label class="pm-check"><input type="checkbox" id="simSignFail"> Sign-in or sign-up fails
+      <span class="pm-help">Apple or Google returns an error (DD-34)</span></label>
+    <label class="pm-check"><input type="checkbox" id="simSignCancel"> Sign-in sheet cancelled
+      <span class="pm-help">The seller closes Apple's or Google's sheet: no error shows (DD-34)</span></label>
+    <label class="pm-check"><input type="checkbox" id="simNoAccount"> No Listly account for this sign-in
+      <span class="pm-help">A returning seller used a different method last time (DD-32)</span></label>
+    <label class="pm-check"><input type="checkbox" id="simLinkExpired"> Email link expired
+      <span class="pm-help">Opening the email link shows the expired state (DD-33)</span></label>
+    <label class="pm-check"><input type="checkbox" id="simReturnTrial"> Returning seller is on the trial
+      <span class="pm-help">Sign-in lands on Home with 1 of 3 free listings left (DD-40)</span></label>
+    <label class="pm-check"><input type="checkbox" id="simNoticeChanged"> AI notice changed since they agreed
+      <span class="pm-help">The first haul on a new phone shows the full notice again (DD-38)</span></label>
+    <label class="pm-check"><input type="checkbox" id="simRestoreNone"> Restore finds no purchases
+      <span class="pm-help">Restore purchases says nothing was found (DD-39)</span></label>
+    <label class="pm-check"><input type="checkbox" id="simRestoreOther"> Purchase is on another Listly account
+      <span class="pm-help">Restore purchases says so and stops (DD-39)</span></label>
     <label class="pm-check"><input type="checkbox" id="simEbayFail"> eBay connection fails
       <span class="pm-help">eBay sign-in is cancelled or fails</span></label>
     <label class="pm-check"><input type="checkbox" id="simGroupFail"> Grouping fails (M-10)
@@ -382,6 +403,8 @@ body:not(.show-record) #record{display:none}
       <span class="pm-help">Default is Needs action first (R-29)</span></label>
     <label class="pm-check"><input type="checkbox" id="simProfitInHome"> Profit inside Home, no Profit tab (Q-14)
       <span class="pm-help">4 tabs for everyone; Home's This month card opens Profit</span></label>
+    <label class="pm-check"><input type="checkbox" id="simPhotoFirst"> Onboarding: photo first (PQ-14)
+      <span class="pm-help">Account just before drafting; marketplaces asked on the first copy (DD-41)</span></label>
   </div>
 
   <div class="pm-group" aria-labelledby="pmShow">
@@ -419,7 +442,7 @@ body:not(.show-record) #record{display:none}
     <li><span class="tag-h">[H]</span> The 3 free listings are the first 3 items drafted; the rest of the haul is saved and locked until a plan is chosen (D-1). The sample haul has 5 items so this shows.</li>
     <li><span class="tag-h">[H]</span> <b>Agreed by the PM (A-19):</b> a trial seller who drafts exactly 3 items sees the plans at Finish haul, without anything being blocked (DD-08). Turn on "Haul has exactly 3 items" under Simulate.</li>
     <li><span class="tag-h">[H]</span> <b>Decided (A-20):</b> Undo has a 10-second countdown (decided 2026-11-14) that pauses while it's touched or focused; Profile → Accessibility → Keep Undo until I dismiss it turns the timer off (WCAG 2.2.1, DD-14).</li>
-    <li><span class="tag-h">[H]</span> Onboarding asks for marketplaces, an account, then camera and microphone, before the first haul (R-33). Maya's persona argues for setup after the first listing (PQ-14).</li>
+    <li><span class="tag-h">[H]</span> Onboarding asks for marketplaces, an account, then camera and microphone, before the first haul (R-33). Maya's persona argues for setup after the first listing (PQ-14). Turn on <b>Onboarding: photo first</b> under Test variants to compare (DD-41).</li>
     <li><span class="tag-h">[H]</span> Home's order and whether Profit stays a tab are decided by the prototype test. Both variants are under Simulate → Test variants (Q-09, Q-14).</li>
     <li><span class="tag-h">[H]</span> Sellers save photos to their library to post them (D-3). The album is "Listly – {item name}"; with add-only or limited access, photos go to Recents (DD-10).</li>
     <li><span class="tag-h">[H]</span> A three-way shipping choice, preselected from Selling defaults, is quick enough that sellers rarely skip it. Skipped shipping is an estimate, never $0 (D-9).</li>
@@ -515,7 +538,9 @@ const TIPS = {
 };
 const TRADE_DEFAULT = () => ({ where:'Facebook group', got:"Levi's 501 jeans", value:30, addInv:true }); /* R-40 synthetic */
 
-function resetState(){ Object.assign(S, { screen:'welcome', markets:['poshmark','ebay','mercari'], perms:'unasked', photos:0,
+function resetState(){ Object.assign(S, { screen:'welcome', markets:['poshmark','ebay','mercari'], cam:'granted', mic:'granted', photos:0,
+  emailMode:'up', email:'', codeErr:false, account:false, method:'', newDevice:false, newPhoneAsked:false, camBack:false, micBack:false,
+  setupCard:false, setupDismissed:false, defaultsSet:false, welcomePlan:null, restoreMsg:null, pfAsked:true, tipsSeenAccount:false,
   groups:[4,3,2,2,2], factIdx:0, facts:ITEMS.map(()=>({done:false, typed:false, cond:'', flaws:'', asked:false, dept:'', size:'', sizeOther:false})), bins:ITEMS.map(()=> 'B1'),
   drafted:0, freeLeft:3, plan:null, inHaul:false, haulFrom:'home', draftIdx:0, mkt:'poshmark', edits:{}, editing:null, prices:{}, listedOn:{},
   saved:{}, photoPerm:'unasked', billing:'month', pending:null, payReason:'finish', notifPerm:'unasked', partial:false,
@@ -551,6 +576,44 @@ const mktChips = (act) => `<div class="chips" role="group" aria-label="Marketpla
 const notice = (title, body, kind='status', extra='') => `<div class="notice" role="${kind}" data-mf="Gap / ${kind==='alert'?'InlineError':'InlineNotice'}" data-mf-props="not in GO"><b>${title}</b>${body?`<span>${body}</span>`:''}${extra}</div>`;
 const back = (label, act) => `<button type="button" class="gap-btn link" data-act="${act}" style="align-self:flex-start" data-mf="Gap / TextButton" data-mf-props="not in GO · back">‹ ${label}</button>`;
 const profitTab = () => !isPass() && !sim('simProfitInHome');
+const pf = () => sim('simPhotoFirst');
+const appleBtn = (id, act, label='Continue with Apple') => `<button type="button" class="sysbtn-apple" id="${id}" data-act="${act}" data-mf="System / AppleSignInButton" data-mf-props="platform UI · Apple's own button style, not GoButton (§9c)">${label}</button>`;
+const camPrompt = () => sysPrompt('“Listly” Would Like to Access the Camera', 'Listly uses the camera to photograph the items you\'re selling.', 'camAllow', 'camDeny');
+const micPrompt = () => sysPrompt('“Listly” Would Like to Access the Microphone', 'Listly uses the microphone so you can say each item\'s brand, size and condition.', 'micAllow', 'micDeny');
+function setupCard(){ if (!S.setupCard) return ''; const shops = Object.keys(S.links).length > 0, defs = S.defaultsSet;
+  if (shops && defs) return '';
+  const row = (id, act, title, sub, done) => done
+    ? `<div class="row" data-mf="Gap / ListRow" data-mf-props="not in GO · done"><span class="grow"><b>${title}</b><span class="small muted">${sub}</span></span><span class="done-tag">Done</span></div>`
+    : `<button type="button" class="row" id="${id}" data-act="${act}" data-mf="Gap / ListRow" data-mf-props="not in GO"><span class="grow"><b>${title}</b><span class="small muted">${sub}</span></span><span aria-hidden="true">›</span></button>`;
+  return `<section class="gocard" id="setupCard" aria-labelledby="setupH" data-mf="GoCard" data-mf-props="state: default · Finish setting up (DD-42, PQ-24) · dismissible">
+    <div class="topline"><h3 class="t" id="setupH">Finish setting up</h3><button type="button" class="gap-btn link" data-act="dismissSetup" aria-label="Dismiss Finish setting up">✕</button></div>
+    <p class="small">Optional. Each takes under a minute.</p>
+    ${row('setupShops','setupShops','Link your shops','So Listly can open your listings on each marketplace', shops)}
+    ${row('setupDefs','toSetupDefaults','Set selling defaults','Who usually pays shipping, and your default bin', defs)}
+    <div class="row" data-mf="Gap / ListRow" data-mf-props="not in GO · static, no action (PQ-20)"><span class="grow"><b>eBay sales, tracked for you</b><span class="small muted">Coming soon</span></span></div>
+  </section>`; }
+function welcomeCard(kind){ if (S.welcomePlan !== kind) return '';
+  return `<section class="gocard" id="welcomeCard" aria-labelledby="welH" data-mf="GoCard" data-mf-props="state: default · plan welcome, one time (DD-43, PQ-29)">
+    <div class="topline"><h3 class="t" id="welH">${kind==='pass' ? 'Your Clear-out Pass is on' : 'Welcome to the Reseller plan'}</h3><button type="button" class="gap-btn link" data-act="dismissWelcome" aria-label="Dismiss welcome">✕</button></div>
+    ${kind==='pass'
+      ? `<ul><li>It runs until Dec 14, for up to 100 listings.</li><li>When something sells, Listly reminds you to take it down everywhere else.</li><li>Your items and listings stay when the Pass ends.</li></ul>`
+      : `<ul><li><b>Profit:</b> what you made after fees, by marketplace.</li><li><b>Listings by item:</b> every item, where it's listed and its bin.</li><li><b>Stale items:</b> anything listed 30+ days.</li><li>Up to 500 listings a month.</li></ul>
+         ${sec('welCosts','Add what you paid, so profit is right','data-act="welcomeCosts"')}`}
+  </section>`; }
+function restoreNote(){ const m = S.restoreMsg; if (!m || m === 'checking') return '';
+  return { done: notice('Reseller plan restored.', 'Your plan is back on this account.'),
+    current: notice('Your plan is already active.', 'There was nothing to restore.'),
+    none: notice('No Listly purchases found for this Apple ID.', 'If you bought with a different Apple ID, sign in to the App Store with it and try again.'),
+    other: notice('This purchase belongs to another Listly account.', 'Sign in with that account to use it. Listly can\'t move a plan between accounts.') }[m] || ''; }
+const restoreLink = () => S.restoreMsg === 'checking'
+  ? `<button type="button" class="gap-btn link" disabled data-mf="Gap / TextButton" data-mf-props="not in GO · busy" style="align-self:flex-start">Checking…</button>`
+  : link('Restore purchases','data-act="restore" id="restoreBtn"');
+function pfAsk(){ return pf() && !S.pfAsked && (S.screen === 'draft' || S.screen === 'pfMarkets'); }
+function pfSheet(){ return sheet(`<h3 class="t">Where will you post these?</h3>
+  <p class="small">Pick where you sell. Listly shows those listings and remembers your choice. You can change it in Profile.</p>
+  ${mktChips('toggleMkt')}
+  ${gobtn('pfMarketsNext','Show these listings', S.markets.length ? 'data-act="pfMarketsDone"' : 'disabled')}
+  ${link('Show all five','data-act="pfMarketsAll"')}`, 'Where will you post these?'); }
 
 function tabbar(cur){ const t = (id, label, act) => `<button type="button" id="tab-${id}" ${cur===id?'aria-current="page"':''} data-act="${act}">${label}</button>`;
   const n = profitTab() ? 5 : 4;
@@ -566,7 +629,7 @@ function undoBar(){ if (!S.undo || S.undo.screen !== S.screen) return '';
 
 const screens = {
   /* ---------- Flow 0 · Onboarding (R-33, S-01 to S-03) ---------- */
-  welcome(){ return `<div class="scr">
+  welcome(){ if (pf()) return screens.pfWelcome(); return `<div class="scr">
       ${steps(1)}
       <div class="topline"><span class="brand">Listly</span></div>
       <h1 class="t">List a whole haul from your phone.</h1>
@@ -591,10 +654,10 @@ const screens = {
       ${fail ? notice("Couldn't create your account.", 'Nothing was saved. Check your connection and try again.', 'alert') : ''}
       <p class="small muted">Still free: your first 3 listings need no card.</p>
     </div>
-    <div class="scr-foot">${gobtn('obApple','Continue with Apple','data-act="toObPerms"')}${sec('obGoogle','Continue with Google','data-act="toObPerms"')}${link('Use email instead','data-act="toObPerms"')}</div>`; },
+    <div class="scr-foot">${appleBtn('obApple','authApple')}${sec('obGoogle','Continue with Google','data-act="authGoogle"')}${link('Use email instead','data-act="toEmailUp"')}</div>`; },
 
-  obPerms(){ return `<div class="scr">
-      ${steps(4)}
+  obPerms(v){ return `<div class="scr">
+      ${v==='pf' ? '<span class="variant">Test variant: photo first (DD-41)</span>' : steps(4)}
       <h2 class="t">Camera and microphone</h2>
       <p>Listly uses the camera to photograph your haul, and the microphone so you can say each item's brand, size, measurements, flaws and condition.</p>
       <div class="gocard" data-mf="GoCard" data-mf-props="state: default · AI processing notice (R-23)">
@@ -605,11 +668,101 @@ const screens = {
     </div>
     <div class="scr-foot">${gobtn('obAllow','Allow and start my first haul','data-act="allowPerms"')}${link("Not now — I'll use my photo library and type",'data-act="denyPerms"')}</div>`; },
 
+  /* ---------- Email: passwordless link and code (S-02, DD-33) ---------- */
+  obEmail(invalid){ const up = S.emailMode === 'up'; return `<div class="scr">
+      ${up && !pf() ? steps(3) : ''}
+      ${back(up ? 'Other ways to sign up' : 'Other ways to sign in', up ? (pf() ? 'toPfAccount' : 'toObAccount') : 'toSignIn')}
+      <h2 class="t">${up ? 'Continue with email' : 'Sign in with email'}</h2>
+      <p>We'll send you a link and a 6-digit code. No password needed.</p>
+      <div class="field" data-mf="Gap / TextField" data-mf-props="not in GO · email · error ${invalid?'on':'off'}"><label for="emailIn">Email address</label>
+        <input id="emailIn" class="input" type="email" autocomplete="email" inputmode="email" value="${esc(S.email)}" ${invalid ? 'aria-invalid="true" aria-describedby="emailErr"' : ''}>
+        ${invalid ? '<span class="small" id="emailErr"><b>Enter an email address like name@example.com.</b></span>' : ''}</div>
+    </div>
+    <div class="scr-foot">${gobtn('emailNext','Send link and code','data-act="emailContinue"')}</div>`; },
+  obEmailSent(){ return `<div class="scr">
+      ${S.emailMode==='up' && !pf() ? steps(3) : ''}
+      <h2 class="t">Check your email</h2>
+      <p>We sent a link and a 6-digit code to <b>${esc(S.email || 'seller@example.com')}</b>.</p>
+      <p class="small">Open the link on this phone, or type the code here if the email is on another device.</p>
+      <div class="field" data-mf="Gap / TextField" data-mf-props="not in GO · one-time code · error ${S.codeErr?'on':'off'}"><label for="codeIn">6-digit code</label>
+        <input id="codeIn" class="input" inputmode="numeric" autocomplete="one-time-code" maxlength="6" ${S.codeErr ? 'aria-invalid="true" aria-describedby="codeErr"' : ''}>
+        ${S.codeErr ? '<span class="small" id="codeErr"><b>Enter all 6 digits from the email.</b></span>' : ''}</div>
+      ${link('Prototype: open the link from Mail','data-act="openEmailLink" id="openLinkBtn"')}
+      <p class="small muted">Not there? Check your spam folder. You can send it again in 30 seconds.</p>
+    </div>
+    <div class="scr-foot">${gobtn('codeNext','Continue','data-act="codeContinue"')}${sec('resendBtn','Send again in 30 s','disabled')}${link('Use a different email','data-act="toEmailBack"')}</div>`; },
+  obEmailExpired(){ return `<div class="scr">
+      <h2 class="t">That link has expired</h2>
+      <p>Sign-in links work once, for a short time. We can send a new one to <b>${esc(S.email || 'seller@example.com')}</b>.</p>
+    </div>
+    <div class="scr-foot">${gobtn('newLinkBtn','Send a new link','data-act="newEmailLink"')}${link('Use a different email','data-act="toEmailBack"')}</div>`; },
+
+  /* ---------- Flow 10 · Sign in, returning seller (R-33, S-02, DD-31 to DD-40) ---------- */
+  signIn(fail){ return `<div class="scr">
+      <div class="topline"><span class="brand">Listly</span></div>
+      <h2 class="t">Welcome back</h2>
+      <p>Sign in the way you did before, to get your items, listings and plan.</p>
+      ${fail ? notice("Couldn't sign you in.", 'Nothing changed. Check your connection and try again.', 'alert') : ''}
+    </div>
+    <div class="scr-foot">${appleBtn('siApple','authApple')}${sec('siGoogle','Continue with Google','data-act="authGoogle"')}${link('Sign in with email','data-act="toEmailIn"')}${link('New to Listly? Get started','data-act="toWelcome"')}</div>`; },
+  signInNoAccount(){ return `<div class="scr">
+      <h2 class="t">No Listly account for this sign-in</h2>
+      <p>There's no account for <b>${esc(S.email || 'sam.r@example.com')}</b>. If you've used Listly before, you may have signed in another way, such as Apple instead of Google.</p>
+    </div>
+    <div class="scr-foot">${gobtn('tryOtherBtn','Try another way','data-act="toSignIn"')}${sec('createInsteadBtn','Create a new account','data-act="createFromSignIn"')}</div>`; },
+  signInLoading(){ return `<div class="scr" aria-busy="true">
+      <div class="spin" aria-hidden="true" data-mf="Gap / Spinner" data-mf-props="not in GO · indeterminate · still under reduced motion"></div>
+      <h2 class="t" style="text-align:center">Getting your items…</h2>
+      <p class="small muted" style="text-align:center">Your items, listings and plan are saved to your account.</p>
+    </div>`; },
+  newPhonePerms(){ const changed = sim('simNoticeChanged'); return `<div class="scr">
+      <h2 class="t">Camera and microphone on this phone</h2>
+      <p>Each new phone asks again. Listly uses the camera to photograph your haul, and the microphone so you can say each item's details.</p>
+      ${changed ? `<div class="gocard" data-mf="GoCard" data-mf-props="state: default · AI processing notice, changed version (DD-38, R-23)">
+        <h3 class="t">How your photos and answers are used has changed</h3>
+        <ul><li>They're sent to an AI service to group photos and draft listings.</li><li>Location data is removed from photos first.</li><li>Listly only writes facts you give it. Nothing is posted for you.</li></ul>
+        <p class="small">What changed: <span class="tag-h">[TBD — Legal]</span></p>
+        ${link('How your data is used','data-act="noop" data-msg="Privacy details: not in this prototype."')}</div>`
+      : `<p class="small muted">You've already agreed to how your photos and answers are used.</p>${link('How your data is used','data-act="noop" data-msg="Privacy details: not in this prototype."')}`}
+    </div>
+    <div class="scr-foot">${gobtn('npAllow', changed ? 'Agree, allow and start the haul' : 'Allow and start the haul','data-act="allowPerms"')}${link("Not now — I'll use my photo library and type",'data-act="denyPerms"')}</div>`; },
+
+  /* ---------- Flow 11 · Photo-first onboarding, test variant (PQ-14, DD-41) ---------- */
+  pfWelcome(){ return `<div class="scr">
+      <span class="variant">Test variant: photo first (PQ-14, DD-41)</span>
+      <div class="topline"><span class="brand">Listly</span></div>
+      <h1 class="t">List a whole haul from your phone.</h1>
+      <p>Photograph what you're selling first. Set things up later, and only if you want to.</p>
+      <div class="gocard" data-mf="GoCard" data-mf-props="state: default"><h3 class="t">Your first 3 listings are free</h3><p>No card needed. Photograph a few items and see the listings before you decide.</p></div>
+    </div>
+    <div class="scr-foot">${gobtn('pfStartBtn','Photograph my first items','data-act="pfStart"')}${link('I already have an account','data-act="signIn"')}</div>`; },
+  pfPerms(){ return screens.obPerms('pf'); },
+  pfAccount(fail){ return `<div class="scr">
+      <span class="variant">Test variant: photo first (DD-41)</span>
+      <h2 class="t">Save your ${haulN()} items</h2>
+      <p>Create an account to draft them. Your photos and answers are kept if you change phones.</p>
+      ${fail ? notice("Couldn't create your account.", 'Your photos and answers are still here. Check your connection and try again.', 'alert') : ''}
+      <p class="small muted">Still free: your first 3 listings need no card.</p>
+    </div>
+    <div class="scr-foot">${appleBtn('pfApple','authApple')}${sec('pfGoogle','Continue with Google','data-act="authGoogle"')}${link('Use email instead','data-act="toEmailUp"')}</div>`; },
+
+  /* ---------- Flow 12 · Finish setting up (DD-42) ---------- */
+  setupDefaults(){ return `<div class="scr">
+      ${back('Home','toHome')}
+      <h2 class="t">Selling defaults</h2>
+      <p>These fill in for you on each item. You can change them any time, here or in Profile.</p>
+      <div class="field"><span class="lbl" id="sdShipL">Shipping, usually</span><div class="chips" role="radiogroup" aria-labelledby="sdShipL" data-mf="Gap / ChoiceChips" data-mf-props="not in GO · preselects Mark sold (R-14)">
+        ${[['buyer','Buyer pays'],['me','I pay'],['free','Free shipping']].map(([v,l])=>`<button type="button" role="radio" class="chip" aria-checked="${S.shipBy===v}" aria-pressed="${S.shipBy===v}" data-act="shipBy" data-v="${v}">${l}</button>`).join('')}</div></div>
+      <div class="field" data-mf="Gap / TextField" data-mf-props="not in GO"><label for="defBin">Default bin</label><input id="defBin" class="input" value="${esc(S.defBin)}" aria-describedby="defBinHelp"><span class="small muted" id="defBinHelp">Where you usually keep new items, like "B1" or "Hall closet". Only you see it.</span></div>
+    </div>
+    <div class="scr-foot">${gobtn('saveDefaults','Save defaults','data-act="saveDefaults"')}${link('Not now','data-act="toHome"')}</div>`; },
+
   /* ---------- Flow 1 · First haul (R-4 to R-12, R-41) ---------- */
-  capture(){ const n = S.photos, off = S.perms === 'denied'; return `<div class="scr">
+  capture(){ const n = S.photos, off = S.cam !== 'granted'; return `<div class="scr">
       <div class="topline"><h2 class="t">New haul</h2><span class="tag" data-mf="Gap / Tag" data-mf-props="not in GO · count" aria-live="polite">${n} photo${n===1?'':'s'}</span></div>
-      ${off ? notice('Camera access is off.', 'Turn it on in Settings, or add photos from your library.', 'status', `<button type="button" class="gap-btn sm" data-act="noop" data-msg="Opens the phone's Settings for Listly (prototype)." style="align-self:flex-start">Open Settings</button>`)
-        : `<div class="viewfinder" role="img" aria-label="Camera viewfinder (placeholder)">Camera<br>Take 2–4 photos of each item.</div>`}
+      ${S.cam === 'denied' ? notice('Camera access is off.', 'Turn it on in Settings, or add photos from your library.', 'status', `<button type="button" class="gap-btn sm" id="camSettingsBtn" data-act="openSettingsCam" style="align-self:flex-start">Open Settings</button>`)
+        : S.cam === 'unasked' ? notice("The camera isn't on yet.", 'Turn it on to photograph your haul here, or add photos from your library.', 'status', `<button type="button" class="gap-btn sm" id="camAskBtn" data-act="camAsk" style="align-self:flex-start">Turn on camera</button>`)
+        : `${S.camBack ? notice('Camera is on.', 'You can take photos now.') : ''}<div class="viewfinder" role="img" aria-label="Camera viewfinder (placeholder)">Camera<br>Take 2–4 photos of each item.</div>`}
       <p class="small muted">Listly groups the photos into items for you. Tap <b>Next item</b> between items to help it.</p>
       ${n ? thumbs(Math.min(n, 13)) : ''}
       <div class="shutter-row">
@@ -644,7 +797,7 @@ const screens = {
     </div>
     <div class="scr-foot">${gobtn('retryGroup','Try again','data-act="retryGroup"')}${sec('oneItem','Continue as one item','data-act="oneItem"')}</div>`; },
 
-  facts(mode){ const i = S.factIdx, it = ITEMS[i], f = S.facts[i], micOff = S.perms === 'denied', n = haulN();
+  facts(mode){ const i = S.factIdx, it = ITEMS[i], f = S.facts[i], micOff = S.mic !== 'granted', n = haulN();
     const needCond = f.done && !f.cond, needFlaws = f.done && !f.flaws, ready = f.done && f.cond && f.flaws;
     const lockedNote = isTrial() && i >= S.freeLeft ? `<p class="small" data-mf="Gap / InlineNotice" data-mf-props="not in GO · D-1"><span class="lock">Locked after drafting</span> Your 3 free listings cover items 1–3. This item will be saved, ready to draft when you pick a plan.</p>` : '';
     const val = (k, v) => f.done ? `<input class="input" id="f-${k}" value="${esc(v)}" data-act="editFact" data-k="${k}">` : `<div class="input empty">Not answered yet</div>`;
@@ -653,7 +806,9 @@ const screens = {
       ${thumbs(it.photos)}
       ${lockedNote}
       ${mode==='retry' ? notice("Didn't catch that.", 'Nothing was filled in. Try again somewhere quieter, or type the answers.', 'alert') : ''}
-      ${micOff ? notice('Microphone is off.', 'Type the answers, or turn the microphone on in Settings.') : ''}
+      ${S.mic === 'denied' ? notice('Microphone is off.', 'Type the answers, or turn the microphone on in Settings.', 'status', `<button type="button" class="gap-btn sm" id="micSettingsBtn" data-act="openSettingsMic" style="align-self:flex-start">Open Settings</button>`)
+        : S.mic === 'unasked' ? notice("The microphone isn't on yet.", 'Turn it on to say the answers, or type them.', 'status', `<button type="button" class="gap-btn sm" id="micAskBtn" data-act="micAsk" style="align-self:flex-start">Turn on microphone</button>`) : ''}
+      ${S.micBack && !micOff ? notice('Microphone is on.', 'Tap to talk.') : ''}
       <p>${micOff ? 'Type' : 'Say'} the brand, size, measurements, any flaws and the condition.</p>
       ${micOff ? '' : `<button type="button" class="mic${f.done?'':' nx'}" id="micBtn" data-act="mic" data-mf="Gap / MicButton" data-mf-props="not in GO · tap to talk">${mode==='retry'?'Try again':(f.done?'Talk again':'Tap to talk')}</button>`}
       ${f.done ? `<p class="small muted">${f.typed ? 'Typed by you' : 'Heard: “' + it.heard + '”'}</p>` : `<button type="button" class="${micOff?'gap-btn nx':'gap-btn link'}" id="typeBtn" data-act="typeIt" data-mf="Gap / ${micOff?'SecondaryButton':'TextButton'}" data-mf-props="not in GO">Type the answers</button>`}
@@ -732,7 +887,7 @@ const screens = {
         <h3 class="t">Clear-out Pass</h3><div class="price">$6.99 once</div>
         <ul><li>30 days, up to 100 listings</li><li>Copy for every marketplace</li><li>Mark sold and the sold-everywhere checklist</li><li>No subscription. It doesn't renew.</li></ul>
         ${gobtn('buyPass','Get Clear-out Pass','data-act="buy" data-plan="pass"')}</div>`}
-      <p class="small muted">Paid through the App Store. ${link('Restore purchases','data-act="noop" data-msg="Restore purchases: checks the App Store for plans you\'ve bought (prototype)."')}</p>
+      <p class="small muted">Paid through the App Store.</p>${restoreLink()}${restoreNote()}
     </div>
     <div class="scr-foot">${sec('notNowBtn', mid ? 'Not now — back to my haul' : (r==='trialDone' ? 'Not now' : 'Not now'), 'data-act="notNow"')}</div>`; },
 
@@ -752,8 +907,9 @@ const screens = {
   homeTrial(){ return `<div class="scr">
       <div class="topline"><h2 class="t">Home</h2>${trial()}</div>
       <div class="gocard" data-mf="GoCard" data-mf-props="state: default · plan status, trial used (DD-08)">
-        <h3 class="t">0 of 3 free listings left</h3><p>Your 3 listings are yours to copy and post. Pick a plan to list more.</p>
+        <h3 class="t">${S.freeLeft} of 3 free listings left</h3><p>${S.freeLeft ? `Your ${3-S.freeLeft} drafted listings are ready to copy and post. Start a haul to use the rest.` : 'Your 3 listings are yours to copy and post. Pick a plan to list more.'}</p>
         ${sec('trialPlans','See plans','data-act="toPaywallTrial"')}</div>
+      ${setupCard()}
       <button type="button" class="gocard tile" data-act="toListings" data-mf="GoCard" data-mf-props="state: default · This month">
         <span class="small muted">This month</span><span class="stats"><span><b class="big">0</b><br>active listings</span><span><b class="big">0</b><br>sold</span><span><b class="big">$0.00</b><br>net profit</span></span></button>
       <p class="small muted">Mark items listed from Copy listings once you've posted them.</p>
@@ -836,13 +992,13 @@ const screens = {
   profile(){ const pass = isPass(), tr = isTrial(); return `<div class="scr">
       <h2 class="t">Profile</h2>
       <section class="pset" aria-labelledby="pAcc" data-mf="Gap / SettingsGroup" data-mf-props="not in GO"><h3 class="t" id="pAcc">Account</h3>
-        <div class="mrow"><span>seller@example.com</span><span class="small muted">Apple</span></div>${link('Sign out','data-act="signOut"')}</section>
+        <div class="mrow"><span>k7x2pq@privaterelay.appleid.com</span><span class="small muted">Apple</span></div><p class="small muted" data-mf="Gap / HelperText" data-mf-props="not in GO · DD-35">Hidden by Apple — emails still reach you.</p>${link('Sign out','data-act="signOut"')}</section>
       <section class="pset" aria-labelledby="pPlan" data-mf="Gap / SettingsGroup" data-mf-props="not in GO"><h3 class="t" id="pPlan">Plan</h3>
         ${tr ? `<div class="mrow"><span>Free trial</span><span>${S.freeLeft} of 3 free listings left</span></div>${sec('profPlans','See plans','data-act="toPaywallTrial"')}`
         : pass ? `<div class="mrow"><span>Clear-out Pass</span><span>${S.passEnded?'Ended Nov 12':'26 days left'}</span></div><div class="mrow"><span>Listings used</span><span>3 of 100</span></div>${sec('profUpgrade','See the Reseller plan','data-act="toUpgrade"')}`
         : `<div class="mrow"><span>Reseller plan · monthly</span><span>$12.99</span></div><div class="mrow"><span>Renews</span><span>Dec 13</span></div><div class="mrow"><span>Listings this month</span><span>212 of 500</span></div>
           ${sec('manageSub','Manage subscription','data-act="noop" data-msg="Opens the App Store subscription page (prototype)."')}`}
-        ${link('Restore purchases','data-act="noop" data-msg="Restore purchases: checks the App Store for plans you\'ve bought (prototype)."')}</section>
+        ${restoreLink()}${restoreNote()}</section>
       <section class="pset" aria-labelledby="pMk" data-mf="Gap / SettingsGroup" data-mf-props="not in GO"><h3 class="t" id="pMk">Marketplaces</h3>
         <p class="small">Drafting for: ${S.markets.length ? S.markets.map(MNAME).join(', ') : 'all five'}</p>
         <p class="small muted">eBay ${S.ebay==='connected'?'connected':'not connected'} · ${Object.keys(S.links).length} shop${Object.keys(S.links).length===1?'':'s'} linked</p>
@@ -867,7 +1023,7 @@ const screens = {
     </div>${tabbar('profile')}`; },
 
   connectors(fail){ return `<div class="scr">
-      ${back('Profile','toProfile')}
+      ${S.back === 'home' ? back('Home','toHome') : back('Profile','toProfile')}
       <h2 class="t">Marketplaces and connections</h2>
       ${fail ? notice("The eBay connection didn't finish.", 'Nothing was changed. Try again, or keep using copy and paste.', 'alert') : ''}
       <p class="small">Pick where you sell, and link your shops so Listly can open your listings.</p>
@@ -931,6 +1087,17 @@ screens.factsRetry = () => screens.facts('retry');
 screens.factsMissing = () => screens.facts();
 screens.ebayFail = () => screens.connectors(true);
 screens.obAccountFail = () => screens.obAccount(true);
+screens.obEmailInvalid = () => screens.obEmail(true);
+screens.obCamPrompt = () => screens.obPerms(); screens.obMicPrompt = () => screens.obPerms();
+screens.signInFail = () => screens.signIn(true);
+screens.pfAccountFail = () => screens.pfAccount(true);
+screens.pfMarkets = () => draftScreen();
+screens.newPhoneNotice = () => screens.newPhonePerms();
+['captureNotNow','captureCamDenied','captureBothDenied','captureCamBack'].forEach(k => screens[k] = () => screens.capture());
+screens.factsMicDenied = () => screens.facts();
+['homeSetup','homeReturnTrial'].forEach(k => screens[k] = () => screens.homeTrial());
+screens.homeWelcomeReseller = () => homeScreen(); screens.homeWelcomePass = () => passHomeScreen();
+['profileRestored','profileRestoreNone','profileRestoreOther'].forEach(k => screens[k] = () => screens.profile());
 ['draftEdit','draftPartial','savedPhotos','photoAsk','photoDenied','photoLimited','draftLocked'].forEach(k => { if (!screens[k]) screens[k] = () => draftScreen(); });
 ['itemEdit','itemRevertDone'].forEach(k => screens[k] = () => detailScreen());
 
@@ -992,6 +1159,7 @@ function draftScreen(){ const n = haulN(), shown = MKTS.filter(m => !S.markets.l
       ${body}
     </div>
     <div class="scr-foot">${gobtn('finishHaul', 'Finish haul', 'data-act="finishHaul"')}${anyLocked && isTrial() ? `<p class="small muted">${n - S.drafted} item${n-S.drafted===1?'':'s'} still to draft. Finishing asks you to pick a plan for ${n-S.drafted===1?'it':'them'}.</p>` : ''}</div>
+    ${pfAsk() ? pfSheet() : ''}
     ${S.overlay==='photoAsk' ? sysPrompt('“Listly” Would Like to Add to Your Photos', 'So you can attach an item\'s photos when you post it.', 'photoAllow', 'photoDeny') : ''}`; }
 
 /* ---------- Home ---------- */
@@ -1014,7 +1182,7 @@ function homeScreen(){ const live = S.L.filter(liveElsewhere); const stale = S.L
   return `<div class="scr">
       <div class="topline"><h2 class="t">Home</h2><span class="tag" data-mf="Gap / Tag" data-mf-props="not in GO · plan">Reseller plan</span></div>
       ${monthFirst ? '<span class="variant">Test variant: This month first (R-29, Q-09)</span>' + month + na : na + ''}
-      ${unfinished}${monthFirst ? '' : month}${staleRow}
+      ${welcomeCard('reseller')}${unfinished}${setupCard()}${monthFirst ? '' : month}${staleRow}
       ${HOWTO_DISMISSED ? '' : `<div class="gocard" id="howToCard" data-mf="GoCard" data-mf-props="state: default · How-to card (R-37), dismissible">
         <div class="topline"><h3 class="t">New to Listly?</h3><button type="button" class="gap-btn link" data-act="dismissHowTo" aria-label="Dismiss how-to card">✕</button></div>
         <p>Watch a 2-minute how-to, or read the steps.</p>
@@ -1031,6 +1199,7 @@ function passHomeScreen(ended){ const live = S.PL.filter(liveElsewhere); const s
       ${live.length ? `<section class="notice alarm" aria-labelledby="naH" data-mf="Gap / AlarmBanner" data-mf-props="not in GO · Needs action, Pass (D-2)"><b id="naH">Needs action</b>
         ${live.map(x=>`<span>${x.name} ${x.status==='traded'?'was traded':'sold on '+x.soldOn}. It's still live on ${x.where.filter(w=>w!==x.soldOn && !x.removed[w]).join(' and ')}.</span>`).join('')}
         <button type="button" class="gap-btn" id="needsActionBtn" data-act="resolveLive" data-key="${live[0].key}">Remove it now</button></section>` : ''}
+      ${ended ? '' : welcomeCard('pass') + setupCard()}
       <div class="gocard" data-mf="GoCard" data-mf-props="state: default · This clear-out"><span class="small muted">This clear-out</span>
         <span class="stats"><span><b class="big">${S.PL.filter(x=>x.status!=='sold').length}</b><br>listed</span><span><b class="big">${sold.length}</b><br>sold</span><span><b class="big">${money(made)}</b><br>made</span></span>
         <span class="small">3 of 100 listings used · "Made" is sale prices before fees [H — G-11]</span></div>
@@ -1225,15 +1394,17 @@ function runUndoTimer(){ clearInterval(undoTick); undoTick = null;
 /* ---------- Rendering ---------- */
 function render(){
   const s = S.screen;
-  const html = screens[s]();
+  const html = screens[s]() + (S.overlay==='camPrompt' ? camPrompt() : S.overlay==='micPrompt' ? micPrompt() : '');
   $app().innerHTML = `<div class="stage"><div class="phone" data-screen="${s}">${html}<div id="toast" class="toast" role="status"></div></div></div>`;
   if (s === 'drafting') requestAnimationFrame(() => { const b = document.getElementById('draftBar'); if (b) b.style.width = '100%'; });
   PROTO_UPDATE();
   showTip(s);
   runUndoTimer();
+  if (S.overlay==='camPrompt' || S.overlay==='micPrompt') { const b = document.querySelector('.sysdlg button'); if (b) b.focus(); }
+  else if (pfAsk() && !document.querySelector('.sheet').contains(document.activeElement)) { const c = document.querySelector('.sheet .chip'); if (c) c.focus(); }
 }
 function showTip(s){
-  const set = TIPS[s]; if (!set || TIPS_SEEN[s] || S.overlay) return;
+  const set = TIPS[s]; if (!set || TIPS_SEEN[s] || S.overlay || S.tipsSeenAccount || pfAsk()) return;   /* tips seen on another phone stay seen (R-36) */
   const i = TIP_IDX[s] || 0, tip = set[i], el = document.querySelector('#app ' + tip.sel), ph = document.querySelector('#app .phone');
   if (!el || !ph) return;
   el.classList.add('coach-target');
@@ -1255,7 +1426,8 @@ function homeFor(){ return S.plan === 'pass' ? (S.passEnded ? 'passEnded' : 'pas
 function tabFor(t){ return { home:homeFor(), listings:isPass()?'listingsPass':'listings', profit:'profit', profile:'profile' }[t] || homeFor(); }
 
 /* drafting: the first S.freeLeft items for a trial seller (D-1), else every undrafted item */
-function startDraft(){ const n = haulN(); const cap = isTrial() ? Math.min(n, S.drafted + S.freeLeft) : n;
+function startDraft(){ if (pf() && !S.account) { show('pfAccount'); say('Create an account to draft your items.'); return; }   /* photo-first variant (DD-41) */
+  const n = haulN(); const cap = isTrial() ? Math.min(n, S.drafted + S.freeLeft) : n;
   if (S.plan === 'reseller' && sim('simLimit')) { show('limitReached'); say("You've reached this month's limit."); return; }
   S.draftCount = cap - S.drafted; if (S.draftCount <= 0) { show('draft'); return; }
   show('drafting'); say(`Drafting ${S.draftCount} listings.`);
@@ -1267,14 +1439,38 @@ function startDraft(){ const n = haulN(); const cap = isTrial() ? Math.min(n, S.
     S.draftIdx = before; show(S.partial ? 'draftPartial' : (S.plan && before>0 ? 'draft' : 'draft'));
     say(S.partial ? '2 of 3 items drafted. 1 didn\'t draft.' : `${S.draftCount} listings ready to post.`); }, 1600); }
 function buy(plan){ S.pending = plan; if (sim('simPayFail')) { show('payFail'); say("The purchase didn't go through."); return; }
-  S.plan = plan; S.passEnded = false;
+  S.plan = plan; S.passEnded = false; S.welcomePlan = plan;   /* plan welcome card waits for Home (DD-43) */
   if (S.inHaul) { S.draftIdx = Math.min(S.drafted, haulN()-1); show('draftAfterBuy');
     toast(plan === 'reseller' ? `Reseller plan started. Draft your other ${haulN()-S.drafted} items.` : `Clear-out Pass active for 30 days. Draft your other ${haulN()-S.drafted} items.`); return; }
   show(homeFor()); toast(plan === 'reseller' ? 'Reseller plan started.' : 'Clear-out Pass active for 30 days.'); }
 function finishHaul(){ const undrafted = haulN() - S.drafted;
   if (isTrial() && undrafted > 0) { S.payReason = 'finish'; show('paywall'); return; }
   if (isTrial() && S.freeLeft === 0) { S.payReason = 'trialDone'; show('trialDone'); return; }   /* A-19 proposal, DD-08 */
-  S.inHaul = false; show(tabFor(S.haulFrom)); toast(`Haul finished. ${S.drafted} items ready to post.`); }
+  S.inHaul = false; if (isTrial() || S.welcomePlan) S.setupCard = !S.setupDismissed;   /* DD-42 */
+  show(tabFor(S.haulFrom)); toast(`Haul finished. ${S.drafted} items ready to post.`); }
+/* ---------- sign-up, sign-in and restore (DD-31 to DD-40) ---------- */
+function authWith(method){
+  if (sim('simSignCancel')) { say('Sign-in cancelled.'); return; }   /* cancelling isn't failing (DD-34) */
+  const signingIn = S.screen === 'signIn' || S.screen === 'signInFail', pfv = S.screen.startsWith('pf');
+  if (sim('simSignFail')) { show(signingIn ? 'signInFail' : (pfv ? 'pfAccountFail' : 'obAccountFail')); say(signingIn ? "Couldn't sign you in." : "Couldn't create your account."); return; }
+  if (signingIn) { if (sim('simNoAccount')) { S.email = method === 'Apple' ? 'k7x2pq@privaterelay.appleid.com' : 'sam.r@example.com'; show('signInNoAccount'); return; } signInSuccess(); return; }
+  S.account = true; S.method = method;
+  if (pfv) { startDraft(); return; }
+  show('obPerms'); say('Account created. Step 4 of 4.'); }
+function emailDone(){
+  if (S.emailMode === 'in') { if (sim('simNoAccount')) { show('signInNoAccount'); return; } signInSuccess(); return; }
+  S.account = true; S.method = 'email'; if (pf()) { startDraft(); return; } show('obPerms'); say('Account created. Step 4 of 4.'); }
+function signInSuccess(){ S.plan = null; S.cam = S.mic = 'unasked'; S.newDevice = true; S.tipsSeenAccount = true; show('signInLoading'); say('Getting your items.');
+  clearTimeout(timer); timer = setTimeout(() => { if (S.screen !== 'signInLoading') return;
+    if (sim('simReturnTrial')) { S.drafted = 2; S.freeLeft = 1; show('homeReturnTrial'); }
+    else { S.plan = 'reseller'; show('home'); }
+    toast('Signed in. Your items are here.'); }, 1400); }
+function doRestore(){ S.restoreMsg = 'checking'; render(); say('Checking the App Store for your purchases.');
+  setTimeout(() => { if (S.restoreMsg !== 'checking') return;
+    if (sim('simRestoreNone')) S.restoreMsg = 'none'; else if (sim('simRestoreOther')) S.restoreMsg = 'other';
+    else if (isTrial()) { S.plan = 'reseller'; S.restoreMsg = 'done'; } else S.restoreMsg = 'current';
+    if (S.restoreMsg === 'done' && S.screen === 'paywall' && S.inHaul) { S.restoreMsg = null; S.draftIdx = Math.min(S.drafted, haulN()-1); show('draftAfterBuy'); toast('Reseller plan restored. Draft the rest of your haul.'); return; }
+    render(); say({ done:'Reseller plan restored.', current:'Your plan is already active.', none:'No Listly purchases found for this Apple ID.', other:'This purchase belongs to another Listly account.' }[S.restoreMsg]); }, 900); }
 function snapshot(){ return JSON.stringify({L:S.L, PL:S.PL, hist:S.hist}); }
 function setUndo(msg, before, back){ S.undo = { msg, before, back, screen:null }; }
 function applySold(){ const it = item(S.soldKey), tr = S.soldOn === 'Traded'; const before = snapshot();
@@ -1303,13 +1499,41 @@ function doUndo(){ const u = S.undo; if (!u) return; const b = JSON.parse(u.befo
 
 function goto(id){
   clearTimeout(timer); resetState();
-  const filledAll = (n) => { S.photos = 13; S.facts.forEach((f,i)=>{ f.done=true; f.cond=ITEMS[i].cond; f.flaws=ITEMS[i].flaws; f.dept=ITEMS[i].dept||''; f.size=ITEMS[i].size||''; }); S.factIdx = (n||haulN())-1; S.perms = 'granted'; S.inHaul = true; };
+  const filledAll = (n) => { S.photos = 13; S.facts.forEach((f,i)=>{ f.done=true; f.cond=ITEMS[i].cond; f.flaws=ITEMS[i].flaws; f.dept=ITEMS[i].dept||''; f.size=ITEMS[i].size||''; }); S.factIdx = (n||haulN())-1; S.cam = S.mic = 'granted'; S.inHaul = true; };
   const trialDrafted = () => { filledAll(); S.drafted = Math.min(3, haulN()); S.freeLeft = 3 - S.drafted; };
+  /* onboarding: nothing asked yet; the photo-first and notice toggles follow the state picked */
+  const OB_DEFAULT = ['welcome','obMarkets','obAccount','obAccountFail','obPerms','obCamPrompt','obMicPrompt'];
+  const tick = (bid, v) => { const b = document.getElementById(bid); if (b) b.checked = v; };
+  if (OB_DEFAULT.includes(id) && id !== 'welcome') tick('simPhotoFirst', false);   /* Welcome shows whichever variant is on */
+  if (id.startsWith('pf')) tick('simPhotoFirst', true);
+  if (id === 'newPhoneNotice') tick('simNoticeChanged', true); if (id === 'newPhonePerms') tick('simNoticeChanged', false);
+  if (OB_DEFAULT.includes(id) || id.startsWith('obEmail') || id.startsWith('signIn') || id === 'pfWelcome' || id === 'pfPerms') S.cam = S.mic = 'unasked';
   switch (id) {
-    case 'capture': case 'group': case 'groupFail': S.perms = 'granted'; S.inHaul = true; if (id!=='capture') S.photos = 13; break;
-    case 'facts': case 'factsRetry': S.photos = 13; S.perms = 'granted'; S.inHaul = true; break;
-    case 'factsMissing': S.photos = 13; S.perms = 'granted'; S.inHaul = true; S.factIdx = 3; [0,1,2].forEach(i=>{S.facts[i]={done:true,cond:ITEMS[i].cond,flaws:ITEMS[i].flaws};}); S.facts[3] = {done:true, cond:'', flaws:'', asked:true, dept:'', size:'One size', sizeOther:false}; break;
-    case 'drafting': filledAll(); S.screen='facts'; startDraft(); return;
+    case 'obCamPrompt': S.overlay = 'camPrompt'; break;
+    case 'obMicPrompt': S.cam = 'granted'; S.overlay = 'micPrompt'; break;
+    case 'obEmail': case 'obEmailInvalid': case 'obEmailSent': case 'obEmailExpired': S.email = id === 'obEmail' ? '' : id === 'obEmailInvalid' ? 'seller@example' : 'seller@example.com'; break;
+    case 'signInLoading': S.screen = 'signIn'; signInSuccess(); return;
+    case 'signInNoAccount': S.email = 'sam.r@example.com'; break;
+    case 'captureNotNow': S.inHaul = true; S.cam = S.mic = 'unasked'; break;
+    case 'captureCamDenied': S.inHaul = true; S.cam = 'denied'; break;
+    case 'captureBothDenied': S.inHaul = true; S.cam = S.mic = 'denied'; break;
+    case 'captureCamBack': S.inHaul = true; S.camBack = true; break;
+    case 'factsMicDenied': S.photos = 13; S.inHaul = true; S.mic = 'denied'; break;
+    case 'newPhonePerms': case 'newPhoneNotice': S.plan = 'reseller'; S.newDevice = true; S.cam = S.mic = 'unasked'; S.tipsSeenAccount = true; S.haulFrom = 'home'; break;
+    case 'homeReturnTrial': S.drafted = 2; S.freeLeft = 1; S.newDevice = true; S.cam = S.mic = 'unasked'; S.tipsSeenAccount = true; break;
+    case 'pfWelcome': case 'pfPerms': S.markets = []; S.pfAsked = false; break;
+    case 'pfAccount': filledAll(); S.markets = []; S.pfAsked = false; break;
+    case 'pfMarkets': trialDrafted(); S.markets = []; S.pfAsked = false; S.account = true; break;
+    case 'homeSetup': case 'setupDefaults': S.drafted = 3; S.freeLeft = 0; S.setupCard = true; break;
+    case 'homeWelcomeReseller': S.plan = 'reseller'; S.welcomePlan = 'reseller'; break;
+    case 'homeWelcomePass': S.plan = 'pass'; S.welcomePlan = 'pass'; S.setupCard = true; break;
+    case 'profileRestored': S.plan = 'reseller'; S.restoreMsg = 'done'; break;
+    case 'profileRestoreNone': S.restoreMsg = 'none'; break;
+    case 'profileRestoreOther': S.restoreMsg = 'other'; break;
+    case 'capture': case 'group': case 'groupFail': S.inHaul = true; if (id!=='capture') S.photos = 13; break;
+    case 'facts': case 'factsRetry': S.photos = 13; S.inHaul = true; break;
+    case 'factsMissing': S.photos = 13; S.inHaul = true; S.factIdx = 3; [0,1,2].forEach(i=>{S.facts[i]={done:true,cond:ITEMS[i].cond,flaws:ITEMS[i].flaws};}); S.facts[3] = {done:true, cond:'', flaws:'', asked:true, dept:'', size:'One size', sizeOther:false}; break;
+    case 'drafting': filledAll(); S.account = true; S.screen='facts'; startDraft(); return;
     case 'draftFail': filledAll(); break;
     case 'draft': case 'draftLocked': trialDrafted(); if (id==='draftLocked') S.draftIdx = 3; break;
     case 'draftEdit': trialDrafted(); S.editing = 'Title'; break;
@@ -1331,7 +1555,7 @@ function goto(id){
     case 'traded': S.plan = 'reseller'; S.soldKey = 'jacket'; S.soldOn = 'Traded'; break;
     default: S.plan = 'reseller';
   }
-  if (['welcome','obMarkets','obAccount','obAccountFail','obPerms','capture','group','groupFail','facts','factsRetry','factsMissing','draftFail','draft','draftLocked','draftEdit','draftPartial','photoAsk','photoDenied','savedPhotos','photoLimited','paywall','payFail','trialDone','homeNew','homeTrial'].includes(id)) S.plan = null;
+  if (['welcome','obMarkets','obAccount','obAccountFail','obPerms','obCamPrompt','obMicPrompt','obEmail','obEmailInvalid','obEmailSent','obEmailExpired','signIn','signInFail','signInNoAccount','captureNotNow','captureCamDenied','captureBothDenied','captureCamBack','factsMicDenied','pfWelcome','pfPerms','pfAccount','pfMarkets','homeSetup','setupDefaults','homeReturnTrial','profileRestoreNone','profileRestoreOther','capture','group','groupFail','facts','factsRetry','factsMissing','draftFail','draft','draftLocked','draftEdit','draftPartial','photoAsk','photoDenied','savedPhotos','photoLimited','paywall','payFail','trialDone','homeNew','homeTrial'].includes(id)) S.plan = null;
   if (id === 'draftAfterBuy' || id === 'limitReached') S.plan = 'reseller';
   /* inventory states */
   if (['itemDetail','itemEdit','itemDelete','itemNoListings'].includes(id)) { S.detailKey = id==='itemNoListings' ? 'bag' : 'jacket'; if (id==='itemEdit') S.editFact = 'flaws'; if (id==='itemNoListings') { const b = item('bag'); b.where = []; b.links = {}; } }
@@ -1360,14 +1584,56 @@ document.addEventListener('click', e => {
   switch (a) {
     /* onboarding */
     case 'toObMarkets': show('obMarkets'); break;
-    case 'signIn': toast('Sign in opens here. A returning seller lands on Home (prototype).'); break;
+    case 'signIn': show('signIn'); break;
     case 'toggleMkt': { const m = t.dataset.m; S.markets = S.markets.includes(m) ? S.markets.filter(x=>x!==m) : [...S.markets, m]; render(); break; }
     case 'skipMarkets': S.markets = MKTS.map(m=>m.id); show('obAccount'); break;
-    case 'toObAccount': show('obAccount'); break;
+    case 'toObAccount': show(S.account ? 'obPerms' : 'obAccount'); break;   /* identity already held from Sign in (DD-32) */
     case 'toObPerms': show('obPerms'); break;
-    case 'allowPerms': S.inHaul = true; S.haulFrom = 'home'; if (sim('simDenied')) { S.perms = 'denied'; show('capture'); toast('Camera and microphone are off. Add photos from your library and type the answers.'); }
-      else { S.perms = 'granted'; show('capture'); } break;
-    case 'denyPerms': S.inHaul = true; S.haulFrom = 'home'; S.perms = 'denied'; show('capture'); break;
+    case 'allowPerms': S.overlay = 'camPrompt'; if (S.screen === 'obPerms') S.screen = 'obCamPrompt'; render(); break;   /* camera prompt, then microphone (S-03 c2) */
+    case 'denyPerms': S.inHaul = true; if (!['newPhonePerms','newPhoneNotice'].includes(S.screen)) S.haulFrom = 'home'; S.cam = S.mic = 'unasked'; S.newPhoneAsked = true; show('captureNotNow');
+      say("Nothing was asked. Add photos from your library and type the answers, or turn the camera on here."); break;
+    case 'camAllow': case 'camDeny': { S.cam = a === 'camAllow' ? 'granted' : 'denied';
+      if (['obCamPrompt','pfPerms','newPhonePerms','newPhoneNotice'].includes(S.screen)) { S.overlay = 'micPrompt'; if (S.screen === 'obCamPrompt') S.screen = 'obMicPrompt'; render(); break; }
+      S.overlay = null; render(); say(S.cam === 'granted' ? 'Camera is on.' : 'Camera access is off. Add photos from your library.'); break; }
+    case 'micAllow': case 'micDeny': { S.mic = a === 'micAllow' ? 'granted' : 'denied'; S.overlay = null;
+      if (['obMicPrompt','pfPerms','newPhonePerms','newPhoneNotice'].includes(S.screen)) { S.inHaul = true; S.newPhoneAsked = true; if (!['newPhonePerms','newPhoneNotice'].includes(S.screen)) S.haulFrom = 'home';
+        const c = S.cam === 'granted', m = S.mic === 'granted';
+        show(c ? 'capture' : (m ? 'captureCamDenied' : 'captureBothDenied'));
+        if (!c && !m) toast('Camera and microphone are off. Add photos from your library and type the answers.');
+        else if (!c) toast('Camera is off. Add photos from your library. You can still answer by voice.');
+        else if (!m) toast("Microphone is off. You'll type each item's answers.");
+        break; }
+      render(); say(S.mic === 'granted' ? 'Microphone is on. Tap to talk.' : 'Microphone access is off. Type the answers.'); break; }
+    case 'camAsk': S.overlay = 'camPrompt'; render(); break;
+    case 'micAsk': S.overlay = 'micPrompt'; render(); break;
+    case 'openSettingsCam': S.cam = 'granted'; S.camBack = true; show('captureCamBack'); toast('Camera is on. (Prototype: the trip to Settings is skipped.)'); break;
+    case 'openSettingsMic': S.mic = 'granted'; S.micBack = true; show(S.screen === 'factsMicDenied' ? 'facts' : S.screen); toast('Microphone is on. (Prototype: the trip to Settings is skipped.)'); break;
+    case 'authApple': case 'authGoogle': authWith(a === 'authApple' ? 'Apple' : 'Google'); break;
+    case 'toEmailUp': S.emailMode = 'up'; S.codeErr = false; show('obEmail'); break;
+    case 'toEmailIn': S.emailMode = 'in'; S.codeErr = false; show('obEmail'); break;
+    case 'toEmailBack': S.codeErr = false; show('obEmail'); break;
+    case 'toPfAccount': show('pfAccount'); break;
+    case 'toSignIn': show('signIn'); break;
+    case 'toWelcome': show('welcome'); break;
+    case 'emailContinue': { const v = ((document.getElementById('emailIn')||{}).value || '').trim(); S.email = v;
+      if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v)) { show('obEmailInvalid'); const f = document.getElementById('emailIn'); if (f) f.focus(); say('Enter an email address like name@example.com.'); break; }
+      S.codeErr = false; show('obEmailSent'); say('Email sent to ' + v + '.'); break; }
+    case 'codeContinue': { const v = ((document.getElementById('codeIn')||{}).value || '').replace(/\D/g,'');
+      if (v.length !== 6) { S.codeErr = true; render(); const f = document.getElementById('codeIn'); if (f) f.focus(); say('Enter all 6 digits from the email.'); break; }
+      S.codeErr = false; emailDone(); break; }
+    case 'openEmailLink': if (sim('simLinkExpired')) { show('obEmailExpired'); say('That link has expired.'); } else emailDone(); break;
+    case 'newEmailLink': show('obEmailSent'); toast('New link and code sent to ' + (S.email || 'seller@example.com') + '.'); break;
+    case 'createFromSignIn': S.account = true; show('obMarkets'); toast('Your sign-in is kept. Pick where you sell, then allow the camera.'); break;
+    case 'pfStart': S.markets = []; S.pfAsked = false; show('pfPerms'); break;
+    case 'pfMarketsDone': S.pfAsked = true; render(); toast('Showing listings for ' + S.markets.map(MNAME).join(', ') + '. Change this in Profile.'); break;
+    case 'pfMarketsAll': S.pfAsked = true; S.markets = []; render(); toast('Showing all five. Change this in Profile.'); break;
+    case 'setupShops': S.back = 'home'; S.linking = null; show('connectors'); break;
+    case 'toSetupDefaults': show('setupDefaults'); break;
+    case 'saveDefaults': S.defaultsSet = true; show(homeFor()); toast('Selling defaults saved.'); break;
+    case 'dismissSetup': S.setupCard = false; S.setupDismissed = true; render(); toast('Find these any time in Profile.'); break;
+    case 'dismissWelcome': S.welcomePlan = null; render(); break;
+    case 'welcomeCosts': S.costIdx = 0; S.costQ = S.L.filter(x=>x.status!=='listed' && x.cost===null).map(x=>x.key); show('addCosts'); break;
+    case 'restore': doRestore(); break;
     /* haul */
     case 'shutter': S.photos++; render(); say(S.photos + ' photos'); break;
     case 'library': S.photos = Math.max(S.photos, 13); render(); say('13 photos added'); break;
@@ -1426,7 +1692,7 @@ document.addEventListener('click', e => {
     case 'buy': buy(t.dataset.plan); break;
     case 'retryPay': buy(S.pending || 'reseller'); break;
     case 'notNow': if (S.inHaul && S.payReason !== 'trialDone') { show('draft'); toast(`Your ${S.drafted} drafted listings stay ready to copy. The other ${haulN()-S.drafted} are saved.`); }
-      else if (S.payReason === 'trialDone') { S.inHaul = false; show('homeTrial'); toast('Your 3 listings stay ready to copy.'); } else show(homeFor()); break;
+      else if (S.payReason === 'trialDone') { S.inHaul = false; S.setupCard = !S.setupDismissed; show('homeTrial'); toast('Your 3 listings stay ready to copy.'); } else show(homeFor()); break;
     /* navigation */
     case 'toHome': show(homeFor()); break;
     case 'toListings': S.listView = 'listings'; S.listStatus = S.listStatus || 'active'; show(isPass() ? 'listingsPass' : 'listings'); break;
@@ -1436,7 +1702,9 @@ document.addEventListener('click', e => {
     case 'toProfile': show('profile'); break;
     case 'newHaul': S.haulFrom = { home:'home', homeNew:'home', homeTrial:'home', passHome:'home', passEnded:'home', listings:'listings', listingsPass:'listings', ledger:'listings', profit:'profit', profile:'profile' }[S.screen] || 'home';
       if (S.plan === 'pass' && S.passEnded) { S.payReason = 'passEnded'; show('paywall'); break; }
-      S.photos = 0; S.groups = [4,3,2,2,2]; S.facts = ITEMS.map(()=>({done:false,typed:false,cond:'',flaws:''})); S.inHaul = true; S.drafted = S.plan ? 0 : S.drafted; S.perms = S.perms === 'denied' ? 'denied' : 'granted'; show('capture'); break;
+      S.photos = 0; S.groups = [4,3,2,2,2]; S.facts = ITEMS.map(()=>({done:false,typed:false,cond:'',flaws:''})); S.inHaul = true; S.drafted = S.plan ? 0 : S.drafted;
+      if (S.newDevice && !S.newPhoneAsked && S.cam === 'unasked') { show(sim('simNoticeChanged') ? 'newPhoneNotice' : 'newPhonePerms'); break; }   /* first haul on a new phone (DD-38) */
+      show('capture'); break;
     case 'continueHaul': S.inHaul = true; S.haulFrom = 'home'; S.photos = 13; show('group'); break;
     case 'toStale': S.listView = 'listings'; S.listStatus = 'stale'; S.listMkt = 'all'; show('listings'); break;
     /* listings */
@@ -1550,8 +1818,20 @@ document.addEventListener('change', e => { if (e.target.closest && e.target.clos
 const PROTO = {
   states: [
     {id:'welcome', label:'Onboarding 1/4 · Welcome (S-01, R-33)'}, {id:'obMarkets', label:'Onboarding 2/4 · Where do you sell? (S-01)'},
-    {id:'obAccount', label:'Onboarding 3/4 · Create account (S-02)'}, {id:'obAccountFail', label:'Onboarding · sign-up failed (S-02)'},
+    {id:'obAccount', label:'Onboarding 3/4 · Create account (S-02)'}, {id:'obAccountFail', label:'Onboarding · sign-up failed (S-02, DD-34)'},
+    {id:'obEmail', label:'Onboarding 3/4 · email address (S-02, DD-33)'}, {id:'obEmailInvalid', label:'Onboarding 3/4 · email not valid (S-02)'},
+    {id:'obEmailSent', label:'Email · link and 6-digit code sent (DD-33)'}, {id:'obEmailExpired', label:'Email · link expired (DD-33)'},
     {id:'obPerms', label:'Onboarding 4/4 · Camera, mic and AI notice (S-03, R-23)'},
+    {id:'obCamPrompt', label:'Onboarding 4/4 · camera system prompt (S-03, DD-36)'}, {id:'obMicPrompt', label:'Onboarding 4/4 · microphone system prompt (S-03)'},
+    {id:'captureNotNow', label:'Haul · Not now: camera and mic not asked yet (S-03, DD-36)'}, {id:'captureCamDenied', label:'Haul · camera denied, voice on (S-03, DD-36)'},
+    {id:'captureBothDenied', label:'Haul · camera and mic denied (S-03)'}, {id:'captureCamBack', label:'Haul · camera turned on in Settings, picked up (S-03, DD-37)'},
+    {id:'factsMicDenied', label:'Haul · microphone denied, typing (S-03, S-10)'},
+    {id:'signIn', label:'Sign in · returning seller (S-02, R-33, DD-31)'}, {id:'signInFail', label:'Sign in · failed (S-02, DD-34)'},
+    {id:'signInNoAccount', label:'Sign in · no Listly account for it (S-02, DD-32)'}, {id:'signInLoading', label:'Sign in · getting your items (DD-31)'},
+    {id:'homeReturnTrial', label:'Home · returning trial seller, new phone (R-1, DD-40)'},
+    {id:'newPhonePerms', label:'New phone · first haul asks for camera and mic again (S-03, DD-38)'}, {id:'newPhoneNotice', label:'New phone · AI notice changed, shown in full (S-03, DD-38)'},
+    {id:'pfWelcome', label:'Test variant · photo first: Welcome (PQ-14, DD-41)'}, {id:'pfPerms', label:'Test variant · photo first: camera, mic and AI notice (DD-41)'},
+    {id:'pfAccount', label:'Test variant · photo first: Save your items (DD-41)'}, {id:'pfMarkets', label:'Test variant · photo first: Where will you post these? (DD-41)'},
     {id:'capture', label:'Haul · camera (S-05, R-4)'}, {id:'group', label:'Haul · check grouping: move, split, merge (S-07, S-08, M-05)'},
     {id:'groupFail', label:'Haul · grouping failed (S-07, M-10)'},
     {id:'facts', label:'Haul · item facts, condition and bin (S-09, S-10, R-6)'}, {id:'factsMissing', label:'Haul · asked once for flaws and condition (S-11)'},
@@ -1566,6 +1846,8 @@ const PROTO = {
     {id:'trialDone', label:'Paywall · exactly 3 items, A-19 (DD-08, agreed)'},
     {id:'draftAfterBuy', label:'Back to the haul after buying (S-19, R-32, D-7)'}, {id:'limitReached', label:'Listing limit reached (S-22, M-06)'},
     {id:'homeNew', label:'Home · new user, empty (S-24)'}, {id:'homeTrial', label:'Home · trial used, nothing undrafted (DD-08, G-09)'},
+    {id:'homeSetup', label:'Home · Finish setting up, after the first haul (DD-42)'}, {id:'setupDefaults', label:'Finish setting up · selling defaults (R-31, DD-42)'},
+    {id:'homeWelcomeReseller', label:'Home · Reseller plan welcome (DD-43)'}, {id:'homeWelcomePass', label:'Home · Clear-out Pass welcome (DD-43)'},
     {id:'home', label:'Home · Reseller plan (S-23, R-29)'}, {id:'homeMonthFirst', label:'Home · test variant: This month first (Q-09)'},
     {id:'homeFlagged', label:'Home · flagged, reminders off (S-29, R-15)'},
     {id:'passHome', label:'Home · Clear-out Pass, with Needs action (S-21, D-2)'}, {id:'passEnded', label:'Home · Clear-out Pass ended (S-21, G-10)'},
@@ -1584,7 +1866,9 @@ const PROTO = {
     {id:'tradeDone', label:'Traded · trade value and profit (S-49)'},
     {id:'profit', label:'Profit · with missing cost and shipping flags (S-31, R-16)'}, {id:'profitEmpty', label:'Profit · no sales yet (S-31)'},
     {id:'addCosts', label:'Profit · add costs one at a time (S-30)'},
-    {id:'profile', label:'Profile (S-33, R-31)'}, {id:'connectors', label:'Marketplaces and connections (S-34, R-34)'},
+    {id:'profile', label:'Profile (S-33, R-31)'},
+    {id:'profileRestored', label:'Profile · Restore purchases: restored (R-3, DD-39)'}, {id:'profileRestoreNone', label:'Profile · Restore purchases: nothing found (DD-39)'},
+    {id:'profileRestoreOther', label:'Profile · Restore purchases: on another account (DD-39)'}, {id:'connectors', label:'Marketplaces and connections (S-34, R-34)'},
     {id:'ebayConnect', label:'Connect eBay · before sign-in (S-54, R-35)'}, {id:'ebayFail', label:'Connect eBay · failed (S-54)'},
     {id:'deleteConfirm', label:'Delete account · confirm (S-36)'}, {id:'howTo', label:'How-to video and steps (S-38, R-37)'}
   ],
@@ -1592,6 +1876,20 @@ const PROTO = {
   flowLabels: { welcome:'Welcome', obMarkets:'Where you sell', obAccount:'Account', obPerms:'Permissions', capture:'Photograph haul', group:'Check grouping', facts:'Answer facts', draft:'Copy listings', paywall:'Pick a plan', draftAfterBuy:'Back to the haul', home:'Home' },
   branches: {
     obAccountFail:{label:'Sign-up failed', returnsTo:'obAccount'},
+    obEmail:{label:'Email', returnsTo:'obAccount'}, obEmailInvalid:{label:'Email not valid', returnsTo:'obAccount'},
+    obEmailSent:{label:'Email: link or code', returnsTo:'obAccount'}, obEmailExpired:{label:'Email link expired', returnsTo:'obAccount'},
+    obCamPrompt:{label:'Camera prompt', returnsTo:'obPerms'}, obMicPrompt:{label:'Microphone prompt', returnsTo:'obPerms'},
+    captureNotNow:{label:'Not now: nothing asked yet', returnsTo:'capture'}, captureCamDenied:{label:'Camera denied', returnsTo:'capture'},
+    captureBothDenied:{label:'Camera and mic denied', returnsTo:'capture'}, captureCamBack:{label:'Camera turned on in Settings', returnsTo:'capture'},
+    factsMicDenied:{label:'Microphone denied', returnsTo:'facts'},
+    signIn:{label:'Flow 10 · Sign in'}, signInFail:{label:'Flow 10 · Sign-in failed'}, signInNoAccount:{label:'Flow 10 · No account'},
+    signInLoading:{label:'Flow 10 · Getting your items'}, homeReturnTrial:{label:'Flow 10 · Returning trial seller'},
+    newPhonePerms:{label:'Flow 10 · Permissions on a new phone'}, newPhoneNotice:{label:'Flow 10 · AI notice changed'},
+    pfWelcome:{label:'Flow 11 · Photo first: Welcome'}, pfPerms:{label:'Flow 11 · Photo first: permissions'},
+    pfAccount:{label:'Flow 11 · Photo first: Save your items'}, pfAccountFail:{label:'Flow 11 · Sign-up failed'}, pfMarkets:{label:'Flow 11 · Where will you post?'},
+    homeSetup:{label:'Flow 12 · Finish setting up'}, setupDefaults:{label:'Flow 12 · Selling defaults'},
+    homeWelcomeReseller:{label:'Flow 12 · Reseller welcome'}, homeWelcomePass:{label:'Flow 12 · Pass welcome'},
+    profileRestored:{label:'Flow 10 · Restored'}, profileRestoreNone:{label:'Flow 10 · Nothing to restore'}, profileRestoreOther:{label:'Flow 10 · On another account'},
     groupFail:{label:'Grouping failed (M-10)', returnsTo:'group'},
     factsMissing:{label:'Asked once for a missing slot', returnsTo:'facts'},
     factsRetry:{label:'Voice not understood (M-02)', returnsTo:'facts'},
@@ -1619,9 +1917,39 @@ const PROTO = {
     howTo:{label:'Flow 8 · How-to'}
   },
   next: {
-    welcome:['Tap <b>Get started</b>.', '#startBtn'], obMarkets:['Pick the marketplaces you sell on, then <b>Continue</b>.', '#obMarketsNext'],
+    welcome:['Tap <b>Get started</b> (in the photo-first variant, <b>Photograph my first items</b>).', '#startBtn'], obMarkets:['Pick the marketplaces you sell on, then <b>Continue</b>.', '#obMarketsNext'],
     obAccount:['Tap <b>Continue with Apple</b>.', '#obApple'], obAccountFail:['Tap <b>Continue with Apple</b> to try again.', '#obApple'],
-    obPerms:['Tap <b>Allow and start my first haul</b> (or try "Camera and mic access denied" under Simulate).', '#obAllow'],
+    obPerms:['Tap <b>Allow and start my first haul</b>, then answer the camera and microphone prompts. Try <b>Don\'t Allow</b> on either, or <b>Not now</b>.', '#obAllow'],
+    obEmail:['Type an email, then <b>Send link and code</b>. Try a bad address to see the error.', '#emailNext'],
+    obEmailInvalid:['Fix the address, then <b>Send link and code</b>.', '#emailNext'],
+    obEmailSent:['Type any 6 digits and <b>Continue</b>, or <b>Open the link from Mail</b> (try "Email link expired" under Simulate).', '#codeNext'],
+    obEmailExpired:['Tap <b>Send a new link</b>.', '#newLinkBtn'],
+    obCamPrompt:['Pick <b>Allow</b> or <b>Don\'t Allow</b>: each outcome has its own fallback.', '#sysAllow'],
+    obMicPrompt:['Pick <b>Allow</b> or <b>Don\'t Allow</b>.', '#sysAllow'],
+    captureNotNow:['Tap <b>Turn on camera</b> to see the prompt now, or <b>Add from library</b>.', '#camAskBtn'],
+    captureCamDenied:['Tap <b>Open Settings</b> to see access picked up on return, or <b>Add from library</b>.', '#camSettingsBtn'],
+    captureBothDenied:['Tap <b>Add from library</b>, then <b>Done</b>. Answers are typed.', '#libraryBtn'],
+    captureCamBack:['The camera is on, with no restart. Take photos, then <b>Done</b>.', '#doneCapture'],
+    factsMicDenied:['Tap <b>Type the answers</b>, or <b>Open Settings</b>.', '#typeBtn'],
+    signIn:['Tap <b>Continue with Apple</b>. Try "No Listly account", "Sign-in fails" or "Returning seller is on the trial" under Simulate.', '#siApple'],
+    signInFail:['Turn off "Sign-in or sign-up fails", then try again.', '#siApple'],
+    signInNoAccount:['Tap <b>Try another way</b>, or <b>Create a new account</b>.', '#tryOtherBtn'],
+    signInLoading:['Wait a moment: Home opens on its own.', null],
+    homeReturnTrial:['Tap <b>Start a haul</b>: this phone asks for the camera and microphone again.', '#homeHaul'],
+    newPhonePerms:['Tap <b>Allow and start the haul</b>, then answer both prompts.', '#npAllow'],
+    newPhoneNotice:['The notice changed, so it shows in full. Tap the main button.', '#npAllow'],
+    pfWelcome:['Tap <b>Photograph my first items</b>.', '#pfStartBtn'],
+    pfPerms:['Tap <b>Allow and start my first haul</b>, then answer both prompts.', '#obAllow'],
+    pfAccount:['Tap <b>Continue with Apple</b> to save the items and draft them.', '#pfApple'],
+    pfAccountFail:['Turn off "Sign-in or sign-up fails", then try again.', '#pfApple'],
+    pfMarkets:['Pick where you post, then <b>Show these listings</b>, or <b>Show all five</b>.', '#pfMarketsNext'],
+    homeSetup:['Tap <b>Set selling defaults</b> or <b>Link your shops</b>, or dismiss the card.', '#setupDefs'],
+    setupDefaults:['Pick who pays shipping, then <b>Save defaults</b>.', '#saveDefaults'],
+    homeWelcomeReseller:['Tap <b>Add what you paid</b>, or dismiss the card.', '#welCosts'],
+    homeWelcomePass:['Read the card, or dismiss it.', null],
+    profileRestored:['The plan row now shows the Reseller plan.', null],
+    profileRestoreNone:['Turn off "Restore finds no purchases", then <b>Restore purchases</b> again.', '#restoreBtn'],
+    profileRestoreOther:['Nothing moves between accounts. Sign out to use the other one.', null],
     capture:['Tap the shutter or <b>Add from library</b>, then <b>Done</b>. (Try "Grouping fails" under Simulate.)', '.nx'],
     group:['Try <b>Move a photo</b>, <b>Split</b> or <b>Merge</b>, then <b>Looks right — add details</b>.', '#groupOk'],
     groupFail:['Turn off "Grouping fails", then <b>Try again</b> — or <b>Continue as one item</b>.', '#retryGroup'],
@@ -1672,12 +2000,17 @@ const PROTO = {
     howTo:['Open a step, or tap <b>‹ Back</b>.', null]
   },
   taskFlows: [
-    { title:'0. Onboarding (new user)', source:'S-01, S-02, S-03 · R-33, R-23, R-34 · step n of 4 (D-7, DD-01). Account before the first photo is [H] (Q-11).', rows:[
-      { steps:[{label:'1 Welcome',state:'welcome'},{label:'2 Where do you sell?',state:'obMarkets'},{label:'3 Create account',state:'obAccount'},{label:'4 Camera, mic and AI notice',state:'obPerms',kind:'decision'},{label:'First haul',state:'capture',kind:'end'}] },
+    { title:'0. Onboarding (new seller)', source:'S-01, S-02, S-03 · R-33, R-23, R-34 · step n of 4 (D-7, DD-01). Email DD-33; cancel vs fail DD-34; permission outcomes DD-36, DD-37. Account before the first photo is [H] (Q-11): compare Flow 11.', rows:[
+      { steps:[{label:'1 Welcome',state:'welcome'},{label:'2 Where do you sell?',state:'obMarkets'},{label:'3 Create account',state:'obAccount'},{label:'4 Camera, mic and AI notice',state:'obPerms'},{label:'Camera prompt',state:'obCamPrompt',kind:'decision'},{label:'Microphone prompt',state:'obMicPrompt',kind:'decision'},{label:'First haul',state:'capture',kind:'end'}] },
       { cond:'Skips marketplaces', steps:[{label:'Drafts for all five',state:'obAccount'}] },
-      { cond:'Sign-up fails', steps:[{label:'Try again',state:'obAccountFail'}] },
-      { cond:'Not now, or denies', steps:[{label:'Library and typing',state:'capture',kind:'end'}] },
-      { cond:'Already has an account', steps:[{label:'Sign in'},{label:'Home',state:'home',kind:'end'}] } ] },
+      { cond:'Uses email (DD-33)', steps:[{label:'Email address',state:'obEmail'},{label:'Not valid',state:'obEmailInvalid'},{label:'Link or code',state:'obEmailSent',kind:'decision'},{label:'Link expired',state:'obEmailExpired'}] },
+      { cond:'Sign-up fails (cancel shows nothing)', steps:[{label:'Try again',state:'obAccountFail'}] },
+      { cond:'Camera denied', steps:[{label:'Library, voice still on',state:'captureCamDenied',kind:'end'}] },
+      { cond:'Microphone denied', steps:[{label:'Camera, typing',state:'factsMicDenied',kind:'end'}] },
+      { cond:'Both denied', steps:[{label:'Library and typing',state:'captureBothDenied',kind:'end'}] },
+      { cond:'Not now', steps:[{label:'Nothing asked; Turn on camera here later',state:'captureNotNow',kind:'end'}] },
+      { cond:'Turns access on in Settings', steps:[{label:'Picked up on return',state:'captureCamBack',kind:'end'}] },
+      { cond:'Already has an account', steps:[{label:'Sign in (Flow 10)',state:'signIn'},{label:'Home',state:'home',kind:'end'}] } ] },
     { title:'1. First haul to paid (Dre on the trial)', source:'S-05 to S-20, S-57 · R-1 to R-12, R-32, R-41 · D-1, D-7. Free listings are the first 3 drafted; the rest are locked [H].', rows:[
       { steps:[{label:'Photograph haul',state:'capture'},{label:'Check grouping',state:'group'},{label:'Facts, condition, bin',state:'facts'},{label:'Draft first 3',state:'drafting'},{label:'Copy, edit, save photos',state:'draft'},{label:'Draft item 4 or Finish haul',state:'draftLocked',kind:'decision'},{label:'Pick a plan',state:'paywall',kind:'decision'},{label:'Back to the haul',state:'draftAfterBuy'},{label:'Finish haul → starting tab',state:'home',kind:'end'}] },
       { cond:'Grouping fails (M-10)', steps:[{label:'Try again or one item',state:'groupFail'}] },
@@ -1733,7 +2066,23 @@ const PROTO = {
       { cond:'Change back to listed', steps:[{label:'eBay recorded it? (M-12)',state:'revertEbay',kind:'decision'},{label:'Relist where removed (M-13)',state:'relist',kind:'end'}] },
       { cond:'Delete', steps:[{label:'Confirm',state:'itemDelete',kind:'decision'},{label:'Listings',state:'listings',kind:'end'}] },
       { cond:'Not listed yet', steps:[{label:'Empty listings section',state:'itemNoListings',kind:'end'}] },
-      { cond:'Clear-out Pass', steps:[{label:'No cost section',state:'itemDetailPass',kind:'end'}] } ] }
+      { cond:'Clear-out Pass', steps:[{label:'No cost section',state:'itemDetailPass',kind:'end'}] } ] },
+    { title:'10. Sign in on a new phone (returning seller)', source:'S-02, S-03, S-20 · R-33, R-3, R-1, R-36 · DD-31, DD-32, DD-38, DD-39, DD-40.', rows:[
+      { steps:[{label:'Welcome',state:'welcome'},{label:'Sign in',state:'signIn',kind:'decision'},{label:'Getting your items',state:'signInLoading'},{label:'Home for their plan',state:'home'},{label:'First haul: camera and mic again',state:'newPhonePerms'},{label:'Haul',state:'capture',kind:'end'}] },
+      { cond:'No account for that sign-in (DD-32)', steps:[{label:'Try another way, or create',state:'signInNoAccount',kind:'decision'},{label:'Step 2, sign-in kept',state:'obMarkets',kind:'end'}] },
+      { cond:'Sign-in fails', steps:[{label:'Try again',state:'signInFail'}] },
+      { cond:'Email', steps:[{label:'Link or code',state:'obEmailSent'}] },
+      { cond:'On the trial (DD-40)', steps:[{label:'What\'s left, never reset',state:'homeReturnTrial',kind:'end'}] },
+      { cond:'AI notice changed (DD-38)', steps:[{label:'Full notice again',state:'newPhoneNotice',kind:'end'}] },
+      { cond:'Restore purchases (DD-39)', steps:[{label:'Restored',state:'profileRestored'},{label:'Nothing found',state:'profileRestoreNone'},{label:'On another account',state:'profileRestoreOther',kind:'end'}] } ] },
+    { title:'11. Onboarding, photo first (test variant, for Maya)', source:'PQ-14, Q-11 · R-33, R-23, R-1 · DD-41. A Phase 0 test against Flow 0: turn on under Simulate → Test variants.', rows:[
+      { steps:[{label:'Welcome',state:'pfWelcome'},{label:'Camera, mic and AI notice',state:'pfPerms',kind:'decision'},{label:'Photograph haul',state:'capture'},{label:'Grouping and facts',state:'facts'},{label:'Save your items (account)',state:'pfAccount',kind:'decision'},{label:'Drafting',state:'drafting'},{label:'Where will you post these?',state:'pfMarkets',kind:'decision'},{label:'Copy listings',state:'draft',kind:'end'}] },
+      { cond:'Shows all five', steps:[{label:'Copy listings, every tab',state:'draft',kind:'end'}] } ] },
+    { title:'12. Finish setting up, and the plan welcome', source:'R-31, R-34, R-3, R-18 · DD-42, DD-43 (proposed: PQ-24, PQ-29).', rows:[
+      { steps:[{label:'First haul finished',state:'homeSetup'},{label:'Set selling defaults',state:'setupDefaults'},{label:'Link your shops',state:'connectors'},{label:'Card goes when done',state:'homeTrial',kind:'end'}] },
+      { cond:'Dismisses the card', steps:[{label:'Every setting stays in Profile',state:'profile',kind:'end'}] },
+      { cond:'Bought the Reseller plan', steps:[{label:'Reseller welcome',state:'homeWelcomeReseller'},{label:'Add what you paid',state:'addCosts',kind:'end'}] },
+      { cond:'Bought the Clear-out Pass', steps:[{label:'Pass welcome',state:'homeWelcomePass',kind:'end'}] } ] }
   ]
 };
 
