@@ -2078,7 +2078,7 @@ const PROTO = {
     { title:'11. Onboarding, photo first (test variant, for Maya)', source:'PQ-14, Q-11 · R-33, R-23, R-1 · DD-41. A Phase 0 test against Flow 0: turn on under Simulate → Test variants.', rows:[
       { steps:[{label:'Welcome',state:'pfWelcome'},{label:'Camera, mic and AI notice',state:'pfPerms',kind:'decision'},{label:'Photograph haul',state:'capture'},{label:'Grouping and facts',state:'facts'},{label:'Save your items (account)',state:'pfAccount',kind:'decision'},{label:'Drafting',state:'drafting'},{label:'Where will you post these?',state:'pfMarkets',kind:'decision'},{label:'Copy listings',state:'draft',kind:'end'}] },
       { cond:'Shows all five', steps:[{label:'Copy listings, every tab',state:'draft',kind:'end'}] } ] },
-    { title:'12. Finish setting up, and the plan welcome', source:'R-31, R-34, R-3, R-18 · DD-42, DD-43 (proposed: PQ-24, PQ-29).', rows:[
+    { title:'12. Finish setting up, and the plan welcome', source:'R-31, R-34, R-3, R-18 · DD-42, DD-43 (agreed: PQ-24, PQ-29).', rows:[
       { steps:[{label:'First haul finished',state:'homeSetup'},{label:'Set selling defaults',state:'setupDefaults'},{label:'Link your shops',state:'connectors'},{label:'Card goes when done',state:'homeTrial',kind:'end'}] },
       { cond:'Dismisses the card', steps:[{label:'Every setting stays in Profile',state:'profile',kind:'end'}] },
       { cond:'Bought the Reseller plan', steps:[{label:'Reseller welcome',state:'homeWelcomeReseller'},{label:'Add what you paid',state:'addCosts',kind:'end'}] },

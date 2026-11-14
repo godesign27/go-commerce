@@ -45,7 +45,7 @@ paywall, drafting, and full-screen system states (DD-02; S-04 `[H]`).
 | Onboarding (4 steps) | First launch; after Sign out or Delete account (Welcome) | New haul (step 4). Photo-first variant: Copy listings (DD-41) |
 | Sign in | Welcome → I already have an account; session expired `[H]` | Home for the seller's plan (DD-31); step 2 if they choose to create an account (DD-32) |
 | Camera and mic on a new phone | The first New haul after signing in on a new phone (DD-38) | New haul |
-| Finish setting up | A card on Home after the first haul (DD-42, proposed) | Home; each row opens its screen, which returns to Home |
+| Finish setting up | A card on Home after the first haul (DD-42) | Home; each row opens its screen, which returns to Home |
 | Restore purchases | Profile → Plan; the paywall | The same screen, with the outcome shown there (DD-39) |
 | New haul (capture → grouping → facts → drafting → copy) | Tab bar New haul; Home Start a haul; Home Unfinished haul → Continue; empty states' Start a haul | **The tab it started from** (R-32), on Finish haul or Close |
 | Paywall | Drafting item 4 on the trial; Finish haul with undrafted items; Finish haul with exactly 3 drafted (proposed, DD-08); New haul on an ended Pass; Profile → See plans or See the Reseller plan; Home's plan card | **The haul**, if opened mid-haul (R-32, D-7); otherwise where it was opened from |
@@ -230,7 +230,7 @@ Compared with Flow 0 in Phase 0. Prototype: Simulate → Test variants → Onboa
 Measure against Flow 0: time from install to first listing copied (KR3), and how many start sign-up and
 finish it.
 
-### Flow 12 — Finish setting up, and the plan welcome (R-31, R-34, R-3, R-18; DD-42, DD-43; proposed, PQ-24, PQ-29)
+### Flow 12 — Finish setting up, and the plan welcome (R-31, R-34, R-3, R-18; DD-42, DD-43; agreed, PQ-24, PQ-29)
 
 - **After the first haul is finished**, Home shows **Finish setting up** (C-79), below Needs action and an
   unfinished haul: Link your shops → Marketplaces and connections (back goes to Home) · Set selling defaults →
@@ -302,8 +302,8 @@ From the stories' entitlement matrix. **Bold** cells are this design's proposals
 | Profit tab and tracker (R-16) | **Tab, empty until a sale** | Yes | Hidden; money made on Home | Hidden |
 | Profile (R-31) | Yes, plan shows the counter | Yes | Yes | Yes |
 | Upgrade suggestion (R-19, P1) | — | — | 10+ active items or a second marketplace, once per pass | Paywall instead |
-| Finish setting up card (DD-42, proposed) | **After the first haul** | **After the first haul** | **After the first haul** | Not shown |
-| Plan welcome card (DD-43, proposed) | — | **Reseller card, once** | **Pass card, once** | — |
+| Finish setting up card (DD-42) | **After the first haul** | **After the first haul** | **After the first haul** | Not shown |
+| Plan welcome card (DD-43) | — | **Reseller card, once** | **Pass card, once** | — |
 | Restore purchases (R-3) | Yes | Yes | Yes | Yes |
 
 **What changes on screen between plans** (for the same item and action):
