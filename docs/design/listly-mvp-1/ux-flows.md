@@ -42,7 +42,11 @@ paywall, drafting, and full-screen system states (DD-02; S-04 `[H]`).
 
 | Screen | Reached from | Returns to |
 |---|---|---|
-| Onboarding (4 steps) | First launch | New haul (step 4) |
+| Onboarding (4 steps) | First launch; after Sign out or Delete account (Welcome) | New haul (step 4). Photo-first variant: Copy listings (DD-41) |
+| Sign in | Welcome → I already have an account; session expired `[H]` | Home for the seller's plan (DD-31); step 2 if they choose to create an account (DD-32) |
+| Camera and mic on a new phone | The first New haul after signing in on a new phone (DD-38) | New haul |
+| Finish setting up | A card on Home after the first haul (DD-42, proposed) | Home; each row opens its screen, which returns to Home |
+| Restore purchases | Profile → Plan; the paywall | The same screen, with the outcome shown there (DD-39) |
 | New haul (capture → grouping → facts → drafting → copy) | Tab bar New haul; Home Start a haul; Home Unfinished haul → Continue; empty states' Start a haul | **The tab it started from** (R-32), on Finish haul or Close |
 | Paywall | Drafting item 4 on the trial; Finish haul with undrafted items; Finish haul with exactly 3 drafted (proposed, DD-08); New haul on an ended Pass; Profile → See plans or See the Reseller plan; Home's plan card | **The haul**, if opened mid-haul (R-32, D-7); otherwise where it was opened from |
 | Item detail | A row in Listings, the ledger, Profit's recent sales; Home's Needs action (via the checklist) | Where it was opened from (back label names it) |
@@ -57,18 +61,33 @@ paywall, drafting, and full-screen system states (DD-02; S-04 `[H]`).
 
 Each flow is in the prototype's Key task flows, step by step, with the same IDs.
 
-### Flow 0 — Onboarding (R-33, R-23, R-34; S-01 to S-03)
+### Flow 0 — Onboarding (R-33, R-23, R-34; S-01 to S-03; DD-31 to DD-37)
 
-1. **Welcome** — step 1 of 4 (C-01, C-02). Get started · I already have an account.
-2. **Where do you sell?** — step 2 of 4. Marketplace chips; Continue (disabled with none picked) · Skip — draft
+1. **Welcome**: step 1 of 4 (C-01, C-02). Get started · I already have an account (→ Flow 10).
+2. **Where do you sell?**: step 2 of 4. Marketplace chips; Continue (disabled with none picked) · Skip — draft
    for all five.
-3. **Create an account** — step 3 of 4. Continue with Apple · Continue with Google · Use email instead.
-4. **Camera and microphone** — step 4 of 4, with the AI processing notice (C-04). Allow and start my first haul
+3. **Create an account**: step 3 of 4. Continue with Apple (Apple's own button) · Continue with Google · Use
+   email instead.
+4. **Camera and microphone**: step 4 of 4, with the AI processing notice (C-04). Allow and start my first haul
    · Not now — I'll use my photo library and type.
-5. → New haul (Flow 1).
+5. **Camera system prompt**, then **microphone system prompt** (C-68, C-69). → New haul (Flow 1).
 
-Branches: sign-up fails → stays on step 3 with C-03 (`obAccountFail`) · "I already have an account" → sign in →
-Home (skips onboarding) · Not now or a denied prompt → capture with the library and typing (C-05, C-06).
+| Branch | What happens | State | Copy |
+|---|---|---|---|
+| Skips marketplaces | Drafting set is all five | `obAccount` | — |
+| Email (DD-33) | Email address → "Check your email": link or 6-digit code → step 4 | `obEmail`, `obEmailSent` | C-62, C-64 |
+| Not a valid email | Error under the field when Continue is tapped; focus returns to the field | `obEmailInvalid` | C-63 |
+| Code not 6 digits | Error under the code field | `obEmailSent` | C-65 |
+| Link expired or used | "That link has expired" → Send a new link | `obEmailExpired` | C-66 |
+| Apple or Google sheet cancelled (DD-34) | Stays on step 3; nothing on screen; "Sign-in cancelled" announced | `obAccount` | C-67 |
+| Sign-up fails | Stays on step 3 with the error; no partial account | `obAccountFail` | C-03 |
+| Both prompts allowed | Camera and voice | `capture` | — |
+| Camera denied, microphone allowed | Photo library; voice still on; Open Settings | `captureCamDenied` | C-05, C-72 |
+| Microphone denied, camera allowed | Camera; facts are typed; Open Settings on the facts step | `factsMicDenied` | C-06, C-72 |
+| Both denied | Library and typing | `captureBothDenied` | C-05, C-06, C-72 |
+| Not now (DD-36) | Nothing is asked. The haul shows **Turn on camera**, and the facts step **Turn on microphone**, each of which shows the system prompt there and then | `captureNotNow` | C-70, C-71 |
+| Access turned on in Settings later (DD-37) | Picked up on return, without a restart; "Camera is on" announced | `captureCamBack` | C-73 |
+| Already has an account | Flow 10 | `signIn` | C-58 |
 
 ### Flow 1 — First haul to paid (R-1 to R-12, R-18, R-32, R-41; S-05 to S-20, S-57)
 
@@ -175,6 +194,52 @@ Listings or the ledger → **item detail** (`itemDetail`) → any of:
 
 Item not listed anywhere yet → `itemNoListings`. Clear-out Pass → `itemDetailPass` (no cost).
 
+### Flow 10 — Sign in on a new phone (R-33, R-3, R-1, R-36; S-02, S-03, S-20; DD-31, DD-32, DD-38 to DD-40)
+
+1. **Welcome** → I already have an account.
+2. **Sign in** (C-58): Continue with Apple · Continue with Google · Sign in with email · New to Listly? Get started.
+3. **Getting your items** (C-61): a spinner and words, a few seconds at most `[H]`.
+4. **Home for the seller's plan**, with tips already seen staying seen (R-36). Their plan comes from the server;
+   nothing to restore by hand (R-3).
+5. **First New haul on this phone** → **Camera and microphone on this phone** (C-74), without the AI notice
+   block → the two system prompts → New haul.
+
+| Branch | What happens | State | Copy |
+|---|---|---|---|
+| No Listly account for that sign-in (DD-32) | Try another way (primary) · Create a new account → step 2, with the sign-in kept, so step 3 is skipped | `signInNoAccount` | C-60, C-87 |
+| Sign-in fails | Stays on Sign in with the error | `signInFail` | C-59 |
+| Email | Same link-and-code screens as Flow 0, with no step dots | `obEmailSent` | C-62 to C-66 |
+| Trial seller (DD-40) | Home shows what's left, e.g. "1 of 3 free listings left"; never reset | `homeReturnTrial` | C-86 |
+| AI notice changed since they agreed (DD-38) | The full notice shows in place of the short screen; nothing is uploaded until they agree | `newPhoneNotice` | C-75 |
+| Restore purchases (DD-39) | Checking… → restored, already active, nothing found, or on another account | `profileRestored`, `profileRestoreNone`, `profileRestoreOther` | C-83 |
+| Session expired `[H — eng lead]` | Sign in, with "You've been signed out" | — (not prototyped) | C-85 |
+
+### Flow 11 — Onboarding, photo first (test variant; PQ-14, Q-11; DD-41)
+
+Compared with Flow 0 in Phase 0. Prototype: Simulate → Test variants → Onboarding: photo first.
+
+1. **Welcome** (C-76), no step dots: Photograph my first items · I already have an account.
+2. **Camera, microphone and the AI notice**: the same screen as step 4, without step dots. The notice must come
+   before the first upload (R-23).
+3. **Capture → grouping → facts**, as Flow 1. The drafting set is all five.
+4. **Save your 5 items** (C-77): Apple · Google · email. This is the account step, just before drafting, because
+   the trial counter belongs to an account (R-1). Grouping before this needs an anonymous session (PQ-28).
+5. **Drafting**, then **Copy listings** with a one-time sheet, **Where will you post these?** (C-78): pick
+   marketplaces → Show these listings, or Show all five. The choice becomes the drafting set.
+
+Measure against Flow 0: time from install to first listing copied (KR3), and how many start sign-up and
+finish it.
+
+### Flow 12 — Finish setting up, and the plan welcome (R-31, R-34, R-3, R-18; DD-42, DD-43; proposed, PQ-24, PQ-29)
+
+- **After the first haul is finished**, Home shows **Finish setting up** (C-79), below Needs action and an
+  unfinished haul: Link your shops → Marketplaces and connections (back goes to Home) · Set selling defaults →
+  **Selling defaults** (C-80) → Save → Home, with the row marked Done · eBay sales tracked for you: Coming soon
+  (no action). Dismissing it says where the settings live. It goes away when both rows are done.
+- **After buying**, Home shows a one-time welcome card. Bought mid-haul: back to the haul first (DD-09); the card
+  waits for Home. **Reseller plan** (C-81): Profit, By item, stale items, 500 a month; Add what you paid →
+  Add costs. **Clear-out Pass** (C-82): when it ends, 100 listings, reminders still on; no cost prompt.
+
 ## 3. State inventory
 
 Every screen against the six state types. "—" means the state can't occur on that screen, with the reason.
@@ -183,11 +248,14 @@ Every screen against the six state types. "—" means the state can't occur on t
 |---|---|---|---|---|---|---|
 | **Welcome** (`welcome`) | — (static) | — | — | — | — | — (no payment in onboarding, R-33) |
 | **Where do you sell?** (`obMarkets`) | No marketplace picked: Continue disabled, hint (C-02) | — | — | — | — | — |
-| **Create account** (`obAccount`) | — | Signing in: buttons disabled, "Signing you in…" (C-03) | Sign-up failed (`obAccountFail`, C-03) | Apple/Google sign-in cancelled = error, nothing created | — | — |
-| **Camera and mic** (`obPerms`) | — | — | — | Handled on the next screens (C-05, C-06) | — | — |
-| **Capture** (`capture`) | 0 photos: Done disabled; "Add from library" highlighted | Uploading after Done: count and progress `[H]` | Upload interrupted (C-54, G-08); photo limit (C-07) | Camera off (C-05): library only, Open Settings | — | Trial with 0 free listings left can still capture `[H]` (S-05) |
+| **Create account** (`obAccount`) | — | Signing in: buttons disabled, "Signing you in…" (C-03) | Sign-up failed (`obAccountFail`, C-03) | — (cancelling the Apple or Google sheet isn't an error: nothing on screen, "Sign-in cancelled" announced, DD-34) | — | — |
+| **Email** (`obEmail`, `obEmailSent`, `obEmailExpired`) | Empty field: Continue checks on tap | Sending: button shows "Sending…" `[H]` | Not a valid address (`obEmailInvalid`, C-63); code not 6 digits (C-65); link expired (C-66); can't send `[H]` (C-03 wording) | — | — | — |
+| **Sign in** (`signIn`) | — | Signing in, then **Getting your items** (`signInLoading`, C-61) | Failed (`signInFail`, C-59); no account for it (`signInNoAccount`, C-60) | — (cancel as above) | — | Plan comes from the server (DD-39) |
+| **Camera and mic on a new phone** (`newPhonePerms`) | — | — | — | Outcomes as Flow 0 | Notice changed: full notice (`newPhoneNotice`, C-75) | All plans |
+| **Camera and mic** (`obPerms`, `obCamPrompt`, `obMicPrompt`) | — | — | — | Each prompt answered separately; four outcomes plus Not now (DD-36, C-70 to C-72) | — | — |
+| **Capture** (`capture`) | 0 photos: Done disabled; "Add from library" highlighted | Uploading after Done: count and progress `[H]` | Upload interrupted (C-54, G-08); photo limit (C-07) | Camera denied (C-05): library, Open Settings; **not asked yet** (`captureNotNow`, C-70): Turn on camera; turned on in Settings → picked up (`captureCamBack`, C-73) | — | Trial with 0 free listings left can still capture `[H]` (S-05) |
 | **Check grouping** (`group`) | — (≥1 photo) | Grouping: "Finding your items…" with activity over 3 s, Cancel over 5 s (§9.3 governance) | Grouping failed (`groupFail`, M-10) | — | One photo or one item: still confirmable | — |
-| **Facts** (`facts`) | Before answering: fields "Not answered yet" | Transcribing and extracting: "Listening…" then "Filling in what you said…" | Voice not understood (`factsRetry`, M-02); ambiguous value (M-02) | Mic off (C-06): typing only | Missing flaws or condition (`factsMissing`, C-12, C-13); blank brand or size (C-20) | Items past the free 3 carry C-15 (D-1) |
+| **Facts** (`facts`) | Before answering: fields "Not answered yet" | Transcribing and extracting: "Listening…" then "Filling in what you said…" | Voice not understood (`factsRetry`, M-02); ambiguous value (M-02) | Mic denied (`factsMicDenied`, C-06): typing, Open Settings; **not asked yet** (C-71): Turn on microphone | Missing flaws or condition (`factsMissing`, C-12, C-13); blank brand or size (C-20) | Items past the free 3 carry C-15 (D-1) |
 | **Drafting** (`drafting`) | — | M-01 with progress and Cancel | → `draftFail` (M-03), `draftPartial` (M-04) | — | — | Limit or cap (`limitReached`, M-06); trial drafts only the first 3 (D-1) |
 | **Copy listings** (`draft`) | Fields not given (C-20); no price yet: Copy disabled (C-21) | Switching item or marketplace: instant `[NFR TBD — eng lead]` | Copy failed to clipboard (C-18 error) `[H]`; a failed item (`draftPartial`) | Photo access denied (`photoDenied`, C-23); limited (`photoLimited`, C-22) | Fields the seller didn't give (G-16, DD-12); title over the limit after an edit (C-19) | Trial: locked items (`draftLocked`, C-17), counter (C-16); after a plan: Draft n more (`draftAfterBuy`, C-27) |
 | **Paywall** (`paywall`) | — | Purchase in progress: plan buttons disabled, "Waiting for the App Store…" | Purchase failed (`payFail`, C-26); restore found nothing (C-26) | — | — | Variants: finish, draft4, trialDone (proposed), passEnded, upgrade (C-25) |
@@ -206,6 +274,12 @@ Every screen against the six state types. "—" means the state can't occur on t
 | **How-to** (`howTo`) | — | Video buffering | Offline: video needs a connection; steps still work (C-51) | — | — | All plans |
 | **Delete account** (`deleteConfirm`) | — | Deleting… | Deletion failed partway (C-49) | — | — | Copy varies: subscription vs Pass (C-49) |
 | **Reminder notification** (`reminderNotif`) | — | — | — | Not sent when denied | — | Both plans |
+| **Save your items** (`pfAccount`, test variant) | — | Signing in | Failed (`pfAccountFail`, C-03 wording, "Your photos and answers are still here") | — | — | Trial counter starts here (R-1) |
+| **Where will you post these?** (`pfMarkets`, sheet) | None picked: Show these listings disabled; Show all five | — | — | — | — | — |
+| **Finish setting up** (card on Home) | Every row done: card gone | — | — | — | One row done: marked Done | Trial, Reseller, active Pass. Not on an ended Pass |
+| **Selling defaults** (`setupDefaults`) | Bin blank: allowed | Saving | Couldn't save `[H]` | — | — | All plans |
+| **Plan welcome** (card on Home) | — | — | — | — | — | Reseller card or Pass card; one per purchase (DD-43) |
+| **Restore purchases** (Profile, paywall) | — | "Checking…" | Nothing found (C-83); on another account (C-83); store unavailable `[H]` | — | — | Restored or already active (C-83) |
 | **First-run tips** (overlay) | Control not on screen: skip that tip (S-37 open question; proposed) | — | — | — | — | Not on onboarding or the paywall (R-36) |
 
 ## 4. Reseller plan vs Clear-out Pass vs trial
@@ -228,6 +302,9 @@ From the stories' entitlement matrix. **Bold** cells are this design's proposals
 | Profit tab and tracker (R-16) | **Tab, empty until a sale** | Yes | Hidden; money made on Home | Hidden |
 | Profile (R-31) | Yes, plan shows the counter | Yes | Yes | Yes |
 | Upgrade suggestion (R-19, P1) | — | — | 10+ active items or a second marketplace, once per pass | Paywall instead |
+| Finish setting up card (DD-42, proposed) | **After the first haul** | **After the first haul** | **After the first haul** | Not shown |
+| Plan welcome card (DD-43, proposed) | — | **Reseller card, once** | **Pass card, once** | — |
+| Restore purchases (R-3) | Yes | Yes | Yes | Yes |
 
 **What changes on screen between plans** (for the same item and action):
 
@@ -247,12 +324,20 @@ From the stories' entitlement matrix. **Bold** cells are this design's proposals
   Keep Undo until I dismiss it** turns the timer off (WCAG 2.2.1). After a
   tick, the bar offers **Undo** (that tick) and **Undo sale** (everything since the sale, D-10). After the bar
   is gone, recovery is item detail → Change back to listed (M-13; M-12 for eBay-recorded sales).
+- **Permissions (DD-36 to DD-38):** camera and microphone are asked one at a time, each with its own fallback.
+  "Not now" means not asked yet: Turn on camera or Turn on microphone shows the system prompt where the seller is.
+  "Denied" means only Settings can turn it on, so the copy says Open Settings. Access turned on in Settings is
+  picked up when the seller comes back. Permissions belong to the phone; the AI notice acknowledgement belongs to
+  the account, with its version. Photo library (R-41) and notifications (R-15) are asked on first use, not here.
+- **Sign-in and session:** a cancelled Apple or Google sheet is never an error (DD-34). No partial account is ever
+  created. Tips, the trial counter, the plan and the AI notice acknowledgement come from the account, so a new
+  phone doesn't reset any of them (DD-38 to DD-40).
 - **Status never by colour alone (DD-28):** text tags ("Still live", "You removed it", "Sold here", "Locked",
   "Not entered", "Estimate", "Stale") plus weight and borders. GO has no status colours.
 - **Offline (G-08, `[TBD — eng lead + ux-lead]`):** proposed: capture works offline and uploads on reconnect;
   grouping, extraction and drafting need a connection and say so (C-53); copying already-drafted listings works
   offline from cache `[H]`; ticks and sales queue and sync, shown as "Saved on this phone — will sync" `[H]`.
-- **Announcements (R-24):** step changes in onboarding, photo count, items found, each filled field, drafting
+- **Announcements (R-24):** step changes in onboarding, "Sign-in cancelled", "Getting your items", email sent, each permission outcome, "Camera is on" after Settings, restore outcomes, photo count, items found, each filled field, drafting
   done, copied (with the field name), every Undo, each tick with the remaining count, and filter result counts.
   See [accessibility-review.md](accessibility-review.md).
 - **Unfinished hauls (S-06):** Close in the haul saves; Home lists each unfinished haul with Continue, which
