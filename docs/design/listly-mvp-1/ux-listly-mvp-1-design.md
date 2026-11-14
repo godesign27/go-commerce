@@ -205,7 +205,7 @@ The full flows, states and entitlement variants are in [ux-flows.md](ux-flows.md
 
 | ID | Flow (PRD §9.1) | Entry → steps → exit | Alternate / failure |
 |---|---|---|---|
-| F-0 | Onboarding | Welcome (1 of 4) → Where do you sell? (2) → Create account (3) → Camera, mic and AI notice (4) → New haul | Skip marketplaces → all five; Not now or denied → library and typing; returning user → sign in → Home |
+| F-0 | Onboarding | Welcome (1 of 4) → Where do you sell? (2) → Create account (3) → Camera, mic and AI notice (4) → camera prompt → microphone prompt → New haul | Skip marketplaces → all five; email → link or code (DD-33); sign-up cancelled or failed (DD-34); camera denied, microphone denied, both denied, or Not now (DD-36); turned on later in Settings (DD-37); returning user → sign in (F-10); photo-first test variant (F-11) |
 | F-1 | First haul to paid | Capture → check grouping → facts for each item (condition and bin) → draft the first 3 → copy, edit, save photos → draft item 4 or Finish haul → paywall → buy → **back to the haul** → draft the rest → Finish haul → starting tab | Grouping failed (M-10); voice not understood (M-02); missing slot asked once; drafting failed (M-03) or partly (M-04); limit (M-06); purchase failed; Not now → haul with locked items |
 | F-2 | Sold → remove it everywhere | Listings or item detail → Mark sold (marketplace, price, shipping) → Undo bar → checklist → "I removed it" on each (Undo each) → bin and net profit | Listed on one marketplace only → straight to bin and profit; Remind me in 1 hour (permission first time; denied → flagged on Home); no saved link → open the marketplace and search; Traded instead (R-40) |
 | F-3 | Check profit | Profit tab (or Home → This month) → by marketplace → flags → add costs or shipping | No sales yet; fee unknown |
@@ -215,6 +215,9 @@ The full flows, states and entitlement variants are in [ux-flows.md](ux-flows.md
 | F-7 | Connect marketplaces | Profile → Marketplaces and connections → link a shop, or connect eBay | eBay sign-in cancelled or failed |
 | F-8 | Learn Listly | First visit → tips; Home card or Profile → Help → video and steps | Skip tips → Show tips again |
 | F-9 | Look after one item | Listings, ledger, Home or Profit → item detail → edit photos, facts, bin, cost or shipping; copy listings; mark sold or traded; change back to listed (M-12, M-13); delete | Item with no listings; Pass version without cost |
+| F-10 | Sign in on a new phone | Welcome → I already have an account → Sign in (Apple, Google or email) → Getting your items → Home for their plan → first haul: camera and microphone again (DD-38) | No account for that sign-in (DD-32); failed or cancelled; trial seller sees what's left (DD-40); Restore purchases: restored, nothing found, on another account (DD-39); AI notice changed → full notice again |
+| F-11 | Onboarding, photo-first (test variant) | Welcome → camera, mic and AI notice → capture → grouping → facts → Save your items (account) → drafting → Where will you post these? → Copy listings | Same failure branches as F-0 and F-1 (DD-41) |
+| F-12 | Finish setting up, and plan welcome | First haul finished → Home with Finish setting up → link shops, selling defaults → Done; after buying → Home with the plan's welcome card | Dismissed → Profile has every setting; Pass seller gets the Pass card (DD-42, DD-43) |
 
 ## 9. Design decisions
 
@@ -283,6 +286,64 @@ agreement, because PRD §9.4 and S-44 name GO.
 
 What it costs to switch instead: GO's tokens, themes and contracts would be thrown away, and S-44's
 "no one-offs" rule would have to be restated against a library the team doesn't control.
+
+## 9c. Onboarding, sign-in and setup (all paths)
+
+Asked for 2026-11-14 ("the set up and onboarding for all"). Covers every way a seller gets into Listly and
+ready to use it: new sellers (both personas, including the PQ-14 test variant), returning sellers on the same
+or a new phone, every camera and microphone outcome, sign-in edge cases, the optional setup after the first
+haul, and what changes after buying a plan. Traces to R-33, R-23, R-1, R-3, R-31, R-34, R-36, R-37 and
+S-01 to S-03, S-19, S-20, S-33, S-34. Flows are in [ux-flows.md](ux-flows.md) (F-0, F-10 to F-12). Wording is in
+[ux-copy.md](ux-copy.md) (C-58 onward).
+
+### Every way into Listly
+
+| Situation | What the seller sees | Lands on | Traces to |
+|---|---|---|---|
+| First launch, default order | Welcome (1 of 4) → Where do you sell? (2) → Create account (3) → Camera, mic and AI notice (4) → system prompts | New haul | R-33, S-01 to S-03 |
+| First launch, **photo-first test variant** (Phase 0) | Welcome → Camera, mic and AI notice → photograph, group, facts → **Save your items** (account) → drafting → **Where will you post?** on the first copy | Copy listings | PQ-14, Q-11, DD-41 |
+| Returning seller, same phone, still signed in | Nothing: the app opens on Home | Home for their plan | R-29 |
+| Returning seller, new phone or reinstall | Welcome → "I already have an account" → Sign in → Getting your items | Home for their plan; permissions asked on the first haul (DD-38) | R-33, S-02 c3, DD-31 |
+| Signed in with a method that has no Listly account | "No Listly account for {email}" | Create one (step 2) or try another way | S-02 edge, DD-32 |
+| Signed out from Profile | Welcome | Welcome | S-02 c5 |
+| Session expired or revoked | Sign in, with "You've been signed out" | Home after sign-in | `[H — eng lead]` |
+| Closed the app mid-onboarding | Welcome again, with the marketplace choice kept on the phone; after the account exists, it reopens at step 4 | The same step | S-01 edge `[H]` |
+
+### The two personas through onboarding
+
+| | Dre (part-time reseller) | Maya (closet clearer) |
+|---|---|---|
+| Order | Default R-33 order. Picking marketplaces up front suits him: he sells on 3–4 | Tested both ways (DD-41). Her persona asks for "no setup before value", so the photo-first variant is built for her |
+| Plan moment | Paywall mid-haul on item 4 → Reseller plan → back to the haul (DD-09) | Same paywall → Clear-out Pass → back to the haul |
+| After the first haul | "Finish setting up" card: link shops, selling defaults (DD-42) | Same card, all optional. Ignoring it changes nothing |
+| Plan welcome | Reseller card: Profit, By item, stale items; suggests adding what he paid (DD-43) | Pass card: when it ends, the 100-listing cap, and the sold-everywhere reminder. No cost prompt (DD-17) |
+
+### Decisions
+
+| ID | Decision | Why (traces to) | Alternatives rejected |
+|---|---|---|---|
+| DD-31 | **Sign in is its own screen, not an onboarding step.** No step dots. The same three methods, in the same order as step 3 (Apple, Google, email), and "New to Listly? Get started", which goes back to Welcome. After success, a short **"Getting your items"** screen (a spinner with the words, at most a few seconds `[H — eng lead]`), then Home for the seller's plan. Tips the seller already saw stay seen (R-36). Onboarding is skipped entirely | R-33 ("a returning user who signs in skips onboarding and lands on Home"), S-01 c5, S-02 c3, R-36 | Signing in from step 3 (a returning seller would wade through Welcome and marketplaces first) |
+| DD-32 | **A sign-in that finds no Listly account doesn't silently create one.** If Apple or Google returns an identity with no account behind it, show "No Listly account for {email}" with **Create an account** (goes to step 2, with the identity held, so step 3 is skipped) and **Try another way** (back to Sign in, for a seller who used a different method last time) | S-02 edge (a second method makes a second account unless the emails match); the rule is `[TBD — eng lead]` (PQ-25) | Creating the account silently (a seller who used Google last time ends up with an empty second account and thinks their items are gone) |
+| DD-33 | **Email is passwordless: a link and a 6-digit code.** Enter the email → "Check your email" with the address shown, the link, and a code field for when the email opens on another device. **Resend** is available after 30 seconds, with the wait shown. "Use a different email" goes back. An expired or used link shows "That link has expired" with **Send a new link**. The format is checked when the seller taps Continue, not on every keystroke, and the error sits under the field | S-02 validation (password or magic link `[TBD — eng lead]`, PQ-26); R-24 (an inline error, identified in text) | A password (one more thing to forget, and a reset flow to build). Validating while typing (an error before the seller has finished) |
+| DD-34 | **Cancelling isn't failing.** Closing the Apple or Google sheet returns to the same step with no message on screen; a screen reader hears "Sign-in cancelled." A real failure (network or provider) shows the inline error and keeps the seller on the step. No partial account is created in either case | S-02 c4, R-24 (status announced) | An error banner on cancel (scolds a seller who changed their mind) |
+| DD-35 | **Apple's hidden email** works like any email. Profile → Account shows the relay address with "Hidden by Apple — emails still reach you". A seller who signed up with Apple is pointed back to Apple if they try email with a relay address `[H — eng lead]` | S-02 edge, R-31 Account | Asking the seller for a "real" email (Apple's rules forbid requiring it) |
+| DD-36 | **Camera and microphone: one explanation, then two system prompts, four outcomes.** Step 4's main button ("Allow and start my first haul") shows the camera prompt, then the microphone prompt (S-03 c2). Each outcome gets its own fallback: **both allowed** → camera and voice; **camera denied** → photo library, voice still on; **microphone denied** → camera, typing; **both denied** → library and typing. **"Not now" is different from "denied"**: nothing has been asked, so the haul shows **Turn on camera** and **Turn on microphone**, which bring up the system prompt there and then. After a denial, iOS won't ask again, so the only route is **Open Settings** | R-33 step 4, S-03 c2–c4 and the single-fallback edge, R-4, R-6 | One combined "camera and mic off" state (v2, and the old Simulate toggle), which can't show the two single fallbacks S-03 asks for |
+| DD-37 | **Access turned on later in Settings is picked up when the seller comes back**, without a restart: the capture screen swaps the notice for the camera, and announces "Camera is on." The microphone works the same way on the facts step | S-03 edge | Asking the seller to restart the app |
+| DD-38 | **On a new phone, permissions are asked again, but the AI notice isn't.** Permissions belong to the device. The AI notice acknowledgement belongs to the account, with its version (S-03 c5 and NFR). So the first haul on a new phone shows a short camera-and-microphone screen without the notice block, plus a link to it. **If the notice has changed since the seller acknowledged it**, the full notice shows instead, and nothing is uploaded until they acknowledge it | S-03 c5, S-03 NFR (notice version), R-23 | Repeating the whole notice on every new phone (noise). Skipping the explanation (the system prompt would arrive with no context) |
+| DD-39 | **Plans come back on sign-in without tapping anything**, because entitlements are checked on the server (R-3). **Restore purchases** (Profile and the paywall) is for a store purchase the account doesn't know about yet. Its states: **checking** (the button shows "Checking…"), **restored** ("Reseller plan restored", and the plan row updates), **nothing found** ("No Listly purchases found for this Apple ID"), and **on another Listly account** ("This purchase belongs to another Listly account. Sign in with that account to use it"). It never moves a plan between accounts `[H — eng lead + Legal]` (PQ-27) | R-3 ("restore purchases works on reinstall"), R-31 Plan, S-20 | A single "Done" toast whatever happened (the seller can't tell whether it worked) |
+| DD-40 | **The trial counter comes from the account**, so a reinstall or a new phone shows what's left ("Free listings: 1 of 3 left") and never resets it. Home for a returning trial seller shows what's left and their drafted listings. Whether a new account on the same phone gets a new trial is still S-02's `[rule TBD — PM]` | R-1 (trial bound to the account), S-02, S-18 | Storing the counter on the phone |
+| DD-41 | **Photo-first is a test variant, not the default** (PQ-14 decided: follow R-33, test both). Order: Welcome (no step dots) → camera, microphone and the AI notice (the notice must come before the first upload, R-23) → photograph, group and answer facts as normal → **"Save your 5 items"**: the account step, just before drafting, because the trial counter belongs to an account (R-1) → drafting for all five marketplaces → on the first visit to Copy listings, a one-time sheet **"Where will you post these?"** sets the drafting set and hides the other tabs (Maya's "ask her marketplace on first copy"). Compare the variants on time to first listing copied (KR3) and sign-up completion | PQ-14, Q-11, R-33, R-23, R-1, closet-clearer.md | Making photo-first the default (contradicts R-33, the build spec). Asking for the account after drafting (the trial counter would have no account to sit on) |
+| DD-42 | **"Finish setting up" on Home after the first haul** (proposed, PQ-24). A card with up to three rows: **Link your shops** (R-34), **Set selling defaults** (shipping and default bin, R-31), and **eBay: coming soon** (text only, PQ-20). Each row shows "Done" when done. It appears only after the first haul is finished, below Needs action and an unfinished haul, never during onboarding. It can be dismissed ("Find these any time in Profile"), and it goes away when every row is done. Notifications aren't in it: they're asked on first use (D-7, DD-15) | R-31, R-34, R-29 order, D-7; Maya's "no setup before value" | Setup steps inside onboarding (more steps before the first listing, against KR3). Nothing at all (sellers never find shop linking, which R-26 matching will need) |
+| DD-43 | **After buying, a one-time welcome card on Home**, not a screen in the way (proposed, PQ-29). Bought mid-haul: the seller goes back to the haul (DD-09), and the card waits for Home. Bought from Home or Profile: the card shows straight away. **Reseller plan:** what's now theirs (the Profit tab, Listings by item, stale items, 500 listings a month) and one suggestion, "Add what you paid, so profit is right". **Clear-out Pass:** when it ends, the 100-listing cap, and that Listly still reminds them to remove sold items everywhere else. No cost suggestion (DD-17). Dismissible | R-3, R-18, R-29, DD-09, DD-17 | A full-screen welcome (interrupts the haul DD-09 returns them to). Nothing (sellers who bought never find Profit or By item) |
+
+### Gaps this adds
+
+No new GO gaps beyond those in [design-system-readiness.md](design-system-readiness.md): the sign-in buttons
+use GoButton (Apple) and the SecondaryButton gap (Google); the email and code fields use the TextField gap;
+the progress screen uses the Progress gap; the setup card is a GoCard with ListRow-gap rows. **One new
+platform piece:** Apple requires its own "Sign in with Apple" button style (`ASAuthorizationAppleIDButton`, or
+`expo-apple-authentication`'s button), which GoButton must not imitate. It's labelled `System /
+AppleSignInButton` in the prototype `[H — check Apple's current button rules]`.
 
 ## 9b. Visual composition (ui-design)
 
@@ -357,8 +418,8 @@ the prototype and listed as a type-scale gap.
 
 ## 11. Open questions
 
-Raised to the PM (or the named owner). **The PM answered all of them on 2026-11-14** (the "Proposed answer" column now starts with
-the decision). None of these edits the PRD or the stories: the PM carries the decisions into PRD v9 and the story set.
+Raised to the PM (or the named owner). **The PM answered PQ-01 to PQ-23 on 2026-11-14** (the "Proposed answer" column now starts with
+the decision). **PQ-24 to PQ-30 are new, from the onboarding design (§9c), and still open.** None of these edits the PRD or the stories: the PM carries the decisions into PRD v9 and the story set.
 
 | # | Question | IDs | Proposed answer | Blocking? | Owner |
 |---|---|---|---|---|---|
@@ -385,6 +446,13 @@ the decision). None of these edits the PRD or the stories: the PM carries the de
 | PQ-21 | Sale marketplace not one the item was listed on: allowed? | S-27 edge | **Decided: as proposed.** Allowed, with an "Other" choice `[H]` | No (decided) | PM |
 | PQ-23 | **Add a department slot (Men's / Women's / Unisex) and a size picker with Other to the facts step?** Not in §9.3c; P-02 and the drafts would use it. Required, or optional as designed? | R-6, §9.3c, DD-30 | **Decided: yes, optional.** Optional; seller-given only; left out of the listing when blank | No (decided) | PM |
 | PQ-22 | An item that sells on a second marketplace before the first checklist is done | S-28 edge | **Decided: as proposed.** The second Mark sold is blocked with "Already sold on {marketplace}. Change it from item detail" `[H]` | No (decided) | PM |
+| PQ-24 | **Add a "Finish setting up" card to Home after the first haul?** Not in R-29's Home sections. Rows: link shops, selling defaults, eBay coming soon | R-29, R-31, R-34, DD-42 | **Proposed: yes**, below Needs action and an unfinished haul, dismissible, gone when done | No | PM |
+| PQ-25 | **A sign-in that finds no Listly account:** offer "Create an account" (DD-32), or create one silently? And do two methods with the same email join one account? | S-02 edges | **Proposed: offer, never silent**; same verified email → same account `[H]` | No (blocks S-02's rule) | Eng lead + PM |
+| PQ-26 | **Email sign-in: passwordless link plus a 6-digit code** (DD-33), or a password? | S-02 validation | **Proposed: link and code**, resend after 30 s, link lifetime `[TBD — eng lead]` | No (blocks S-02's email path) | Eng lead |
+| PQ-27 | **Restore purchases when the purchase is on another Listly account:** tell the seller and stop (DD-39), or move the plan across? | R-3, S-20 | **Proposed: tell and stop**; moving plans is a support case | No | Eng lead + Legal |
+| PQ-28 | **The photo-first variant uploads photos for grouping before an account exists.** Is an anonymous session that becomes the account feasible, and does it still meet R-23 (notice first) and deletion rules? | DD-41, R-23, R-1 | **Proposed: an anonymous session, upgraded on "Save your items"**; anonymous data deleted after 7 days if no account is made `[H]` | Yes, for the variant | Eng lead + Legal |
+| PQ-29 | **A one-time plan welcome card on Home after buying?** Not in the PRD | R-3, R-18, DD-43 | **Proposed: yes**, dismissible, one per purchase | No | PM |
+| PQ-30 | **An unfinished haul on a new phone:** is it on the account (photos already uploaded for grouping), or only on the old phone? | S-06, DD-38 | **Proposed: on the account once grouping has run; before that, only on the phone it started on** `[H]` | No | Eng lead |
 
 **Related open questions owned elsewhere** (not design decisions, but the design waits on them): Q-04 title
 limits and fee rates (eng lead, blocking for real numbers); Q-05 the how-to video's maker (founder); Q-07
