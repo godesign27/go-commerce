@@ -1,0 +1,1222 @@
+<!DOCTYPE html>
+<!--
+type: design
+product: go-commerce-listly
+feature: listly-mvp-1
+aliases: [Listly reseller-first MVP 1]
+status: draft
+author: ux-lead (initial-prototype)
+created: 2026-11-13
+updated: 2026-11-13 (v2: onboarding, Home, Listings, Profile, connectors, tab bar)
+source: [docs/prd/listly-mvp-1.md, docs/ideas/listly.md, docs/strategy/listly-recommendation-2026-11.md, docs/personas/part-time-reseller.md, docs/personas/closet-clearer.md]
+design_system: GO Mobile Design System 0.1.0 (listly/packages/go-mobile-design-system) — GoButton, GoCard, light theme tokens
+published: []
+-->
+<!--
+INITIAL PROTOTYPE — shell template (ux-lead skill, `initial-prototype` tool)
+
+Procedure and output checklist: skills/ux-lead/references/initial-prototype.md. Copy this file to
+<output-folder>/<product-slug>/design/<feature-slug>/initial-prototype.html and fill ONLY the marked slots.
+Do not rewrite the shell (slim bar, controls menu, flow guide, task flows, assumptions, record, PROTO engine):
+it is what makes every initial prototype behave the same way.
+
+Slots, in order:
+  Listly MVP 1 — haul to paid          page <title> and the menu's feature name
+  GO Commerce · Listly        the product name in the menu header (e.g. ZAIDYN Field Incentives)
+  [SLOT: TOKENS]         only the token roles this prototype uses, each commented with its token name
+                         (shared/design-context/tokens/README.md). No invented hex.
+  [SLOT: FEATURE CSS]    styles for the product UI, using the token variables only
+  [SLOT: SIMULATE]       one "Simulate …" checkbox per system-driven branch (e.g. a send failure) — or none
+  [SLOT: PRODUCT UI]     the product screens, built from the mid-fi contracts; every component carries
+                         data-mf="MidFi / <Name>" and data-mf-props="<variant · state · props used>"
+  [SLOT: ASSUMPTIONS]    <li> items, each tagged [H] — always present
+  [SLOT: RECORD]         the design-context record — DELETE the whole <section id="record"> if the PM said no
+  [SLOT: FEATURE JS]     the feature's state + render(), plus the PROTO config at the bottom
+
+Opens on View = Prototype, with every "Show on the prototype" add-on off (no labels, no record).
+Self-contained: inline CSS/JS, no network requests, no web fonts.
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Listly MVP 1 — haul to paid — initial prototype (Prototype — not production)</title>
+<style>
+/* ============ TOKENS — keep the shell roles; add only the ones this prototype uses ============ */
+:root{
+  --zds-font:"Open Sans", sans-serif;          /* zds.font */
+  --zds-surface:#ffffff;                       /* zds.surface */
+  --zds-text:#2f2c3c;                          /* zds.textDefault */
+  --zds-text-helper:#5b5864;                   /* zds.textHelper */
+  --zds-text-inverse:#ffffff;                  /* zds.textInverse */
+  --zds-border:#B2B0B6;                        /* zds.border */
+  --zds-border-subtle:#d5d3d8;                 /* zds.borderSubtle */
+  --zds-ink-bold:#1a1628;                      /* zds.inkBold */
+  --zds-line-dashed:#9c9aa1;                   /* zds.lineDashed */
+  --zs-focus:#027AFF;                          /* standard focus ring (--zs-border-focus) */
+  /* GO Mobile Design System — light theme (src/themes/index.ts) and metrics (src/tokens/index.ts) */
+  --go-bg:#FCFDFD;                             /* light.background */
+  --go-surface:#F0F6F4;                        /* light.surface */
+  --go-color:#232925;                          /* light.color */
+  --go-border:#627C72;                         /* light.borderColor */
+  --go-action-bg:#006840;                      /* light.actionBackground */
+  --go-action-pressed:#005333;                 /* light.actionPressed */
+  --go-action-color:#FFFFFF;                   /* light.actionColor */
+  --go-font:system-ui, sans-serif;             /* fonts.body (web) */
+  --go-text-1:14px; --go-lh-1:20px;            /* body.size.1 / lineHeight.1 */
+  --go-text-2:16px; --go-lh-2:24px;            /* body.size.2 / lineHeight.2 */
+  --go-text-3:20px; --go-lh-3:28px;            /* body.size.3 / lineHeight.3 */
+  --go-w-2:600; --go-w-3:700;                  /* body.weight.2 / weight.3 */
+  --go-space-1:4px; --go-space-2:8px; --go-space-3:12px; --go-space-4:16px; --go-space-5:24px; /* space.1–5 */
+  --go-radius-1:4px; --go-radius-2:8px; --go-radius-3:12px; --go-radius-4:16px;               /* radius.1–4 */
+  --go-size-4:44px; --go-size-5:52px;          /* size.4 (min touch target) / size.5 */
+}
+
+/* ============ SHELL — do not edit ============ */
+*{box-sizing:border-box}
+body{margin:0;font:14px/1.5 var(--zds-font);color:var(--zds-text);background:var(--zds-surface)}
+.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.proto-bar{background:var(--zds-ink-bold);color:var(--zds-text-inverse);padding:8px 16px;display:flex;flex-wrap:wrap;gap:12px 20px;align-items:center;font-size:12px}
+.proto-bar strong{letter-spacing:.02em}
+.proto-bar label{display:inline-flex;gap:6px;align-items:center;cursor:pointer}
+.proto-bar select{font:inherit;font-size:12px;padding:2px 4px}
+.proto-bar a{color:var(--zds-text-inverse)}
+/* flow guide */
+.flow-guide{background:var(--zds-surface);border-bottom:1px solid var(--zds-border-subtle);padding:8px 16px;display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center;font-size:12px;color:var(--zds-text-helper)}
+.flow-guide ol{display:flex;flex-wrap:wrap;gap:4px;list-style:none;margin:0;padding:0;counter-reset:fs}
+.flow-guide li button{font:inherit;font-size:12px;border:1px solid var(--zds-border-subtle);background:var(--zds-surface);color:var(--zds-text-helper);border-radius:12px;padding:2px 10px;cursor:pointer}
+.flow-guide li button::before{counter-increment:fs;content:counter(fs) " · "}
+.flow-guide li.done button{color:var(--zds-text);border-color:var(--zds-border)}
+.flow-guide li.done button::after{content:" \2713"}
+.flow-guide li.current button{color:var(--zds-surface);background:var(--zds-text);border-color:var(--zds-text);font-weight:600}
+.flow-guide .branch{font-weight:600;color:var(--zds-text)}
+.flow-guide .next{color:var(--zds-text)}
+body.guide .guide-next{outline:2px solid var(--zs-focus);outline-offset:3px;animation:guidePulse 1.6s ease-in-out infinite}
+@keyframes guidePulse{0%,100%{outline-color:var(--zs-focus)}50%{outline-color:transparent}}
+@media (prefers-reduced-motion: reduce){body.guide .guide-next{animation:none}}
+/* key task flows */
+.taskflows{display:none;border-bottom:2px solid var(--zds-text);padding:16px;font-size:13px}
+.taskflows h2{font-size:18px;margin:0 0 2px}
+.taskflows > p{margin:0 0 12px;color:var(--zds-text-helper)}
+.tf{border:1px solid var(--zds-border-subtle);padding:10px 12px;margin-bottom:10px}
+.tf h3{font-size:14px;margin:0 0 2px}
+.tf .who{color:var(--zds-text-helper);font-size:12px;margin:0 0 8px}
+.tf-row{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:4px 0}
+.tf-row.branch{margin-left:24px}
+.tf-row.branch > .cond{color:var(--zds-text-helper);font-size:12px;min-width:170px}
+.tf-node{font:inherit;font-size:12px;border:1px solid var(--zds-border);background:var(--zds-surface);color:var(--zds-text);padding:4px 10px;cursor:pointer;border-radius:4px}
+.tf-node.decision{border-style:dashed}
+.tf-node.end{border-radius:12px;font-weight:600}
+.tf-node.system{cursor:default;color:var(--zds-text-helper)}
+.tf-node.here{background:var(--zds-text);color:var(--zds-surface);border-color:var(--zds-text)}
+.tf-arrow{color:var(--zds-text-helper)}
+.tf-legend{display:flex;flex-wrap:wrap;gap:12px;font-size:12px;color:var(--zds-text-helper);margin-top:6px}
+/* component labels */
+body.annot [data-mf]{outline:1px dashed var(--zds-line-dashed);outline-offset:2px;position:relative}
+body.annot [data-mf]::before{content:attr(data-mf);position:absolute;top:-9px;left:4px;z-index:5;background:var(--zds-surface);color:var(--zds-text-helper);border:1px solid var(--zds-line-dashed);font:600 12px/1.3 var(--zds-font);padding:0 4px;white-space:nowrap;pointer-events:none}
+body.annot [data-mf][data-mf-props]:hover::after{content:attr(data-mf-props);position:absolute;top:10px;left:4px;z-index:6;background:var(--zds-ink-bold);color:var(--zds-text-inverse);font:12px/1.35 var(--zds-font);padding:4px 6px;max-width:420px;white-space:normal;pointer-events:none}
+/* assumptions + record */
+.doc{margin:36px 16px 24px;border-top:2px solid var(--zds-ink-bold);padding-top:16px;font-size:13px}
+.doc h2{font-size:18px;margin:0 0 4px}
+.doc h3{font-size:15px;margin:22px 0 6px}
+.doc table{width:100%;border-collapse:collapse}
+.doc th,.doc td{border:1px solid var(--zds-border-subtle);padding:6px 8px;text-align:left;vertical-align:top}
+.doc .tag-h{font-weight:700}
+
+/* ============ [SLOT: FEATURE CSS] ============ */
+
+/* Phone frame (prototype presentation only) */
+.stage{padding:16px;display:flex;justify-content:center;background:var(--go-surface)}
+.phone{position:relative;width:100%;max-width:390px;min-height:720px;background:var(--go-bg);color:var(--go-color);border:1px solid var(--go-border);border-radius:var(--go-radius-4);overflow:hidden;display:flex;flex-direction:column;font-family:var(--go-font);font-size:var(--go-text-1);line-height:var(--go-lh-1)}
+.scr{flex:1;display:flex;flex-direction:column;padding:var(--go-space-4);gap:var(--go-space-3);overflow:auto}
+.scr-foot{padding:var(--go-space-3) var(--go-space-4) var(--go-space-4);display:flex;flex-direction:column;gap:var(--go-space-2);border-top:1px solid var(--go-surface)}
+.topline{display:flex;justify-content:space-between;align-items:center;gap:var(--go-space-2);font-size:var(--go-text-1)}
+.brand{font-weight:var(--go-w-3);font-size:var(--go-text-3);line-height:var(--go-lh-3)}
+h1.t{font-size:24px;line-height:30px;margin:var(--go-space-2) 0 0;font-weight:var(--go-w-3)} /* GAP: no display size in GO type scale (max 20) */
+h2.t{font-size:var(--go-text-3);line-height:var(--go-lh-3);margin:0;font-weight:var(--go-w-3)}
+h3.t{font-size:var(--go-text-2);line-height:var(--go-lh-2);margin:0;font-weight:var(--go-w-2)}
+.muted{color:var(--go-border)} /* reuses borderColor as secondary text: GO has no helper-text role */
+.small{font-size:12px;line-height:16px}
+p{margin:0}
+
+/* GoButton — the only button in GO (states: default, pressed, disabled) */
+.gobtn{min-height:var(--go-size-4);min-width:var(--go-size-4);width:100%;border:0;border-radius:var(--go-radius-2);background:var(--go-action-bg);color:var(--go-action-color);font:inherit;font-size:var(--go-text-2);font-weight:var(--go-w-2);padding:0 var(--go-space-4);cursor:pointer}
+.gobtn:active{background:var(--go-action-pressed)}
+.gobtn[disabled]{opacity:.45;cursor:not-allowed}
+.gobtn:focus-visible,.gap-btn:focus-visible,.chip:focus-visible,.row:focus-visible,.tab:focus-visible{outline:2px solid var(--go-action-bg);outline-offset:2px}
+/* GoCard */
+.gocard{background:var(--go-surface);border-radius:var(--go-radius-3);padding:var(--go-space-4);display:flex;flex-direction:column;gap:var(--go-space-2)}
+
+/* GAP components: not in GO yet — styled from GO tokens only */
+.gap-btn{min-height:var(--go-size-4);border:1px solid var(--go-border);border-radius:var(--go-radius-2);background:var(--go-bg);color:var(--go-color);font:inherit;font-weight:var(--go-w-2);padding:0 var(--go-space-3);cursor:pointer}
+.gap-btn.link{border:0;background:transparent;text-decoration:underline;padding:0 var(--go-space-1)}
+.gap-btn.sm{min-height:32px;font-size:12px;padding:0 var(--go-space-2)}
+.gap-btn[disabled]{opacity:.45;cursor:not-allowed}
+.chips{display:flex;flex-wrap:wrap;gap:var(--go-space-2)}
+.chip{min-height:32px;border:1px solid var(--go-border);border-radius:var(--go-radius-4);background:var(--go-bg);color:var(--go-color);font:inherit;font-size:12px;padding:0 var(--go-space-3);cursor:pointer}
+.chip[aria-pressed="true"],.chip[aria-selected="true"]{background:var(--go-color);color:var(--go-bg);border-color:var(--go-color);font-weight:var(--go-w-2)}
+.tag{display:inline-block;border:1px solid var(--go-border);border-radius:var(--go-radius-1);padding:0 6px;font-size:12px;line-height:18px}
+.tag.strong{background:var(--go-color);color:var(--go-bg);border-color:var(--go-color)}
+.notice{border:2px solid var(--go-color);border-radius:var(--go-radius-2);padding:var(--go-space-3);display:flex;flex-direction:column;gap:var(--go-space-2)}
+.notice.alarm{border-width:3px}
+.notice b{font-weight:var(--go-w-3)}
+.field{display:flex;flex-direction:column;gap:var(--go-space-1)}
+.field label,.field .lbl{font-size:12px;font-weight:var(--go-w-2)}
+.input{min-height:var(--go-size-4);border:1px solid var(--go-border);border-radius:var(--go-radius-2);padding:var(--go-space-2) var(--go-space-3);background:var(--go-bg);font:inherit;color:var(--go-color)}
+.input.empty{color:var(--go-border);font-style:italic}
+.copyrow{display:flex;gap:var(--go-space-2);align-items:flex-start;justify-content:space-between;border-bottom:1px solid var(--go-surface);padding:var(--go-space-2) 0}
+.copyrow .val{flex:1;white-space:pre-line}
+.thumbs{display:flex;gap:var(--go-space-1);flex-wrap:wrap}
+.thumb{width:44px;height:44px;border-radius:var(--go-radius-1);background:var(--go-surface);border:1px solid var(--go-border);display:flex;align-items:center;justify-content:center;font-size:12px;color:var(--go-border)}
+.viewfinder{height:300px;border-radius:var(--go-radius-3);background:var(--go-color);color:var(--go-bg);display:flex;align-items:center;justify-content:center;text-align:center;padding:var(--go-space-4)}
+.shutter-row{display:flex;justify-content:space-between;align-items:center}
+.shutter{width:72px;height:72px;border-radius:50%;border:4px solid var(--go-color);background:var(--go-bg);cursor:pointer}
+.mic{width:88px;height:88px;border-radius:50%;border:0;background:var(--go-action-bg);color:var(--go-action-color);font:inherit;font-weight:var(--go-w-2);cursor:pointer;align-self:center}
+.tabs{display:flex;gap:2px;overflow-x:auto;border-bottom:1px solid var(--go-border)}
+.tab{flex:0 0 auto;min-height:var(--go-size-4);border:0;background:transparent;font:inherit;font-size:12px;padding:0 var(--go-space-3);color:var(--go-color);cursor:pointer;border-bottom:3px solid transparent}
+.tab[aria-selected="true"]{border-bottom-color:var(--go-action-bg);font-weight:var(--go-w-3)}
+.row{display:flex;gap:var(--go-space-3);align-items:center;width:100%;text-align:left;background:var(--go-bg);border:0;border-bottom:1px solid var(--go-surface);padding:var(--go-space-3) 0;font:inherit;color:var(--go-color);cursor:pointer;min-height:var(--go-size-5)}
+.row .grow{flex:1;display:flex;flex-direction:column;gap:2px}
+.tabbar{display:flex;border-top:1px solid var(--go-border);background:var(--go-bg)}
+.tabbar button{flex:1;min-height:var(--go-size-5);border:0;background:transparent;font:inherit;font-size:12px;color:var(--go-color);cursor:pointer}
+.tabbar button[aria-current="page"]{font-weight:var(--go-w-3);box-shadow:inset 0 3px 0 var(--go-action-bg)}
+.plan{border:1px solid var(--go-border);border-radius:var(--go-radius-3);padding:var(--go-space-4);display:flex;flex-direction:column;gap:var(--go-space-2)}
+.plan.rec{border:2px solid var(--go-action-bg)}
+.price{font-size:var(--go-text-3);line-height:var(--go-lh-3);font-weight:var(--go-w-3)}
+.plan ul,.gocard ul{margin:0;padding-left:18px}
+.check{display:flex;gap:var(--go-space-2);align-items:center;min-height:var(--go-size-4);font-weight:var(--go-w-2);cursor:pointer}
+.check input{width:22px;height:22px}
+.mrow{display:flex;justify-content:space-between;gap:var(--go-space-2);padding:6px 0;border-bottom:1px solid var(--go-surface)}
+.mrow.total{font-weight:var(--go-w-3);border-bottom:0;border-top:2px solid var(--go-color)}
+.big{font-size:28px;line-height:34px;font-weight:var(--go-w-3)} /* GAP: no display size in GO */
+.progress{height:6px;border-radius:3px;background:var(--go-surface);overflow:hidden}
+.progress > i{display:block;height:100%;background:var(--go-action-bg);width:0;transition:width 1.6s linear}
+@media (prefers-reduced-motion: reduce){.progress > i{transition:none}}
+.toast{position:absolute;left:16px;right:16px;bottom:72px;background:var(--go-color);color:var(--go-bg);border-radius:var(--go-radius-2);padding:var(--go-space-3);font-weight:var(--go-w-2);display:none}
+.toast.on{display:block}
+.ai-note{font-size:12px;line-height:16px;border-left:3px solid var(--go-border);padding-left:var(--go-space-2)}
+/* v2 additions — GO tokens only */
+.tabbar button.tab-new{font-weight:var(--go-w-3);color:var(--go-action-bg)}
+.tabbar button.tab-new span{display:inline-block;width:28px;height:28px;line-height:26px;border-radius:50%;background:var(--go-action-bg);color:var(--go-action-color);font-size:20px}
+.dots{display:flex;gap:6px}
+.dots i{width:24px;height:4px;border-radius:2px;background:var(--go-surface);border:1px solid var(--go-border)}
+.dots i.on{background:var(--go-action-bg);border-color:var(--go-action-bg)}
+.gocard.tile{border:0;text-align:left;font:inherit;color:inherit;cursor:pointer;width:100%}
+.stats{display:flex;justify-content:space-between;gap:var(--go-space-2);font-size:12px}
+.stats .big{font-size:var(--go-text-3);line-height:var(--go-lh-3)}
+.lrow{cursor:default;align-items:flex-start}
+.rowact{display:flex;gap:var(--go-space-2);margin-top:var(--go-space-1)}
+.alarm-row{border-left:3px solid var(--go-color);padding-left:var(--go-space-2)}
+.pset{display:flex;flex-direction:column;gap:var(--go-space-2);padding:var(--go-space-3) 0;border-bottom:1px solid var(--go-surface)}
+/* first-run tips and how-to (R-36, R-37) */
+.coach{position:absolute;left:16px;right:16px;z-index:20;background:var(--go-color);color:var(--go-bg);border-radius:var(--go-radius-2);padding:var(--go-space-3);display:flex;flex-direction:column;gap:var(--go-space-2);box-shadow:0 6px 18px rgba(0,0,0,.25)}
+.coach p{margin:0;font-weight:var(--go-w-2)}
+.coach .gap-btn{color:var(--go-bg);border-color:var(--go-bg);background:transparent}
+.coach-acts{display:flex;justify-content:space-between;align-items:center}
+.coach-target{outline:3px solid var(--go-action-bg);outline-offset:3px}
+.video{height:190px;border:0;border-radius:var(--go-radius-3);background:var(--go-color);color:var(--go-bg);font:inherit;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:var(--go-space-2);cursor:pointer}
+.video .play{width:52px;height:52px;border-radius:50%;background:var(--go-bg);color:var(--go-color);display:flex;align-items:center;justify-content:center;font-size:20px}
+.howto-ch summary{cursor:pointer;min-height:var(--go-size-4);display:flex;align-items:center}
+.howto-ch ol{margin:0;padding-left:20px}
+.gap-btn.danger{border-width:2px;border-color:var(--go-color);font-weight:var(--go-w-3)} /* GAP: no destructive colour role in GO */
+
+</style>
+<style>
+/* ============ SHELL: prototype menu (hamburger) — do not edit ============ */
+.proto-top{position:relative;display:flex;align-items:center;gap:10px;height:32px;padding:0 12px;background:var(--zds-ink-bold);color:var(--zds-text-inverse);font-size:12px}
+.proto-top strong{letter-spacing:.02em;font-weight:600}
+.proto-menu-btn{display:inline-flex;align-items:center;gap:6px;font:inherit;font-size:12px;color:var(--zds-text-inverse);background:transparent;border:1px solid transparent;border-radius:4px;padding:2px 8px;cursor:pointer}
+.proto-menu-btn:hover,.proto-menu-btn[aria-expanded="true"]{border-color:var(--zds-text-inverse)}
+.proto-menu-btn:focus-visible{outline:2px solid var(--zs-focus, #027AFF);outline-offset:2px}
+.proto-menu-btn .bars{display:inline-block;width:14px;height:10px;border-top:2px solid currentColor;border-bottom:2px solid currentColor;position:relative}
+.proto-menu-btn .bars::after{content:"";position:absolute;left:0;right:0;top:2px;border-top:2px solid currentColor}
+.proto-menu{position:absolute;top:32px;left:0;z-index:1000;width:min(560px,100vw);max-height:calc(100vh - 40px);overflow:auto;background:var(--zds-surface);border:1px solid var(--zds-border-subtle);box-shadow:0 8px 24px rgba(0,0,0,.18)}
+.proto-menu[hidden]{display:none}
+.proto-menu .proto-bar{flex-direction:column;align-items:flex-start;gap:10px;padding:12px 16px;background:var(--zds-surface);color:var(--zds-text);border-bottom:1px solid var(--zds-border-subtle)}
+.proto-menu .proto-bar a{color:var(--zds-text)}
+.proto-menu .proto-bar strong{display:none}
+.proto-menu .flow-guide{flex-direction:column;align-items:flex-start;border-bottom:0;padding:10px 16px 14px}
+/* ---------- prototype menu: groups (shell — do not edit) ---------- */
+.proto-status{margin-left:auto;opacity:.85}
+.proto-menu{padding:0 0 8px}
+.pm-head{display:flex;justify-content:space-between;gap:12px;padding:12px 16px 10px;border-bottom:1px solid var(--zds-border-subtle)}
+.pm-title{font-weight:600;font-size:14px;color:var(--zds-text)}
+.pm-sub,.pm-help{font-size:12px;color:var(--zds-text-helper)}
+.pm-help{display:block;font-weight:400}
+.pm-close{font:inherit;font-size:18px;line-height:1;background:transparent;border:0;color:var(--zds-text-helper);cursor:pointer;padding:0 4px}
+.pm-group{padding:12px 16px;border-bottom:1px solid var(--zds-border-subtle);display:flex;flex-direction:column;gap:8px;font-size:12px;color:var(--zds-text)}
+.pm-group:last-child{border-bottom:0}
+.pm-h{font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--zds-text-helper)}
+.pm-row{display:flex;justify-content:space-between;align-items:center}
+.pm-link{font:inherit;font-size:12px;background:transparent;border:0;color:var(--zds-text);text-decoration:underline;cursor:pointer;padding:0}
+.pm-seg{display:inline-flex;border:1px solid var(--zds-border);border-radius:6px;overflow:hidden;align-self:flex-start}
+.pm-seg label{cursor:pointer}
+.pm-seg input{position:absolute;opacity:0;pointer-events:none}
+.pm-seg span{display:block;padding:5px 14px;font-size:12px;color:var(--zds-text)}
+.pm-seg label + label span{border-left:1px solid var(--zds-border)}
+.pm-seg input:checked + span{background:var(--zds-text);color:var(--zds-surface);font-weight:600}
+.pm-seg input:focus-visible + span{outline:2px solid var(--zs-focus, #027AFF);outline-offset:-2px}
+.pm-check{display:flex;flex-wrap:wrap;gap:0 6px;align-items:baseline;cursor:pointer;font-weight:600}
+.pm-check .pm-help{flex-basis:100%;margin-left:20px}
+.pm-field{display:flex;flex-direction:column;gap:4px;color:var(--zds-text-helper)}
+.pm-field select{font:inherit;font-size:12px;padding:3px 4px;max-width:100%}
+.pm-pos{font-weight:600}
+.proto-menu .flow-guide{flex-direction:column;align-items:stretch;border-bottom:1px solid var(--zds-border-subtle);padding:12px 16px}
+.proto-menu .flow-guide ol{gap:4px}
+body.view-flows > :not(.proto-top):not(#protoMenu):not(#taskflows):not(#live):not(script):not(style){display:none !important}
+body.view-flows .taskflows{display:block}
+body:not(.show-record) #record{display:none}
+</style>
+</head>
+<body>
+
+<!-- ============ SHELL: control bar ============ -->
+<div class="proto-top">
+  <button type="button" id="protoMenuBtn" class="proto-menu-btn" aria-expanded="false" aria-controls="protoMenu"><span class="bars" aria-hidden="true"></span>Prototype controls</button>
+  <strong>PROTOTYPE — NOT PRODUCTION</strong>
+  <span id="protoStatus" class="proto-status" aria-live="polite"></span>
+</div>
+<div id="protoMenu" class="proto-menu" role="dialog" aria-modal="false" aria-labelledby="pmTitle" hidden>
+  <div class="pm-head">
+    <div><div id="pmTitle" class="pm-title">Listly MVP 1 — haul to paid</div>
+    <div class="pm-sub">GO Commerce · Listly · all data synthetic</div></div>
+    <button type="button" id="protoMenuClose" class="pm-close" aria-label="Close prototype controls">×</button>
+  </div>
+
+  <div class="pm-group" role="radiogroup" aria-labelledby="pmView">
+    <div id="pmView" class="pm-h">View</div>
+    <div class="pm-seg">
+      <label><input type="radio" name="protoView" value="proto" checked><span>Prototype</span></label>
+      <label><input type="radio" name="protoView" value="flows"><span>Key task flows</span></label>
+    </div>
+  </div>
+
+  <nav class="pm-group flow-guide" aria-labelledby="pmWalk">
+    <div class="pm-row"><div id="pmWalk" class="pm-h">Walk the flow</div>
+      <button type="button" id="protoRestart" class="pm-link">Start over</button></div>
+    <div id="flowPos" class="pm-pos"></div>
+    <ol id="flowSteps"></ol>
+    <span id="flowBranch" class="branch" hidden></span>
+    <span id="flowNext" class="next"></span>
+    <label class="pm-check"><input type="checkbox" id="guideToggle" checked> Highlight the next step on the page</label>
+    <label class="pm-field">Go to any state
+      <select id="stateJump" aria-label="Go to any prototype state"></select></label>
+  </nav>
+
+  <div class="pm-group" id="pmSimulate" aria-labelledby="pmSim">
+    <div id="pmSim" class="pm-h">Simulate</div>
+    <div class="pm-help">What the system does — so its branches can be reached in the flow.</div>
+    <label class="pm-check"><input type="checkbox" id="simVoiceFail"> Voice not understood
+      <span class="pm-help">Tapping the mic on an item's facts shows the retry state</span></label>
+    <label class="pm-check"><input type="checkbox" id="simDraftFail"> Drafting fails
+      <span class="pm-help">The AI draft step fails after the wait</span></label>
+    <label class="pm-check"><input type="checkbox" id="simPayFail"> Purchase fails
+      <span class="pm-help">The App Store purchase doesn't go through</span></label>
+    <label class="pm-check"><input type="checkbox" id="simDenied"> Camera and mic access denied
+      <span class="pm-help">The user says no to the system prompts during onboarding</span></label>
+    <label class="pm-check"><input type="checkbox" id="simEbayFail"> eBay connection fails
+      <span class="pm-help">eBay sign-in is cancelled or fails</span></label>
+  </div>
+
+  <div class="pm-group" aria-labelledby="pmShow">
+    <div id="pmShow" class="pm-h">Show on the prototype</div>
+    <label class="pm-check"><input type="checkbox" id="showLabels"> Component labels
+      <span class="pm-help">Each part's <code>MidFi</code> name; hover for its variant and state</span></label>
+    <label class="pm-check" id="showRecordRow"><input type="checkbox" id="showRecord"> Design-context record
+      <span class="pm-help">Contracts, pattern and density, accountability, gaps — below the prototype.
+      <a href="#record" class="record-link">Go to it ↓</a></span></label>
+  </div>
+</div><!-- /protoMenu -->
+<section class="taskflows" id="taskflows" aria-labelledby="tfTitle">
+  <h2 id="tfTitle">Key task flows</h2>
+  <p>The flows this feature supports, traced to the story and PRD (<b>[H]</b> where they aren't). Click any step to
+  open that point in the prototype; the step you're on is highlighted. Prototype documentation, not product UI.</p>
+  <div id="tfList"></div>
+  <div class="tf-legend"><span>Solid box: a screen or step</span><span>Dashed box: a decision</span>
+  <span>Rounded: where the flow ends</span><span>Grey text: happens off-screen</span><span>↳ a branch</span></div>
+</section>
+<div id="live" class="sr-only" aria-live="polite" role="status"></div>
+
+<!-- ============ [SLOT: PRODUCT UI] ============ -->
+<main id="app" aria-label="Listly app (prototype)">
+</main>
+
+<!-- ============ SHELL: assumptions (always) ============ -->
+<section class="doc" id="assumptions" aria-labelledby="assumpTitle">
+  <h2 id="assumpTitle">Assumptions to validate</h2>
+  <p>What this prototype assumes. Each <span class="tag-h">[H]</span> item is a hypothesis to confirm with the PM, SME or engineering.</p>
+  <ul>
+    <li><span class="tag-h">[H]</span> Photos from one haul can be grouped into items automatically, accurately enough that checking the grouping is quicker than tagging each item by hand. A <b>Next item</b> tap while shooting is the fallback.</li>
+    <li><span class="tag-h">[H]</span> Resellers will answer brand, size, measurements and flaws <b>by voice</b>, and voice capture works in a normal home. Typing is the fallback.</li>
+    <li><span class="tag-h">[H]</span> Collecting facts for every item first, then drafting all of them at once, beats the item-by-item flow the marketplaces use.</li>
+    <li><span class="tag-h">[H]</span> The 3 free listings are full quality, and the paywall appears at <b>Finish haul</b>, when the value is on screen. "Not now" keeps those 3 listings copyable. Whether a 7-day trial that renews automatically converts better is untested.</li>
+    <li><span class="tag-h">[H]</span> Onboarding asks for marketplaces, then an account, then camera and microphone, before the first haul. Creating the account before the first photo (not after the first draft) is a guess to test.</li>
+    <li><span class="tag-h">[H]</span> Home's order (Needs action, unfinished haul, this month, stale items, plan) suits resellers. Sections with nothing in them are hidden.</li>
+    <li><span class="tag-h">[H]</span> Listings shows one row per item per marketplace by default, with a <b>By item</b> view for the per-item ledger. Clear-out Pass users see only the Active filter.</li>
+    <li><span class="tag-h">[H]</span> <b>Connections:</b> Poshmark, Mercari, Depop and Facebook Marketplace can only be <i>linked</i> by username, because they don't let apps post, remove or read listings. Linking lets Listly open the seller's listings and match forwarded sale emails.</li>
+    <li><span class="tag-h">[H]</span> <b>eBay connection</b> through eBay's own sign-in, reading orders so eBay sales appear on their own, is allowed under eBay's current API terms. Its 2026 license update adds restricted APIs and AI-content rules, so this needs checking before it's built.</li>
+    <li><span class="tag-h">[H]</span> Listly never asks for or stores a marketplace password.</li>
+    <li><span class="tag-h">[H]</span> <b>First-run tips</b> appear once, on the first visit to Home, Copy listings and Listings, with 1–3 tips each, and can be skipped. Whether tips help, or get dismissed unread, needs testing.</li>
+    <li><span class="tag-h">[H]</span> A <b>2-minute how-to video</b> with captions and a transcript, plus written steps, is enough help for MVP. Who makes the video, and its length, are undecided. The Home card shows until it's dismissed.</li>
+    <li><span class="tag-h">[H]</span> Showing both plans side by side, with the Reseller plan marked for regular sellers, doesn't confuse occasional sellers.</li>
+    <li><span class="tag-h">[H]</span> Sellers will paste listing links back into Listly, and tick "I removed it" on each marketplace, reliably enough to keep the ledger true without marketplace APIs.</li>
+    <li><span class="tag-h">[H]</span> The sold-everywhere checklist is enough without automatic delisting. Listly never says a listing is down until the seller confirms.</li>
+    <li><span class="tag-h">[H]</span> Marketplace fee rates (Poshmark 20%, eBay 13.25%, Mercari 10%) and title character limits are <b>placeholders</b>. They must be verified and kept current before profit figures are shown.</li>
+    <li><span class="tag-h">[H]</span> A price estimate labeled "A guess, not based on sold prices" is useful rather than misleading.</li>
+    <li><span class="tag-h">[H]</span> The Clear-out Pass hides the ledger, checklist and profit tracker, and an upgrade nudge after 10+ items or a second marketplace is welcome, not naggy.</li>
+    <li><span class="tag-h">[H]</span> The bin labels, the sale-email forwarding and the "fix photo" step are deferred to the next release, so they appear only as text here.</li>
+    <li><span class="tag-h">[H]</span> <b>Design-system gaps:</b> GO Mobile Design System has only <code>GoButton</code> (no secondary variant) and <code>GoCard</code>. Every other part here is a gap styled from GO tokens: secondary and text buttons, tabs, segmented control, chips and tags, list rows, text fields, checkbox, tab bar, progress bar, toast, plan card, mic and shutter buttons, inline error and alarm banner, progress dots, settings groups, switches, sort control, a destructive button, coach-mark tips, video player and accordion. GO also has no error or warning colour role and no helper-text colour; this prototype uses borders, weight and the border colour instead. Turn on <b>Component labels</b> to see which is which.</li>
+    <li><span class="tag-h">[H]</span> This prototype shows the light theme only. GO's dark theme isn't applied here.</li>
+  </ul>
+</section>
+
+
+
+<script>
+/* ============ FEATURE JS — Listly MVP 1 (v2: onboarding, Home, Listings, Profile, tab bar) ============ */
+/* All data synthetic. Fee rates and title limits are placeholders [H] — verify before use. */
+const ITEMS = [
+  { key:'jacket', name:'Denim trucker jacket', photos:4, brand:"Levi's", size:'M', meas:'Pit to pit 21 in · length 25 in', flaws:'Small mark on left cuff (photo 3)',
+    heard:"Levi's, medium, pit to pit twenty-one, length twenty-five, small mark on the left cuff",
+    titles:{ ebay:"Levi's Denim Trucker Jacket Men's M Blue Button Front Cotton", poshmark:"Levi's Denim Trucker Jacket Size M Blue", mercari:"Levi's Denim Trucker Jacket M Blue", depop:"levi's denim trucker jacket size m blue", facebook:"Levi's denim trucker jacket, size M" },
+    desc:"Levi's denim trucker jacket in blue, men's size M.\nPit to pit 21 in, length 25 in.\nCondition: good used. Small mark on the left cuff, shown in photo 3. No other flaws found.",
+    est:'$32–$40' },
+  { key:'tee', name:'90s band tee', photos:3, brand:'No brand tag', size:'L', meas:'Pit to pit 22 in · length 28 in', flaws:'Light fading; small hole near hem (photo 2)',
+    heard:"No brand tag, large, pit to pit twenty-two, length twenty-eight, light fading and a small hole near the hem",
+    titles:{ ebay:"Vintage 90s Band Tee Single Stitch Size L Faded Black", poshmark:"Vintage 90s Band Tee Size L", mercari:"Vintage 90s Band Tee L Single Stitch", depop:"vintage 90s band tee size L faded", facebook:"Vintage 90s band tee, size L" },
+    desc:"Vintage 90s band tee, size L, no brand tag.\nPit to pit 22 in, length 28 in.\nCondition: fair. Light fading overall and a small hole near the hem, shown in photo 2.",
+    est:'$25–$35' },
+  { key:'bag', name:'Leather crossbody bag', photos:2, brand:'Brand C', size:'One size', meas:'10 × 7 × 3 in · strap drop 22 in', flaws:'Scuff on bottom corner',
+    heard:"Brand C, one size, ten by seven by three, strap drop twenty-two, scuff on the bottom corner",
+    titles:{ ebay:"Brand C Leather Crossbody Bag Brown Adjustable Strap", poshmark:"Brand C Leather Crossbody Bag Brown", mercari:"Brand C Leather Crossbody Bag", depop:"brand c leather crossbody bag brown", facebook:"Brand C leather crossbody bag" },
+    desc:"Brand C leather crossbody bag in brown.\n10 × 7 × 3 in, strap drop 22 in.\nCondition: good used. Scuff on one bottom corner, shown in photo 2.",
+    est:'$28–$45' }
+];
+const MKTS = [ {id:'ebay',name:'eBay',limit:80}, {id:'poshmark',name:'Poshmark',limit:80}, {id:'mercari',name:'Mercari',limit:80},
+               {id:'depop',name:'Depop',limit:null}, {id:'facebook',name:'Facebook Marketplace',limit:100} ];
+const MNAME = id => MKTS.find(m => m.id === id).name;
+/* Inventory for the returning-user views. status: listed | sold | soldLive (sold on one marketplace, still live elsewhere) */
+const LEDGER = [
+  { key:'tee', name:'90s band tee', where:['Poshmark','eBay','Mercari'], days:12, bin:'B4', price:38, cost:6, status:'listed' },
+  { key:'jacket', name:'Denim trucker jacket', where:['Poshmark','Mercari'], days:3, bin:'B2', price:36, cost:8, status:'listed' },
+  { key:'boots', name:'Suede ankle boots', where:['eBay'], days:41, bin:'C1', price:45, cost:12, status:'listed' },
+  { key:'bag', name:'Leather crossbody bag', where:['Poshmark','eBay','Mercari','Depop'], days:1, bin:'B4', price:40, cost:7, status:'listed' },
+  { key:'cord', name:'Corduroy jacket', where:['Poshmark','eBay','Mercari'], days:18, bin:'A1', price:42, cost:9, status:'soldLive', soldOn:'Mercari' },
+  { key:'cardigan', name:'Wool cardigan', where:['Mercari'], days:9, bin:'A3', price:22, cost:5, status:'sold' }
+];
+const FEES = { Poshmark:[0.20,0], eBay:[0.1325,0], Mercari:[0.10,0], Depop:[0.033,0.45], 'Facebook Marketplace':[0.10,0] }; /* [H] placeholders */
+const item = k => LEDGER.find(x => x.key === k);
+
+const S = {};
+const TRADE_DEFAULT = () => ({ where:'Facebook group', got:'Levi\'s 501 jeans', value:30, addInv:true }); /* R-40 synthetic */
+let timer = null;
+/* First-run tips (R-36): kept across state jumps so each set shows once per session; Profile → Show tips again resets */
+let TIPS_SEEN = {}, TIP_IDX = {}, HOWTO_DISMISSED = false;
+const TIPS = {
+  home: [ {sel:'#needsActionBtn', t:"When something sells, it shows here until you've removed it from your other marketplaces."},
+          {sel:'#homeHaul', t:'Start a haul to photograph a batch of items in one go.'},
+          {sel:'#tab-listings', t:"Listings shows everything that's live. Profit shows what you made."} ],
+  draft: [ {sel:'.copyrow .gap-btn', t:'Tap Copy on each field, then paste it into the marketplace app.'},
+           {sel:'#openMktBtn', t:'Open the marketplace app straight from here, then paste the listing link back.'} ],
+  listings: [ {sel:'[data-act=listMkt]', t:"Filter by marketplace to see what's live where. Mark sold from any row."} ]
+};
+function resetState(){ Object.assign(S, { screen:'welcome', markets:['poshmark','ebay','mercari'], perms:'unasked', photos:0, factIdx:0,
+  filled:[false,false,false], typed:false, draftIdx:0, mkt:'poshmark', billing:'month', plan:null, pending:null,
+  soldKey:'tee', soldOn:'Poshmark', removed:{}, listView:'listings', listStatus:'active', listMkt:'all', sort:'days',
+  shipBy:'buyer', notify:true, links:{}, ebay:'none', linking:null }); }
+resetState();
+
+const $app = () => document.getElementById('app');
+const sim = id => { const el = document.getElementById(id); return el && el.checked; };
+function say(msg){ const l = document.getElementById('live'); l.textContent = ''; setTimeout(() => l.textContent = msg, 30); }
+function toast(msg){ const t = document.getElementById('toast'); if (!t) return; t.textContent = msg; t.classList.add('on'); say(msg);
+  clearTimeout(toast._t); toast._t = setTimeout(() => t.classList.remove('on'), 2200); }
+const money = n => '$' + n.toFixed(2);
+const thumbs = n => `<div class="thumbs" data-mf="Gap / Thumbnail" data-mf-props="not in GO · 44×44 · count ${n}">${Array.from({length:n},(_, i)=>`<span class="thumb" aria-hidden="true">${i+1}</span>`).join('')}</div>`;
+const gobtn = (id, label, attrs='') => { const nx = /class="gobtn nx"/.test(attrs); attrs = attrs.replace('class="gobtn nx"','');
+  return `<button type="button" class="gobtn${nx?' nx':''}" id="${id}" data-mf="GoButton" data-mf-props="state: ${/disabled/.test(attrs)?'disabled':'default'} · label: ${label}" ${attrs}>${label}</button>`; };
+const sec = (id, label, attrs='') => `<button type="button" class="gap-btn" id="${id}" data-mf="Gap / SecondaryButton" data-mf-props="not in GO · GoButton has no secondary variant" ${attrs}>${label}</button>`;
+const trial = used => `<span class="tag" data-mf="Gap / Tag" data-mf-props="not in GO · trial counter">Free listings: ${used} of 3</span>`;
+const dots = (n, of) => `<div class="dots" role="img" aria-label="Step ${n} of ${of}" data-mf="Gap / ProgressDots" data-mf-props="not in GO">${Array.from({length:of},(_, i)=>`<i class="${i<n?'on':''}"></i>`).join('')}</div>`;
+const mktChips = (act) => `<div class="chips" role="group" aria-label="Marketplaces" data-mf="Gap / ToggleChips" data-mf-props="not in GO · multi-select">${MKTS.map(m=>`<button type="button" class="chip" aria-pressed="${S.markets.includes(m.id)}" data-act="${act}" data-m="${m.id}">${m.name}</button>`).join('')}</div>`;
+const isPass = () => S.plan === 'pass';
+
+function tabbar(cur){ const t = (id, label, act) => `<button type="button" id="tab-${id}" ${cur===id?'aria-current="page"':''} data-act="${act}">${label}</button>`;
+  return `<nav class="tabbar" aria-label="Main" data-mf="Gap / TabBar" data-mf-props="not in GO · ${isPass()?4:5} tabs · New haul central">
+  ${t('home','Home','toHome')}${t('listings','Listings','toListings')}
+  <button type="button" id="tab-new" class="tab-new" data-act="newHaul" aria-label="New haul"><span aria-hidden="true">+</span><br>New haul</button>
+  ${isPass() ? '' : t('profit','Profit','toProfit')}${t('profile','Profile','toProfile')}</nav>`; }
+
+const screens = {
+  /* ---------- Onboarding (R-33) ---------- */
+  welcome(){ return `<div class="scr">
+      <div class="topline"><span class="brand">Listly</span></div>
+      <h1 class="t">List a whole haul from your phone.</h1>
+      <p>Sell it on eBay, Poshmark, Mercari, Depop and Facebook Marketplace. Always know what's sold, where it is and what you made.</p>
+      <div class="gocard" data-mf="GoCard" data-mf-props="state: default">
+        <h3 class="t">Your first 3 listings are free</h3>
+        <p>No card needed. Photograph a few items and see the listings before you decide.</p>
+      </div>
+    </div>
+    <div class="scr-foot">${gobtn('startBtn','Get started','data-act="toObMarkets"')}
+      <button type="button" class="gap-btn link" data-act="signIn" data-mf="Gap / TextButton" data-mf-props="not in GO · link style">I already have an account</button></div>`; },
+
+  obMarkets(){ return `<div class="scr">
+      ${dots(1,3)}
+      <h2 class="t">Where do you sell?</h2>
+      <p>Listly drafts a listing for each marketplace you pick. You can change this later in Profile.</p>
+      ${mktChips('toggleMkt')}
+      ${S.markets.length ? '' : '<p class="small" role="status">Pick at least one marketplace, or skip to get all of them.</p>'}
+      <p class="small muted">You can connect your marketplace accounts later, in Profile → Marketplaces and connections.</p>
+    </div>
+    <div class="scr-foot">${gobtn('obMarketsNext','Continue', S.markets.length ? 'data-act="toObAccount"' : 'disabled')}
+      <button type="button" class="gap-btn link" data-act="skipMarkets" data-mf="Gap / TextButton" data-mf-props="not in GO">Skip — draft for all five</button></div>`; },
+
+  obAccount(){ return `<div class="scr">
+      ${dots(2,3)}
+      <h2 class="t">Save your listings</h2>
+      <p>Create an account so your items, listings and sales are kept if you change phones.</p>
+      <p class="small muted">Still free: your first 3 listings need no card.</p>
+    </div>
+    <div class="scr-foot">${gobtn('obApple','Continue with Apple','data-act="toObPerms"')}
+      ${sec('obGoogle','Continue with Google','data-act="toObPerms"')}
+      <button type="button" class="gap-btn link" data-act="toObPerms" data-mf="Gap / TextButton" data-mf-props="not in GO">Use email instead</button></div>`; },
+
+  obPerms(){ return `<div class="scr">
+      ${dots(3,3)}
+      <h2 class="t">Camera and microphone</h2>
+      <p>Listly uses the camera to photograph your haul and the microphone so you can say each item's brand, size, measurements and flaws.</p>
+      <div class="gocard" data-mf="GoCard" data-mf-props="state: default · AI processing notice (R-23)">
+        <h3 class="t">How your photos and answers are used</h3>
+        <ul><li>They're sent to an AI service to group photos and draft listings.</li>
+        <li>Location data is removed from photos first.</li>
+        <li>Listly only writes facts you give it. Nothing is posted for you.</li></ul>
+        <button type="button" class="gap-btn link" data-act="noop" data-msg="Privacy details: not in this prototype." style="align-self:flex-start">How your data is used</button>
+      </div>
+    </div>
+    <div class="scr-foot">${gobtn('obAllow','Allow and start my first haul','data-act="allowPerms"')}
+      <button type="button" class="gap-btn link" data-act="denyPerms" data-mf="Gap / TextButton" data-mf-props="not in GO">Not now — I'll use my photo library and type</button></div>`; },
+
+  /* ---------- First haul ---------- */
+  capture(){ const n = S.photos, off = S.perms === 'denied'; return `<div class="scr">
+      <div class="topline"><h2 class="t">New haul</h2><span class="tag" data-mf="Gap / Tag" data-mf-props="not in GO · count">${n} photo${n===1?'':'s'}</span></div>
+      ${off ? `<div class="notice" role="status" data-mf="Gap / InlineNotice" data-mf-props="not in GO · permission denied"><b>Camera access is off.</b><span>Turn it on in Settings, or add photos from your library.</span>
+          <button type="button" class="gap-btn sm" data-act="noop" data-msg="Opens the phone's Settings for Listly (prototype)." style="align-self:flex-start">Open Settings</button></div>`
+        : `<div class="viewfinder" role="img" aria-label="Camera viewfinder (placeholder)">Camera<br>Take 2–4 photos of each item.</div>`}
+      <p class="small muted">Listly groups the photos into items for you. Tap <b>Next item</b> between items to help it.</p>
+      ${n ? thumbs(Math.min(n, 12)) : ''}
+      <div class="shutter-row">
+        <button type="button" class="gap-btn sm${n?'':' nx'}" data-act="library" id="libraryBtn" data-mf="Gap / SecondaryButton" data-mf-props="not in GO">Add from library</button>
+        <button type="button" class="shutter" data-act="shutter" aria-label="Take photo" ${off?'disabled':''} data-mf="Gap / ShutterButton" data-mf-props="not in GO · 72pt · ${off?'disabled':'default'}"></button>
+        <button type="button" class="gap-btn sm" data-act="nextItemMark" data-mf="Gap / SecondaryButton" data-mf-props="not in GO">Next item</button>
+      </div>
+    </div>
+    <div class="scr-foot">${gobtn('doneCapture', n ? `Done · ${n} photos` : 'Done', (n ? 'data-act="toGroup" class="gobtn nx"' : 'disabled'))}
+      <button type="button" class="gap-btn link" data-act="cancelHaul" data-mf="Gap / TextButton" data-mf-props="not in GO">Cancel haul</button></div>`; },
+
+  group(){ return `<div class="scr">
+      <h2 class="t">3 items found in 9 photos</h2>
+      <p class="ai-note" data-mf="Gap / AINote" data-mf-props="not in GO · states uncertainty (M-05)">Grouped automatically from your photos. Check that each item's photos belong together before you continue.</p>
+      ${ITEMS.map((it,i)=>`<div class="gocard" data-mf="GoCard" data-mf-props="state: default">
+        <div class="topline"><h3 class="t">Item ${i+1}</h3><span class="small muted">${it.photos} photos</span></div>
+        ${thumbs(it.photos)}
+        <div class="chips"><button type="button" class="chip" data-act="noop" data-msg="Move a photo: drag it to another item (not in this prototype)." data-mf="Gap / Chip" data-mf-props="not in GO">Move a photo</button>
+        <button type="button" class="chip" data-act="noop" data-msg="Split item: not in this prototype." data-mf="Gap / Chip" data-mf-props="not in GO">Split</button></div>
+      </div>`).join('')}
+    </div>
+    <div class="scr-foot">${gobtn('groupOk','Looks right — add details','data-act="toFacts"')}</div>`; },
+
+  facts(retry){ const i = S.factIdx, it = ITEMS[i], done = S.filled[i], micOff = S.perms === 'denied'; return `<div class="scr">
+      <div class="topline"><h2 class="t">Item ${i+1} of 3</h2>${trial(0)}</div>
+      ${thumbs(it.photos)}
+      ${retry ? `<div class="notice" role="alert" data-mf="Gap / InlineError" data-mf-props="not in GO · M-02"><b>Didn't catch that.</b><span>Try again somewhere quieter, or type the answers.</span></div>` : ''}
+      ${micOff ? `<div class="notice" role="status" data-mf="Gap / InlineNotice" data-mf-props="not in GO · permission denied"><b>Microphone is off.</b><span>Type the answers, or turn the microphone on in Settings.</span></div>` : ''}
+      <p>${micOff ? 'Type' : 'Say'} the brand, size, measurements and any flaws.</p>
+      ${micOff ? '' : `<button type="button" class="mic${done?'':' nx'}" id="micBtn" data-act="mic" data-mf="Gap / MicButton" data-mf-props="not in GO · tap to talk">${retry?'Try again':(done?'Talk again':'Tap to talk')}</button>`}
+      ${done ? `<p class="small muted">${S.typed ? 'Typed answers' : 'Heard: “' + it.heard + '”'}</p>` : `<button type="button" class="${micOff?'gap-btn nx':'gap-btn link'}" id="typeBtn" data-act="typeIt" data-mf="Gap / ${micOff?'SecondaryButton':'TextButton'}" data-mf-props="not in GO">Type the answers</button>`}
+      ${[['Brand',it.brand],['Size',it.size],['Measurements',it.meas],['Flaws',it.flaws]].map(([l,v])=>`<div class="field" data-mf="Gap / TextField" data-mf-props="not in GO · ${done?'filled':'empty'}"><span class="lbl">${l}</span><div class="input${done?'':' empty'}">${done?v:'Not answered yet'}</div></div>`).join('')}
+      <p class="small muted">Listly never fills these in on its own. Anything you don't give stays blank.</p>
+    </div>
+    <div class="scr-foot">${gobtn('factsNext', i<2 ? 'Next item' : 'Draft all 3 listings', done ? 'data-act="factsNext" class="gobtn nx"' : 'disabled')}</div>`; },
+
+  drafting(){ const n = S.markets.length || 5; return `<div class="scr" aria-busy="true">
+      <h2 class="t">Drafting 3 listings</h2>
+      <p>For ${n} marketplace${n===1?'':'s'}. This takes a few seconds.</p>
+      <div class="progress" role="progressbar" aria-label="Drafting listings" data-mf="Gap / ProgressBar" data-mf-props="not in GO · M-01"><i id="draftBar"></i></div>
+    </div>
+    <div class="scr-foot">${sec('cancelDraftBtn','Cancel','data-act="cancelDraft"')}</div>`; },
+
+  draftFail(){ return `<div class="scr">
+      <h2 class="t">Couldn't draft these listings</h2>
+      <div class="notice" role="alert" data-mf="Gap / InlineError" data-mf-props="not in GO · M-03"><span>Your photos and answers are saved. Nothing was used from your free listings.</span></div>
+    </div>
+    <div class="scr-foot">${gobtn('retryDraft','Try again','data-act="startDraft"')}</div>`; },
+
+  draft(){ const shown = MKTS.filter(m => !S.markets.length || S.markets.includes(m.id));
+    if (!shown.find(m => m.id === S.mkt)) S.mkt = shown[0].id;
+    const it = ITEMS[S.draftIdx], m = MKTS.find(x=>x.id===S.mkt), title = it.titles[m.id]; return `<div class="scr">
+      <div class="topline"><h2 class="t">Ready to post</h2>${trial(3)}</div>
+      <div class="chips" role="tablist" aria-label="Item" data-mf="Gap / SegmentedControl" data-mf-props="not in GO · 3 items">${ITEMS.map((x,i)=>`<button type="button" role="tab" class="chip" aria-selected="${i===S.draftIdx}" data-act="pickItem" data-i="${i}">${i+1} · ${x.name}</button>`).join('')}</div>
+      <div class="tabs" role="tablist" aria-label="Marketplace" data-mf="Gap / Tabs" data-mf-props="not in GO · your marketplaces">${shown.map(x=>`<button type="button" role="tab" class="tab" aria-selected="${x.id===S.mkt}" data-act="pickMkt" data-m="${x.id}">${x.name.replace(' Marketplace','')}</button>`).join('')}</div>
+      <div data-mf="Gap / CopyField" data-mf-props="not in GO · label, value, Copy">
+        ${[['Title', title + (m.limit ? `\n${title.length} of ${m.limit} characters` : '')],['Description', it.desc],['Brand', it.brand],['Size', it.size],['Condition', S.draftIdx===1?'Fair':'Good used']].map(([l,v])=>`<div class="copyrow"><div class="val"><span class="small muted">${l}</span><br>${v}</div><button type="button" class="gap-btn sm" data-act="copy" data-f="${l}">Copy</button></div>`).join('')}
+        <div class="copyrow"><div class="val"><span class="small muted">Price</span><br><b>${it.est}</b><br><span class="ai-note">Estimate from similar items. A guess, not based on sold prices.</span></div><button type="button" class="gap-btn sm" data-act="copy" data-f="Price">Copy</button></div>
+      </div>
+      ${sec('openMktBtn','Open ' + m.name,'data-act="openMkt"')}
+      <div class="field" data-mf="Gap / TextField" data-mf-props="not in GO · optional"><label for="linkIn">Listing link (after you post)</label><input id="linkIn" class="input" placeholder="Paste the link from ${m.name}"></div>
+    </div>
+    <div class="scr-foot">${gobtn('finishHaul','Finish haul','data-act="toPaywall"')}</div>`; },
+
+  paywall(fail){ const yr = S.billing==='year'; return `<div class="scr">
+      <h2 class="t">Your 3 free listings are ready to post</h2>
+      <p>Pick a plan to list more and keep track of what sells.</p>
+      ${fail ? `<div class="notice" role="alert" data-mf="Gap / InlineError" data-mf-props="not in GO"><b>The purchase didn't go through.</b><span>You haven't been charged. Try again, or check your payment details in the App Store.</span>${gobtn('retryPay','Try again','data-act="retryPay"')}</div>` : ''}
+      <div class="plan rec" data-mf="Gap / PlanCard" data-mf-props="not in GO · recommended">
+        <span class="tag strong">For regular sellers</span>
+        <h3 class="t">Reseller plan</h3>
+        <div class="chips" data-mf="Gap / SegmentedControl" data-mf-props="not in GO · billing period"><button type="button" class="chip" aria-pressed="${!yr}" data-act="bill" data-b="month">Monthly</button><button type="button" class="chip" aria-pressed="${yr}" data-act="bill" data-b="year">Yearly</button></div>
+        <div class="price">${yr ? '$99 a year' : '$12.99 a month'}</div>
+        ${yr ? '<span class="small muted">About $8.25 a month</span>' : ''}
+        <ul><li>Hauls up to 500 listings a month</li><li>Sold-everywhere checklist</li><li>Profit tracker with CSV export</li><li>Every listing, where it is and its bin</li></ul>
+        ${gobtn('buyReseller','Start Reseller plan','data-act="buy" data-plan="reseller"')}
+      </div>
+      <div class="plan" data-mf="Gap / PlanCard" data-mf-props="not in GO">
+        <h3 class="t">Clear-out Pass</h3>
+        <div class="price">$6.99 once</div>
+        <ul><li>30 days, up to 100 listings</li><li>Copy for every marketplace</li><li>Mark sold and see money made</li><li>No subscription</li></ul>
+        ${gobtn('buyPass','Get Clear-out Pass','data-act="buy" data-plan="pass"')}
+      </div>
+      <p class="small muted">Paid through the App Store. The Reseller plan renews until you cancel in Settings. <button type="button" class="gap-btn link small" data-act="noop" data-msg="Restore purchases: not in this prototype.">Restore purchases</button></p>
+    </div>
+    <div class="scr-foot">${sec('notNowBtn','Not now — keep my 3 listings','data-act="notNow"')}</div>`; },
+
+  /* ---------- Home (R-29) ---------- */
+  home(){ const cord = item('cord'); const stale = LEDGER.filter(x => x.status==='listed' && x.days>=30).length; return `<div class="scr">
+      <div class="topline"><h2 class="t">Home</h2><span class="tag" data-mf="Gap / Tag" data-mf-props="not in GO · plan">Reseller plan</span></div>
+      <section class="notice alarm" aria-labelledby="naH" data-mf="Gap / AlarmBanner" data-mf-props="not in GO · Needs action (R-15)">
+        <b id="naH">Needs action</b>
+        <span>${cord.name} sold on ${cord.soldOn}. It's still live on ${cord.where.filter(w=>w!==cord.soldOn).join(' and ')}.</span>
+        <button type="button" class="gap-btn" id="needsActionBtn" data-act="resolveCord">Remove it now</button>
+      </section>
+      <div class="gocard" data-mf="GoCard" data-mf-props="state: default · Unfinished haul">
+        <div class="topline"><h3 class="t">Unfinished haul</h3><span class="small muted">Saturday</span></div>
+        <p>4 photos of 2 items, not drafted yet.</p>
+        ${sec('continueHaul','Continue','data-act="toGroup"')}
+      </div>
+      <button type="button" class="gocard tile" id="monthTile" data-act="toProfit" data-mf="GoCard" data-mf-props="state: default · This month (tappable)">
+        <span class="small muted">This month</span>
+        <span class="stats"><span><b class="big">${LEDGER.filter(x=>x.status==='listed').reduce((n,x)=>n+x.where.length,0)}</b><br>active listings</span><span><b class="big">23</b><br>sold</span><span><b class="big">$412.80</b><br>net profit</span></span>
+      </button>
+      ${stale ? `<button type="button" class="row" id="staleRow" data-act="toStale" data-mf="Gap / ListRow" data-mf-props="not in GO"><span class="grow"><b>${stale} item listed 30+ days</b><span class="small muted">Reprice or relist it</span></span><span aria-hidden="true">›</span></button>` : ''}
+      ${HOWTO_DISMISSED ? '' : `<div class="gocard" id="howToCard" data-mf="GoCard" data-mf-props="state: default · How-to card (R-37), dismissible">
+        <div class="topline"><h3 class="t">New to Listly?</h3><button type="button" class="gap-btn link" data-act="dismissHowTo" aria-label="Dismiss how-to card">✕</button></div>
+        <p>Watch a 2-minute how-to, or read the steps.</p>
+        <div class="chips">${sec('howToVideo','Watch the video','data-act="toHowTo"')}<button type="button" class="gap-btn link" data-act="toHowTo">Read the steps</button></div>
+      </div>`}
+      <p class="small muted">Reseller plan · renews Dec 13 · 212 of 500 listings used this month</p>
+    </div>
+    <div class="scr-foot">${gobtn('homeHaul','Start a haul','data-act="newHaul"')}</div>${tabbar('home')}`; },
+
+  homeNew(){ return `<div class="scr">
+      <div class="topline"><h2 class="t">Home</h2>${trial(0)}</div>
+      <div class="gocard" data-mf="GoCard" data-mf-props="state: default · empty Home (R-29)">
+        <h3 class="t">Start your first haul</h3>
+        <p>Photograph a few items, answer a few questions, and get listings for every marketplace you sell on. Your first 3 listings are free.</p>
+        ${gobtn('homeNewHaul','Start a haul','data-act="newHaul"')}
+        <button type="button" class="gap-btn link" data-act="toHowTo" style="align-self:flex-start">Watch how Listly works (2 min)</button>
+      </div>
+    </div>${tabbar('home')}`; },
+
+  passHome(){ return `<div class="scr">
+      <div class="topline"><h2 class="t">Home</h2><span class="tag" data-mf="Gap / Tag" data-mf-props="not in GO · plan">Clear-out Pass · 30 days left</span></div>
+      <div class="gocard" data-mf="GoCard" data-mf-props="state: default · This clear-out"><span class="small muted">This clear-out</span>
+        <span class="stats"><span><b class="big">3</b><br>listed</span><span><b class="big">0</b><br>sold</span><span><b class="big">$0.00</b><br>made</span></span>
+        <span class="small">3 of 100 listings used</span></div>
+      <button type="button" class="row" data-act="toListings" data-mf="Gap / ListRow" data-mf-props="not in GO"><span class="grow"><b>See your listings</b><span class="small muted">3 active on Poshmark</span></span><span aria-hidden="true">›</span></button>
+      <div class="gocard" data-mf="GoCard" data-mf-props="state: default · upgrade suggestion (R-19), shown after 10+ items or a second marketplace">
+        <h3 class="t">Selling more?</h3><p>The Reseller plan warns you when something sold is still live elsewhere, and tracks what you made.</p>
+        ${sec('passUpgrade','See the Reseller plan','data-act="toPaywall"')}</div>
+    </div>
+    <div class="scr-foot">${gobtn('newHaul','Start a haul','data-act="newHaul"')}</div>${tabbar('home')}`; },
+
+  /* ---------- Listings (R-30) and the per-item view (R-13) ---------- */
+  listings(){ return S.listView === 'items' ? listingsItems() : listingsRows(); },
+  ledger(){ return listingsItems(); },
+
+  sold(){ const it = item(S.soldKey); return `<div class="scr">
+      <button type="button" class="gap-btn link" data-act="toListings" style="align-self:flex-start">‹ Listings</button>
+      <h2 class="t">${it.name}</h2>
+      ${thumbs(3)}
+      <p class="small">Listed on ${it.where.join(', ')} · Bin ${it.bin} · cost ${money(it.cost)}</p>
+      <div class="gocard" data-mf="GoCard" data-mf-props="state: default">
+        <h3 class="t">${S.soldOn==='Traded' ? 'Mark as traded' : 'Mark as sold'}</h3>
+        <div class="field"><span class="lbl">Where did it go?</span>
+          <div class="chips" data-mf="Gap / SegmentedControl" data-mf-props="not in GO">${it.where.concat(['Traded']).map(x=>`<button type="button" class="chip" aria-pressed="${S.soldOn===x}" data-act="soldOn" data-v="${x}">${x}</button>`).join('')}</div></div>
+        ${S.soldOn==='Traded' ? `
+        <div class="field" data-mf="Gap / TextField" data-mf-props="not in GO"><label for="tradeWhere">Where did you trade it?</label><input id="tradeWhere" class="input" value="${S.trade.where}"></div>
+        <div class="field" data-mf="Gap / TextField" data-mf-props="not in GO"><label for="tradeGot">What did you get?</label><input id="tradeGot" class="input" value="${S.trade.got}"></div>
+        <div class="field" data-mf="Gap / TextField" data-mf-props="not in GO · currency"><label for="tradeValue">What's it worth? (your estimate)</label><input id="tradeValue" class="input" value="${money(S.trade.value)}"></div>
+        <label class="check" data-mf="Gap / Checkbox" data-mf-props="not in GO"><input type="checkbox" data-act="tradeInv" ${S.trade.addInv?'checked':''}> Add what I got to my items, with this value as its cost</label>`
+        : `<div class="field" data-mf="Gap / TextField" data-mf-props="not in GO · currency"><label for="salePrice">Sale price</label><input id="salePrice" class="input" value="${money(it.price)}"></div>`}
+      </div>
+      <p class="small muted">${S.soldOn==='Traded' ? 'Listly records trades you make elsewhere. The value is your estimate and counts as the sale in your profit.' : 'Coming next: forward the sale email and Listly fills this in.'}</p>
+    </div>
+    <div class="scr-foot">${gobtn('confirmSold', S.soldOn==='Traded' ? 'Mark traded' : 'Mark sold','data-act="toSoldCheck"')}</div>`; },
+
+  soldCheck(){ const it = item(S.soldKey); const others = it.where.filter(x=>x!==S.soldOn);
+    const allDone = others.every(k=>S.removed[k]); const firstOpen = others.find(k=>!S.removed[k]); return `<div class="scr">
+      <div class="notice alarm" role="alert" data-mf="Gap / AlarmBanner" data-mf-props="not in GO · no warning colour role">
+        <b>Still live on ${others.join(' and ')}. Remove it now.</b>
+        <span>${S.soldOn==='Traded' ? `You traded ${it.name} for ${S.trade.got}.` : `${it.name} sold on ${S.soldOn} for ${money(it.price)}.`} A buyer could still pay for it until you remove it.</span></div>
+      ${others.map(x=>`<div class="gocard" data-mf="GoCard" data-mf-props="state: default">
+        <div class="topline"><h3 class="t">${x}</h3><span class="tag${S.removed[x]?' strong':''}">${S.removed[x]?'You removed it':'Still live'}</span></div>
+        <button type="button" class="gap-btn" data-act="openOther" data-v="${x}" data-mf="Gap / SecondaryButton" data-mf-props="not in GO · deep link">Open the ${x} listing</button>
+        <label class="check${x===firstOpen?' nx':''}" data-mf="Gap / Checkbox" data-mf-props="not in GO"><input type="checkbox" data-act="removed" data-k="${x}" ${S.removed[x]?'checked':''}> I removed it on ${x}</label>
+      </div>`).join('')}
+      <p class="small muted">Listly can't remove listings for you. It shows them as live until you confirm.</p>
+    </div>
+    <div class="scr-foot">${gobtn('soldDoneBtn','Done', allDone ? 'data-act="toSoldDone" class="gobtn nx"' : 'disabled')}
+      ${sec('remindBtn','Remind me in 1 hour','data-act="remind"')}</div>`; },
+
+  soldDone(){ const it = item(S.soldKey); if (S.soldOn==='Traded') return tradeDoneView(it); const [rate, fixed] = FEES[S.soldOn]; const fee = it.price*rate + fixed; const net = it.price - fee - it.cost;
+    const others = it.where.filter(x=>x!==S.soldOn); return `<div class="scr">
+      <h2 class="t">Sold on ${S.soldOn}</h2>
+      <div class="gocard" data-mf="GoCard" data-mf-props="state: default"><span class="small muted">Find it in</span><span class="big">Bin ${it.bin}</span></div>
+      <div data-mf="Gap / MoneyBreakdown" data-mf-props="not in GO">
+        <div class="mrow"><span>Sale price</span><span>${money(it.price)}</span></div>
+        <div class="mrow"><span>${S.soldOn} fees (estimate)</span><span>−${money(fee)}</span></div>
+        <div class="mrow"><span>Shipping (${S.shipBy==='buyer'?'buyer paid':'you paid'})</span><span>$0.00</span></div>
+        <div class="mrow"><span>What you paid</span><span>−${money(it.cost)}</span></div>
+        <div class="mrow total"><span>Net profit</span><span>${money(net)}</span></div>
+      </div>
+      <p class="small muted">Removed from ${others.join(' and ')} — you confirmed ${others.length===1?'it':'both'}. Fee rates are estimates; check them against your payout.</p>
+    </div>
+    <div class="scr-foot">${gobtn('toProfitBtn','See profit','data-act="toProfit"')}${sec('backListings','Back to listings','data-act="toListings"')}</div>`; },
+
+  tradeDone(){ return screens.soldDone(); },
+
+  profit(){ return `<div class="scr">
+      <div class="topline"><h2 class="t">Profit</h2><button type="button" class="chip" aria-pressed="true" data-mf="Gap / Chip" data-mf-props="not in GO · period">November</button></div>
+      <div class="gocard" data-mf="GoCard" data-mf-props="state: default"><span class="small muted">Net profit this month</span><span class="big">$412.80</span><span class="small">23 sold · $968.00 in sales · 11 days to sell on average</span></div>
+      <div class="notice" data-mf="Gap / InlineNotice" data-mf-props="not in GO · partial data"><span><b>3 sold items have no cost.</b> Their profit is shown as the full sale minus fees.</span>
+        <button type="button" class="gap-btn sm" data-act="noop" data-msg="Adding costs isn't part of this prototype." style="align-self:flex-start">Add costs</button></div>
+      <h3 class="t">By marketplace</h3>
+      <div data-mf="Gap / MoneyBreakdown" data-mf-props="not in GO">
+        ${[['Poshmark','11 sold','$214.60'],['eBay','6 sold','$121.40'],['Mercari','4 sold','$58.30'],['Depop','2 sold','$18.50']].map(([a,b,c])=>`<div class="mrow"><span>${a} <span class="small muted">${b}</span></span><span>${c}</span></div>`).join('')}
+      </div>
+      ${sec('exportBtn','Export CSV for taxes','data-act="export"')}
+      <p class="small muted">Fees are worked out from each marketplace's published rates. Check them against your payouts. Not tax advice.</p>
+    </div>${tabbar('profit')}`; },
+
+  /* ---------- Profile (R-31) ---------- */
+  profile(){ const pass = isPass(); return `<div class="scr">
+      <h2 class="t">Profile</h2>
+      <section class="pset" aria-labelledby="pAcc" data-mf="Gap / SettingsGroup" data-mf-props="not in GO"><h3 class="t" id="pAcc">Account</h3>
+        <div class="mrow"><span>seller@example.com</span><span class="small muted">Apple</span></div>
+        <button type="button" class="gap-btn link" data-act="signOut" style="align-self:flex-start">Sign out</button></section>
+      <section class="pset" aria-labelledby="pPlan" data-mf="Gap / SettingsGroup" data-mf-props="not in GO"><h3 class="t" id="pPlan">Plan</h3>
+        ${pass ? `<div class="mrow"><span>Clear-out Pass</span><span>30 days left</span></div><div class="mrow"><span>Listings used</span><span>3 of 100</span></div>
+          ${sec('profUpgrade','See the Reseller plan','data-act="toPaywall"')}`
+        : `<div class="mrow"><span>Reseller plan · monthly</span><span>$12.99</span></div><div class="mrow"><span>Renews</span><span>Dec 13</span></div><div class="mrow"><span>Listings this month</span><span>212 of 500</span></div>
+          ${sec('manageSub','Manage subscription','data-act="noop" data-msg="Opens the App Store subscription page (prototype)."')}`}
+        <button type="button" class="gap-btn link" data-act="noop" data-msg="Restore purchases: not in this prototype." style="align-self:flex-start">Restore purchases</button></section>
+      <section class="pset" aria-labelledby="pMk" data-mf="Gap / SettingsGroup" data-mf-props="not in GO"><h3 class="t" id="pMk">Marketplaces</h3>
+        <p class="small">Drafting for: ${S.markets.length ? S.markets.map(MNAME).join(', ') : 'all five'}</p>
+        <p class="small muted">eBay ${S.ebay==='connected'?'connected':'not connected'} · ${Object.keys(S.links).length} shop${Object.keys(S.links).length===1?'':'s'} linked</p>
+        ${sec('profConnectors','Marketplaces and connections','data-act="toConnectors"')}</section>
+      <section class="pset" aria-labelledby="pDef" data-mf="Gap / SettingsGroup" data-mf-props="not in GO"><h3 class="t" id="pDef">Selling defaults</h3>
+        <div class="field"><span class="lbl">Who usually pays shipping?</span><div class="chips" data-mf="Gap / SegmentedControl" data-mf-props="not in GO">
+          <button type="button" class="chip" aria-pressed="${S.shipBy==='buyer'}" data-act="shipBy" data-v="buyer">The buyer</button><button type="button" class="chip" aria-pressed="${S.shipBy==='me'}" data-act="shipBy" data-v="me">I do</button></div></div>
+        <div class="field" data-mf="Gap / TextField" data-mf-props="not in GO"><label for="defBin">Default bin</label><input id="defBin" class="input" value="B1"></div></section>
+      <section class="pset" aria-labelledby="pNot" data-mf="Gap / SettingsGroup" data-mf-props="not in GO"><h3 class="t" id="pNot">Notifications</h3>
+        <label class="check" data-mf="Gap / Switch" data-mf-props="not in GO"><input type="checkbox" data-act="notify" ${S.notify?'checked':''}> Remind me about sold items still live elsewhere</label></section>
+      <section class="pset" aria-labelledby="pPriv" data-mf="Gap / SettingsGroup" data-mf-props="not in GO"><h3 class="t" id="pPriv">Privacy and data</h3>
+        <p class="small">Photos and spoken answers are processed by an AI service to draft listings. Location data is removed first.</p>
+        ${sec('exportAll','Export all my data','data-act="noop" data-msg="Your data export is being prepared. You will get an email when it is ready (prototype)."')}
+        <button type="button" class="gap-btn danger" id="deleteAcct" data-act="toDelete" data-mf="Gap / DestructiveButton" data-mf-props="not in GO · no destructive variant or colour">Delete account and data</button></section>
+      <section class="pset" aria-labelledby="pHelp" data-mf="Gap / SettingsGroup" data-mf-props="not in GO"><h3 class="t" id="pHelp">Help</h3>
+        ${sec('profHowTo','How-to video and steps','data-act="toHowTo"')}
+        <button type="button" class="gap-btn link" data-act="resetTips" style="align-self:flex-start">Show tips again</button>
+        <button type="button" class="gap-btn link" data-act="noop" data-msg="Help and feedback: not in this prototype." style="align-self:flex-start">Contact us and send feedback</button>
+        <p class="small muted">Listly 0.1 (prototype)</p></section>
+    </div>${tabbar('profile')}`; },
+
+  /* ---------- Marketplaces and connections (R-34, R-35) ---------- */
+  connectors(fail){ return `<div class="scr">
+      <button type="button" class="gap-btn link" data-act="toProfile" style="align-self:flex-start">‹ Profile</button>
+      <h2 class="t">Marketplaces and connections</h2>
+      ${fail ? `<div class="notice" role="alert" data-mf="Gap / InlineError" data-mf-props="not in GO"><b>The eBay connection didn't finish.</b><span>Nothing was changed. Try again, or keep using copy and paste.</span></div>` : ''}
+      <p class="small">Pick where you sell, and link your accounts so Listly can open your listings and match your sales.</p>
+      <p class="ai-note" data-mf="Gap / InfoNote" data-mf-props="not in GO">Poshmark, Mercari, Depop and Facebook Marketplace don't let apps post or remove listings, so you'll still paste listings in and remove them yourself. Listly never asks for your marketplace passwords.</p>
+      ${MKTS.map(m => { const on = S.markets.includes(m.id), ebay = m.id==='ebay', linked = S.links[m.id];
+        const status = ebay ? (S.ebay==='connected' ? 'Connected' : 'Not connected') : (linked ? 'Linked' : 'Not linked');
+        return `<div class="gocard" id="conn-${m.id}" data-mf="GoCard" data-mf-props="state: default · connector">
+        <div class="topline"><h3 class="t">${m.name}</h3><span class="tag${(ebay&&S.ebay==='connected')||linked?' strong':''}">${status}</span></div>
+        <label class="check" data-mf="Gap / Switch" data-mf-props="not in GO"><input type="checkbox" data-act="draftFor" data-m="${m.id}" ${on?'checked':''}> Draft listings for ${m.name}</label>
+        ${ebay ? (S.ebay==='connected'
+            ? `<p class="small">Signed in as <b>seller_example</b>. Sales on eBay show in Listly automatically. Listly can't post or end eBay listings yet.</p>
+               <button type="button" class="gap-btn link" data-act="ebayDisconnect" style="align-self:flex-start">Disconnect eBay</button>`
+            : `<p class="small muted">Connect to have your eBay sales show up in Listly on their own.</p>${sec('ebayConnectBtn','Connect with eBay','data-act="toEbayConnect"')}`)
+          : (S.linking===m.id
+            ? `<div class="field" data-mf="Gap / TextField" data-mf-props="not in GO"><label for="linkUser">Your ${m.name} username or shop link</label><input id="linkUser" class="input" placeholder="e.g. yourshop"></div>
+               <div class="chips">${sec('saveLink','Save','data-act="saveLink" data-m="'+m.id+'"')}<button type="button" class="gap-btn link" data-act="cancelLink">Cancel</button></div>`
+            : linked
+            ? `<p class="small">Linked as <b>@${linked}</b>. Listly opens your listings there and matches forwarded sale emails.</p>
+               <button type="button" class="gap-btn link" data-act="unlink" data-m="${m.id}" style="align-self:flex-start">Unlink</button>`
+            : `<p class="small muted">Link your shop so Listly can open your listings and match your sale emails.</p>${sec('link-'+m.id,'Link your shop','data-act="startLink" data-m="'+m.id+'"')}`)}
+      </div>`; }).join('')}
+    </div>${tabbar('profile')}`; },
+
+  ebayConnect(){ return `<div class="scr">
+      <h2 class="t">Connect your eBay account</h2>
+      <p>You'll sign in on eBay's own page. Listly never sees or stores your eBay password.</p>
+      <div class="gocard" data-mf="GoCard" data-mf-props="state: default · permissions summary">
+        <h3 class="t">Listly will be able to</h3><ul><li>See your eBay orders, so sales show up on their own</li><li>See whether each listing is still live</li></ul>
+        <h3 class="t">Listly won't</h3><ul><li>Post, change or end listings</li><li>See your payment or bank details</li></ul>
+      </div>
+      <p class="small muted">You can disconnect at any time in Profile.</p>
+    </div>
+    <div class="scr-foot">${gobtn('ebayContinue','Continue to eBay','data-act="ebayAuth"')}${sec('ebayCancel','Cancel','data-act="toConnectors"')}</div>`; },
+
+  howTo(){ const ch = [
+      ['Photograph a haul', ['Tap New haul.', 'Take 2–4 photos of each item, or add them from your library. Tap Next item between items.', 'Check that Listly grouped the photos into the right items.']],
+      ['Answer by voice', ['For each item, tap the mic and say the brand, size, measurements and any flaws.', 'Anything you don\'t say stays blank. Listly never fills it in for you.']],
+      ['Copy to your marketplaces', ['Pick a marketplace tab and tap Copy on each field.', 'Tap Open to go to that marketplace\'s app, paste, and post.', 'Paste the listing link back into Listly.']],
+      ['When something sells', ['Mark it sold, or let a connected eBay account do it.', 'Listly shows where it\'s still live. Remove it there and tick I removed it.', 'Find it in the bin Listly shows you.']],
+      ['See what you made', ['Add what you paid for each item.', 'Profit shows net profit after each marketplace\'s fees. Export it as a CSV.']] ];
+    return `<div class="scr">
+      <button type="button" class="gap-btn link" data-act="toHomeOrProfile" style="align-self:flex-start">‹ Back</button>
+      <h2 class="t">How to use Listly</h2>
+      <button type="button" class="video" id="playVideo" data-act="noop" data-msg="The video plays here, with captions on by default (prototype)." aria-label="Play the how-to video, 2 minutes, captions available" data-mf="Gap / VideoPlayer" data-mf-props="not in GO · captions · transcript">
+        <span class="play" aria-hidden="true">▶</span><span>How-to video · 2:00 · captions</span></button>
+      <button type="button" class="gap-btn link" data-act="noop" data-msg="The full transcript opens here (prototype)." style="align-self:flex-start">Read the transcript</button>
+      <h3 class="t">Step by step</h3>
+      ${ch.map(([h, steps], i) => `<details class="gocard howto-ch" ${i===0?'open':''} data-mf="Gap / Accordion" data-mf-props="not in GO"><summary><b>${i+1}. ${h}</b></summary><ol>${steps.map(x=>`<li>${x}</li>`).join('')}</ol></details>`).join('')}
+      <p class="small muted">You can find this any time in Profile → Help.</p>
+    </div>${tabbar(S.plan ? 'profile' : 'home')}`; },
+
+  deleteConfirm(){ return `<div class="scr">
+      <h2 class="t">Delete your account?</h2>
+      <div class="notice alarm" role="alert" data-mf="Gap / AlarmBanner" data-mf-props="not in GO"><span>This deletes your items, listings, sales and photos from Listly. <b>It can't be undone.</b></span>
+        <span>Your listings on the marketplaces aren't affected.</span>
+        <span>${isPass() ? 'Your Clear-out Pass ends now.' : 'Deleting doesn\'t cancel your subscription. Cancel it in the App Store first.'}</span></div>
+      <button type="button" class="gap-btn link" data-act="noop" data-msg="Export all my data: prepared and emailed (prototype)." style="align-self:flex-start">Export my data first</button>
+    </div>
+    <div class="scr-foot"><button type="button" class="gap-btn danger" id="confirmDelete" data-act="confirmDelete" data-mf="Gap / DestructiveButton" data-mf-props="not in GO">Delete account</button>
+      ${gobtn('cancelDelete','Keep my account','data-act="toProfile"')}</div>`; }
+};
+
+function listingsRows(){ const pass = isPass();
+  let rows = [];
+  LEDGER.forEach(it => {
+    if (it.status === 'listed') it.where.forEach(w => rows.push({ it, w, live:true, kind: it.days>=30 ? 'stale' : 'active' }));
+    if (it.status === 'soldLive') it.where.filter(w=>w!==it.soldOn).forEach(w => rows.push({ it, w, live:true, kind:'soldLive' }));
+  });
+  if (pass) rows = ITEMS.map(x => ({ it:{ key:x.key, name:x.name, price:+x.est.match(/\d+/)[0], days:0, bin:'—', where:['Poshmark'] }, w:'Poshmark', live:true, kind:'active' }));
+  const counts = {}; rows.forEach(r => counts[r.w] = (counts[r.w]||0)+1);
+  const st = S.listStatus;
+  let shown = rows.filter(r => (st==='active' ? r.kind!=='soldLive' : r.kind===st) && (S.listMkt==='all' || r.w===S.listMkt));
+  shown.sort((a,b) => S.sort==='days' ? b.it.days - a.it.days : b.it.price - a.it.price);
+  const statusChips = [['active','Active'], ...(pass ? [] : [['stale','Stale (30+ days)'],['soldLive','Sold, still live']])];
+  return `<div class="scr">
+    <div class="topline"><h2 class="t">Listings</h2>${pass?'':`<div class="chips" role="tablist" aria-label="View" data-mf="Gap / SegmentedControl" data-mf-props="not in GO · R-30 / R-13"><button type="button" role="tab" class="chip" aria-selected="true">By listing</button><button type="button" role="tab" class="chip" aria-selected="false" data-act="listView" data-v="items">By item</button></div>`}</div>
+    <div class="chips" aria-label="Marketplace" data-mf="Gap / FilterChips" data-mf-props="not in GO · counts per marketplace">
+      <button type="button" class="chip" aria-pressed="${S.listMkt==='all'}" data-act="listMkt" data-v="all">All ${rows.filter(r=>r.kind!=='soldLive').length}</button>
+      ${Object.keys(counts).map(w=>`<button type="button" class="chip" aria-pressed="${S.listMkt===w}" data-act="listMkt" data-v="${w}">${w.replace(' Marketplace','')} ${counts[w]}</button>`).join('')}</div>
+    <div class="chips" aria-label="Status" data-mf="Gap / FilterChips" data-mf-props="not in GO · status">${statusChips.map(([v,l])=>`<button type="button" class="chip" aria-pressed="${st===v}" data-act="listStatus" data-v="${v}">${l}</button>`).join('')}
+      <button type="button" class="chip" data-act="sort" data-mf="Gap / SortControl" data-mf-props="not in GO">Sort: ${S.sort==='days'?'days listed':'price'}</button></div>
+    ${shown.length ? `<div data-mf="Gap / ListRow" data-mf-props="not in GO · one row per item per marketplace">${shown.map(r=>`<div class="row lrow${r.kind==='soldLive'?' alarm-row':''}" id="lrow-${r.it.key}-${r.w.toLowerCase().replace(/\s.*/,'')}">
+        <span class="thumb" aria-hidden="true"></span>
+        <span class="grow"><b>${r.it.name}</b><span class="small">${r.w} · ${money(r.it.price)}</span>
+          <span class="small muted">${r.kind==='soldLive' ? 'Sold on '+r.it.soldOn+' — still live here' : r.it.days+' days listed'} · Bin ${r.it.bin}</span>
+          <span class="rowact"><button type="button" class="gap-btn sm" data-act="openOther" data-v="${r.w}">Open listing</button>
+          ${r.kind==='soldLive' ? `<button type="button" class="gap-btn sm" data-act="resolveCord">Remove it</button>` : `<button type="button" class="gap-btn sm" data-act="markSold" data-key="${r.it.key}" data-w="${r.w}">Mark sold</button>`}</span></span>
+        ${r.kind==='stale'?'<span class="tag">Stale</span>':''}</div>`).join('')}</div>`
+      : `<div class="gocard" data-mf="GoCard" data-mf-props="state: default · empty"><h3 class="t">No listings here</h3><p>Nothing matches this filter.</p>${sec('emptyHaul','Start a haul','data-act="newHaul"')}</div>`}
+  </div>${tabbar('listings')}`; }
+
+function listingsItems(){ return `<div class="scr">
+    <div class="topline"><h2 class="t">Listings</h2><div class="chips" role="tablist" aria-label="View" data-mf="Gap / SegmentedControl" data-mf-props="not in GO"><button type="button" role="tab" class="chip" aria-selected="false" data-act="listView" data-v="listings">By listing</button><button type="button" role="tab" class="chip" aria-selected="true">By item</button></div></div>
+    <p class="small muted">One row per item, with every marketplace it's on (R-13).</p>
+    <div data-mf="Gap / ListRow" data-mf-props="not in GO · thumbnail, title, marketplaces, days, bin, price">
+    ${LEDGER.map(r=>`<button type="button" class="row" id="row-${r.key}" data-act="${r.status==='listed'?'markSold':(r.status==='soldLive'?'resolveCord':'noop')}" data-key="${r.key}" data-w="${r.where[0]}" data-msg="${r.name} sold. Item details aren't part of this prototype.">
+      <span class="thumb" aria-hidden="true"></span>
+      <span class="grow"><b>${r.name}</b><span class="small">${r.where.join(' · ')}</span><span class="small muted">${r.status==='listed' ? r.days+' days listed' : 'Sold on '+(r.soldOn||r.where[0])} · Bin ${r.bin}</span></span>
+      <span>${money(r.price)}${r.status==='listed'&&r.days>=30?'<br><span class="tag">Stale</span>':''}${r.status!=='listed'?'<br><span class="tag strong">Sold</span>':''}</span></button>`).join('')}
+    </div></div>${tabbar('listings')}`; }
+
+/* R-40: traded instead of sold. Trade value is the user's estimate; no marketplace fee. */
+function tradeDoneView(it){ const net = S.trade.value - it.cost; return `<div class="scr">
+      <h2 class="t">Traded</h2>
+      <div class="gocard" data-mf="GoCard" data-mf-props="state: default"><span class="small muted">Take it from</span><span class="big">Bin ${it.bin}</span><span class="small">${it.name} → ${S.trade.got} · ${S.trade.where}</span></div>
+      <div data-mf="Gap / MoneyBreakdown" data-mf-props="not in GO">
+        <div class="mrow"><span>Trade value (your estimate)</span><span>${money(S.trade.value)}</span></div>
+        <div class="mrow"><span>Marketplace fees</span><span>$0.00</span></div>
+        <div class="mrow"><span>What you paid</span><span>−${money(it.cost)}</span></div>
+        <div class="mrow total"><span>Net profit (estimate)</span><span>${money(net)}</span></div>
+      </div>
+      ${S.trade.addInv ? `<div class="gocard" data-mf="GoCard" data-mf-props="state: default"><h3 class="t">Added to your items</h3><p class="small">${S.trade.got}, cost ${money(S.trade.value)}. List it when you're ready.</p></div>` : ''}
+      <p class="small muted">Removed from ${it.where.join(' and ')}: you confirmed each one. Trades count as income for tax; your export lists them as trades.</p>
+    </div>
+    <div class="scr-foot">${gobtn('toProfitBtn','See profit','data-act="toProfit"')}${sec('backListings','Back to listings','data-act="toListings"')}</div>`; }
+
+function render(){
+  const s = S.screen;
+  const html = s==='factsRetry' ? screens.facts(true) : s==='payFail' ? screens.paywall(true) : s==='ebayFail' ? screens.connectors(true) : screens[s]();
+  $app().innerHTML = `<div class="stage"><div class="phone" data-screen="${s}">${html}<div id="toast" class="toast" role="status"></div></div></div>`;
+  if (s === 'drafting') requestAnimationFrame(() => { const b = document.getElementById('draftBar'); if (b) b.style.width = '100%'; });
+  PROTO_UPDATE();
+  showTip(s);
+}
+function showTip(s){
+  const set = TIPS[s]; if (!set || TIPS_SEEN[s]) return;
+  const i = TIP_IDX[s] || 0, tip = set[i], el = document.querySelector('#app ' + tip.sel), ph = document.querySelector('#app .phone');
+  if (!el || !ph) return;
+  el.classList.add('coach-target');
+  const c = document.createElement('div');
+  c.className = 'coach'; c.id = 'coachTip'; c.setAttribute('role', 'dialog'); c.setAttribute('aria-label', 'Tip ' + (i+1) + ' of ' + set.length);
+  c.setAttribute('data-mf', 'Gap / CoachMark'); c.setAttribute('data-mf-props', 'not in GO · first-run tip (R-36)');
+  c.innerHTML = `<span class="small">Tip ${i+1} of ${set.length}</span><p>${tip.t}</p>
+    <div class="coach-acts"><button type="button" class="gap-btn link small" data-act="tipSkip">Skip tips</button>
+    <button type="button" class="gap-btn sm" id="tipNext" data-act="tipNext" data-s="${s}">${i+1 < set.length ? 'Next' : 'Got it'}</button></div>`;
+  ph.appendChild(c);
+  const r = el.getBoundingClientRect(), pr = ph.getBoundingClientRect();
+  let top = r.bottom - pr.top + 10;
+  if (top + c.offsetHeight > pr.height - 8) { top = r.top - pr.top - c.offsetHeight - 10; c.classList.add('above'); }
+  c.style.top = Math.max(8, top) + 'px';
+  say('Tip: ' + tip.t);
+}
+function show(screen){ S.screen = screen; render(); window.scrollTo(0, 0); }
+function homeFor(){ return S.plan === 'pass' ? 'passHome' : S.plan === 'reseller' ? 'home' : 'homeNew'; }
+function startDraft(){ show('drafting'); say('Drafting 3 listings.');
+  clearTimeout(timer); timer = setTimeout(() => { if (S.screen !== 'drafting') return;
+    show(sim('simDraftFail') ? 'draftFail' : 'draft'); say(S.screen==='draft' ? '3 listings ready to post.' : "Couldn't draft these listings."); }, 1800); }
+function buy(plan){ S.pending = plan; if (sim('simPayFail')) { show('payFail'); say("The purchase didn't go through."); return; }
+  S.plan = plan; show(plan === 'reseller' ? 'home' : 'passHome');
+  toast(plan === 'reseller' ? 'Reseller plan started.' : 'Clear-out Pass active for 30 days.'); }
+
+function goto(id){
+  clearTimeout(timer); resetState();
+  const filledAll = () => { S.photos = 9; S.filled = [true,true,true]; S.factIdx = 2; S.perms = 'granted'; };
+  switch (id) {
+    case 'capture': case 'group': S.perms = 'granted'; if (id==='group') S.photos = 9; break;
+    case 'facts': case 'factsRetry': S.photos = 9; S.perms = 'granted'; break;
+    case 'drafting': filledAll(); startDraft(); return;
+    case 'draftFail': case 'draft': case 'paywall': filledAll(); break;
+    case 'payFail': filledAll(); S.pending = 'reseller'; break;
+    case 'home': case 'listings': case 'profit': case 'profile': case 'deleteConfirm': S.plan = 'reseller'; break;
+    case 'ledger': S.plan = 'reseller'; S.listView = 'items'; break;
+    case 'sold': S.plan = 'reseller'; break;
+    case 'traded': S.plan = 'reseller'; S.soldKey = 'jacket'; S.soldOn = 'Traded'; S.trade = TRADE_DEFAULT(); S.screen = 'sold'; render(); return;
+    case 'tradeDone': S.plan = 'reseller'; S.soldKey = 'jacket'; S.soldOn = 'Traded'; S.trade = TRADE_DEFAULT(); S.removed = {Poshmark:true, Mercari:true}; break;
+    case 'soldCheck': S.plan = 'reseller'; S.soldKey = 'cord'; S.soldOn = 'Mercari'; break;
+    case 'soldDone': S.plan = 'reseller'; S.soldKey = 'cord'; S.soldOn = 'Mercari'; break;
+    case 'passHome': S.plan = 'pass'; break;
+    case 'connectors': case 'ebayConnect': case 'ebayFail': case 'howTo': S.plan = 'reseller'; break;
+    case 'ebayDone': S.plan = 'reseller'; S.ebay = 'connected'; S.links = {poshmark:'yourshop'}; S.screen = 'connectors'; render(); return;
+  }
+  S.screen = id; render(); window.scrollTo(0, 0);
+}
+function currentState(){ return S.screen; }
+
+document.addEventListener('click', e => {
+  const t = e.target.closest('#app [data-act]'); if (!t || t.disabled) return;
+  const a = t.dataset.act; const it = ITEMS[S.factIdx];
+  switch (a) {
+    /* onboarding */
+    case 'toObMarkets': show('obMarkets'); break;
+    case 'signIn': toast('Sign in: not in this prototype.'); break;
+    case 'toggleMkt': { const m = t.dataset.m; S.markets = S.markets.includes(m) ? S.markets.filter(x=>x!==m) : [...S.markets, m]; render(); break; }
+    case 'skipMarkets': S.markets = MKTS.map(m=>m.id); show('obAccount'); break;
+    case 'toObAccount': show('obAccount'); break;
+    case 'toObPerms': show('obPerms'); break;
+    case 'allowPerms': if (sim('simDenied')) { S.perms = 'denied'; show('capture'); toast('Camera and microphone are off. Use your library and type the answers.'); }
+      else { S.perms = 'granted'; show('capture'); } break;
+    case 'denyPerms': S.perms = 'denied'; show('capture'); break;
+    /* haul */
+    case 'shutter': S.photos++; render(); say(S.photos + ' photos'); break;
+    case 'library': S.photos = Math.max(S.photos, 9); render(); say('9 photos added'); break;
+    case 'nextItemMark': toast('Marked the start of a new item.'); break;
+    case 'cancelHaul': show(homeFor()); toast('Haul cancelled. Nothing was saved.'); break;
+    case 'toGroup': S.photos = Math.max(S.photos, 9); show('group'); break;
+    case 'toFacts': S.factIdx = 0; show('facts'); break;
+    case 'mic':
+      if (sim('simVoiceFail')) { show('factsRetry'); say("Didn't catch that."); break; }
+      S.filled[S.factIdx] = true; S.typed = false; show('facts'); say('Heard: ' + it.heard); break;
+    case 'typeIt': S.filled[S.factIdx] = true; S.typed = true; show('facts'); break;
+    case 'factsNext': if (S.factIdx < 2) { S.factIdx++; S.typed = false; show('facts'); } else startDraft(); break;
+    case 'cancelDraft': clearTimeout(timer); show('facts'); say('Drafting cancelled. Your answers are saved.'); break;
+    case 'startDraft': startDraft(); break;
+    case 'pickItem': S.draftIdx = +t.dataset.i; render(); break;
+    case 'pickMkt': S.mkt = t.dataset.m; render(); break;
+    case 'copy': toast(t.dataset.f + ' copied.'); break;
+    case 'openMkt': toast('Opens the ' + MNAME(S.mkt) + ' app (prototype).'); break;
+    /* plans */
+    case 'toPaywall': show('paywall'); break;
+    case 'bill': S.billing = t.dataset.b; render(); break;
+    case 'buy': buy(t.dataset.plan); break;
+    case 'retryPay': buy(S.pending || 'reseller'); break;
+    case 'notNow': show('draft'); toast('Your 3 listings stay ready to copy.'); break;
+    /* navigation */
+    case 'toHome': show(homeFor()); break;
+    case 'toListings': S.listView = 'listings'; show('listings'); break;
+    case 'toProfit': show('profit'); break;
+    case 'toProfile': show('profile'); break;
+    case 'newHaul': S.photos = 0; S.filled = [false,false,false]; S.perms = S.perms === 'denied' ? 'denied' : 'granted'; show('capture'); break;
+    case 'toStale': S.listView = 'listings'; S.listStatus = 'stale'; S.listMkt = 'all'; show('listings'); break;
+    /* listings */
+    case 'listView': S.listView = t.dataset.v; show(t.dataset.v === 'items' ? 'ledger' : 'listings'); break;
+    case 'listMkt': S.listMkt = t.dataset.v; render(); break;
+    case 'listStatus': S.listStatus = t.dataset.v; render(); break;
+    case 'sort': S.sort = S.sort === 'days' ? 'price' : 'days'; render(); break;
+    case 'markSold': S.soldKey = t.dataset.key; S.soldOn = t.dataset.w; S.trade = TRADE_DEFAULT(); show('sold'); break;
+    case 'resolveCord': S.soldKey = 'cord'; S.soldOn = 'Mercari'; S.removed = {}; show('soldCheck'); break;
+    /* sold */
+    case 'soldOn': S.soldOn = t.dataset.v; if (!S.trade) S.trade = TRADE_DEFAULT(); render(); break;
+    case 'tradeInv': S.trade.addInv = t.checked; break;
+    case 'toSoldCheck': if (S.soldOn==='Traded') { const g=document.getElementById('tradeGot'), w=document.getElementById('tradeWhere'), v=document.getElementById('tradeValue');
+        if (g&&g.value.trim()) S.trade.got=g.value.trim(); if (w&&w.value.trim()) S.trade.where=w.value.trim(); if (v) { const n=parseFloat(v.value.replace(/[^0-9.]/g,'')); if (!isNaN(n)) S.trade.value=n; } }
+      S.removed = {}; { const it=item(S.soldKey); const others = it.where.filter(x=>x!==S.soldOn); if (!others.length) { show('soldDone'); break; } } show('soldCheck'); break;
+    case 'openOther': toast('Opens the ' + t.dataset.v + ' app at this listing (prototype).'); break;
+    case 'remind': show(homeFor()); toast("Reminder set for 1 hour. It still shows as live."); break;
+    case 'toSoldDone': show('soldDone'); break;
+    case 'export': toast('CSV exported (prototype).'); break;
+    /* profile */
+    case 'shipBy': S.shipBy = t.dataset.v; render(); break;
+    case 'signOut': goto('welcome'); break;
+    case 'toDelete': show('deleteConfirm'); break;
+    case 'confirmDelete': goto('welcome'); toast('Your account and data were deleted.'); break;
+    /* connectors */
+    case 'toConnectors': S.linking = null; show('connectors'); break;
+    case 'draftFor': break;
+    case 'startLink': S.linking = t.dataset.m; render(); const f = document.getElementById('linkUser'); if (f) f.focus(); break;
+    case 'cancelLink': S.linking = null; render(); break;
+    case 'saveLink': { const v = (document.getElementById('linkUser').value || 'yourshop').replace(/^@/, ''); S.links[t.dataset.m] = v; S.linking = null; render(); toast(MNAME(t.dataset.m) + ' shop linked.'); break; }
+    case 'unlink': delete S.links[t.dataset.m]; render(); toast(MNAME(t.dataset.m) + ' unlinked.'); break;
+    case 'toEbayConnect': show('ebayConnect'); break;
+    case 'ebayAuth': if (sim('simEbayFail')) { show('ebayFail'); say("The eBay connection didn't finish."); } else { S.ebay = 'connected'; show('connectors'); toast('eBay connected.'); } break;
+    case 'ebayDisconnect': S.ebay = 'none'; render(); toast('eBay disconnected. Sales there need to be marked by hand again.'); break;
+    /* tips and how-to */
+    case 'tipNext': { const s = t.dataset.s; TIP_IDX[s] = (TIP_IDX[s]||0) + 1; if (TIP_IDX[s] >= TIPS[s].length) TIPS_SEEN[s] = true; render(); break; }
+    case 'tipSkip': Object.keys(TIPS).forEach(k => TIPS_SEEN[k] = true); render(); toast('Tips off. Turn them back on in Profile → Help.'); break;
+    case 'resetTips': TIPS_SEEN = {}; TIP_IDX = {}; toast("Tips will show again the next time you open each screen."); break;
+    case 'dismissHowTo': HOWTO_DISMISSED = true; render(); toast('Find the how-to any time in Profile → Help.'); break;
+    case 'toHowTo': S.back = S.screen; show('howTo'); break;
+    case 'toHomeOrProfile': show(S.back === 'profile' ? 'profile' : homeFor()); break;
+    case 'noop': toast(t.dataset.msg || 'Not part of this prototype.'); break;
+  }
+});
+document.addEventListener('change', e => {
+  const t = e.target.closest('#app input[data-act]'); if (!t) return;
+  if (t.dataset.act === 'removed') { S.removed[t.dataset.k] = t.checked; render();
+    const box = document.querySelector(`#app input[data-k="${t.dataset.k}"]`); if (box) box.focus(); }
+  if (t.dataset.act === 'draftFor') { const m = t.dataset.m; S.markets = t.checked ? [...S.markets, m] : S.markets.filter(x=>x!==m); render(); }
+  if (t.dataset.act === 'notify') { S.notify = t.checked; toast(t.checked ? 'Reminders on.' : 'Reminders off.'); }
+});
+
+const PROTO = {
+  states: [
+    {id:'welcome', label:'Welcome'}, {id:'obMarkets', label:'Onboarding · where do you sell?'}, {id:'obAccount', label:'Onboarding · create account'},
+    {id:'obPerms', label:'Onboarding · camera, mic and AI notice'},
+    {id:'capture', label:'Haul mode · camera'}, {id:'group', label:'Check photo grouping'}, {id:'facts', label:'Item facts by voice'},
+    {id:'factsRetry', label:'Voice not understood'}, {id:'drafting', label:'Drafting (wait)'}, {id:'draftFail', label:'Drafting failed'},
+    {id:'draft', label:'Ready to post · copy per marketplace'}, {id:'paywall', label:'Paywall · pick a plan'}, {id:'payFail', label:'Purchase failed'},
+    {id:'home', label:'Home dashboard (Reseller plan)'}, {id:'homeNew', label:'Home · new user (empty)'}, {id:'passHome', label:'Home (Clear-out Pass)'},
+    {id:'listings', label:'Listings · active, by listing'}, {id:'ledger', label:'Listings · by item'}, {id:'sold', label:'Mark as sold'},
+    {id:'soldCheck', label:'Sold-everywhere checklist'}, {id:'soldDone', label:'Sold · bin and net profit'}, {id:'traded', label:'Mark as traded (R-40)'}, {id:'tradeDone', label:'Traded · bin and profit'}, {id:'profit', label:'Profit tracker'},
+    {id:'profile', label:'Profile and account'}, {id:'connectors', label:'Marketplaces and connections'}, {id:'ebayConnect', label:'Connect eBay · before sign-in'}, {id:'ebayFail', label:'eBay connection failed'}, {id:'deleteConfirm', label:'Delete account · confirm'}, {id:'howTo', label:'How-to video and steps'}
+  ],
+  flow: ['welcome','obMarkets','capture','facts','draft','paywall','home'],
+  flowLabels: { welcome:'Welcome', obMarkets:'Set up', capture:'Photograph haul', facts:'Answer by voice', draft:'Copy listings', paywall:'Pick a plan', home:'Home' },
+  branches: {
+    obAccount:  {label:'Onboarding · create account', returnsTo:'obMarkets'},
+    obPerms:    {label:'Onboarding · camera, mic and AI notice', returnsTo:'obMarkets'},
+    group:      {label:'Check photo grouping', returnsTo:'capture'},
+    factsRetry: {label:'Voice not understood', returnsTo:'facts'},
+    drafting:   {label:'Drafting (wait)', returnsTo:'draft'},
+    draftFail:  {label:'Drafting failed', returnsTo:'draft'},
+    payFail:    {label:'Purchase failed', returnsTo:'paywall'},
+    homeNew:    {label:'Home for a new user'},
+    passHome:   {label:'Clear-out Pass Home'},
+    listings:   {label:'Listings'},
+    ledger:     {label:'Listings by item'},
+    sold:       {label:'Mark as sold'},
+    soldCheck:  {label:'Sold-everywhere checklist'},
+    soldDone:   {label:'Sold · bin and net profit'},
+    tradeDone:  {label:'Traded · bin and profit'},
+    profit:     {label:'Profit tracker'},
+    profile:    {label:'Profile'},
+    deleteConfirm: {label:'Delete account'},
+    connectors: {label:'Marketplaces and connections'},
+    ebayConnect:{label:'Connect eBay', returnsTo:null},
+    ebayFail:   {label:'eBay connection failed'},
+    howTo:      {label:'How-to video and steps'}
+  },
+  next: {
+    welcome:   ['Tap <b>Get started</b>.', '#startBtn'],
+    obMarkets: ['Pick the marketplaces you sell on, then <b>Continue</b>.', '#obMarketsNext'],
+    obAccount: ['Tap <b>Continue with Apple</b>.', '#obApple'],
+    obPerms:   ['Tap <b>Allow and start my first haul</b> (or try "Camera and mic access denied" under Simulate).', '#obAllow'],
+    capture:   ['Tap the shutter or <b>Add from library</b>, then <b>Done</b>.', '.nx'],
+    group:     ['Tap <b>Looks right — add details</b>.', '#groupOk'],
+    facts:     ['Answer for each item (mic or typing), then <b>Next item</b>.', '.nx'],
+    factsRetry:['Turn off "Voice not understood", then tap <b>Try again</b> — or type.', '#micBtn'],
+    drafting:  ['Wait a moment — drafting finishes on its own.', null],
+    draftFail: ['Turn off "Drafting fails", then tap <b>Try again</b>.', '#retryDraft'],
+    draft:     ['Try an item, a marketplace tab and a <b>Copy</b> button, then <b>Finish haul</b>.', '#finishHaul'],
+    paywall:   ['Tap <b>Start Reseller plan</b> (or try the Clear-out Pass).', '#buyReseller'],
+    payFail:   ['Turn off "Purchase fails", then tap <b>Try again</b>.', '#retryPay'],
+    home:      ['Main flow done. Try <b>Remove it now</b> under Needs action, or the Listings and Profile tabs.', '#needsActionBtn'],
+    homeNew:   ['Tap <b>Start a haul</b>.', '#homeNewHaul'],
+    passHome:  ['This is what an occasional seller sees. Try Listings or Profile.', null],
+    listings:  ['Filter by marketplace or status, or tap <b>Mark sold</b> on a row.', '#tab-listings'],
+    ledger:    ['Tap an item to mark it sold, or switch back to <b>By listing</b>.', null],
+    sold:      ['Tap <b>Mark sold</b>.', '#confirmSold'],
+    soldCheck: ['Tick <b>I removed it</b> on each marketplace, then <b>Done</b>.', '.nx'],
+    soldDone:  ['Tap <b>See profit</b>.', '#toProfitBtn'],
+    tradeDone: ['Tap <b>See profit</b>.', '#toProfitBtn'],
+    profit:    ['Flow done. Try the Profile tab.', '#tab-profile'],
+    profile:   ['Change your marketplaces, or try <b>Delete account and data</b>.', '#deleteAcct'],
+    deleteConfirm: ['Tap <b>Keep my account</b> to go back.', '#cancelDelete'],
+    connectors: ['Tap <b>Connect with eBay</b>, or <b>Link your shop</b> on another marketplace.', '#ebayConnectBtn'],
+    ebayConnect:['Tap <b>Continue to eBay</b> (or turn on "eBay connection fails" under Simulate).', '#ebayContinue'],
+    ebayFail:   ['Turn off "eBay connection fails", then tap <b>Connect with eBay</b> again.', '#ebayConnectBtn'],
+    howTo:      ['Open a step, or tap <b>‹ Back</b>.', null]
+  },
+  taskFlows: [
+    { title:'1. Onboarding (new user)', source:'PRD R-33, R-23, R-31 (My marketplaces). Account timing is [H].', rows:[
+      { steps:[{label:'Welcome',state:'welcome'},{label:'Where do you sell?',state:'obMarkets'},{label:'Create account',state:'obAccount'},{label:'Camera, mic and AI notice',state:'obPerms',kind:'decision'},{label:'First haul',state:'capture',kind:'end'}] },
+      { cond:'Skips marketplaces', steps:[{label:'Drafts for all five',state:'obAccount'}] },
+      { cond:'Denies camera and mic', steps:[{label:'Library and typing',state:'capture',kind:'end'}] } ] },
+    { title:'2. First haul to paid (Dre, part-time reseller)', source:'PRD R-1 to R-12, R-18. Grouping, voice and paywall timing are [H].', rows:[
+      { steps:[{label:'Photograph haul',state:'capture'},{label:'Check grouping',state:'group'},{label:'Answer by voice',state:'facts'},{label:'Drafting',state:'drafting'},{label:'Copy listings',state:'draft'},{label:'Pick a plan',state:'paywall',kind:'decision'},{label:'Home',state:'home',kind:'end'}] },
+      { cond:'Voice not understood', steps:[{label:'Try again or type',state:'factsRetry'}] },
+      { cond:'Drafting fails', steps:[{label:'Drafting failed · Try again',state:'draftFail'}] },
+      { cond:'Purchase fails', steps:[{label:'Purchase failed · Try again',state:'payFail'}] },
+      { cond:'Not now', steps:[{label:'Keep copying the 3 free listings',state:'draft',kind:'end'}] },
+      { cond:'Picks the Clear-out Pass', steps:[{label:'Clear-out Pass Home',state:'passHome',kind:'end'}] } ] },
+    { title:'3. Open the app (returning reseller)', source:'PRD R-29, R-30, R-32.', rows:[
+      { steps:[{label:'Home',state:'home'},{label:'Needs action: Remove it now',state:'soldCheck',kind:'decision'},{label:'Sold · bin and profit',state:'soldDone',kind:'end'}] },
+      { cond:'Unfinished haul', steps:[{label:'Continue',state:'group'}] },
+      { cond:'This month', steps:[{label:'Profit',state:'profit',kind:'end'}] },
+      { cond:'Stale items', steps:[{label:'Listings, stale filter',state:'listings',kind:'end'}] },
+      { cond:'No items yet', steps:[{label:'Home for a new user',state:'homeNew'}] } ] },
+    { title:'4. Sold or traded → remove it everywhere else', source:'PRD R-14, R-15, R-30, R-40. Listly never claims a listing is down until the seller confirms.', rows:[
+      { steps:[{label:'Listings',state:'listings'},{label:'Mark as sold',state:'sold'},{label:'Still live on X, Y',state:'soldCheck',kind:'decision'},{label:'Bin and net profit',state:'soldDone',kind:'end'}] },
+      { cond:'Not removed yet', steps:[{label:'Remind me in 1 hour'},{label:'Home',state:'home'}] },
+      { cond:'Listed on one marketplace only', steps:[{label:'Bin and net profit',state:'soldDone',kind:'end'}] },
+      { cond:'Traded instead (R-40)', steps:[{label:'Mark as traded',state:'traded'},{label:'Still live on X, Y',state:'soldCheck'},{label:'Trade value and profit',state:'tradeDone',kind:'end'}] } ] },
+    { title:'5. Check profit', source:'PRD R-16, R-17. Fee rates are placeholders [H].', rows:[
+      { steps:[{label:'Home',state:'home'},{label:'Profit',state:'profit',kind:'end'}] },
+      { cond:'Sold items have no cost', steps:[{label:'Add costs prompt',state:'profit'}] } ] },
+    { title:'6. Manage my account', source:'PRD R-31.', rows:[
+      { steps:[{label:'Profile',state:'profile'},{label:'Delete account',state:'deleteConfirm',kind:'decision'},{label:'Back to Welcome',state:'welcome',kind:'end'}] },
+      { cond:'Keeps the account', steps:[{label:'Profile',state:'profile',kind:'end'}] } ] },
+    { title:'7. Connect marketplaces', source:'PRD R-34, R-35. eBay connection depends on eBay API terms [H].', rows:[
+      { steps:[{label:'Profile',state:'profile'},{label:'Marketplaces and connections',state:'connectors'},{label:'Connect eBay',state:'ebayConnect',kind:'decision'},{label:'eBay connected',state:'connectors',kind:'end'}] },
+      { cond:'eBay sign-in fails or is cancelled', steps:[{label:'Connection failed',state:'ebayFail'}] },
+      { cond:'Poshmark, Mercari, Depop or Facebook', steps:[{label:'Link your shop (username)',state:'connectors',kind:'end'}] } ] },
+    { title:'8. Learn how to use Listly', source:'PRD R-36, R-37. Which screens get tips, and the video length, are [H].', rows:[
+      { steps:[{label:'First visit to Home',state:'home'},{label:'Tips 1–3'},{label:'Home',state:'home',kind:'end'}] },
+      { cond:'How-to card on Home', steps:[{label:'How-to video and steps',state:'howTo',kind:'end'}] },
+      { cond:'Profile → Help', steps:[{label:'Profile',state:'profile'},{label:'How-to video and steps',state:'howTo',kind:'end'}] },
+      { cond:'Skip tips', steps:[{label:'Show tips again in Profile',state:'profile'}] } ] },
+    { title:'9. Occasional seller (Maya, closet clearer)', source:'PRD R-18, R-19. Upgrade-suggestion trigger is [H].', rows:[
+      { steps:[{label:'Copy listings',state:'draft'},{label:'Pick a plan',state:'paywall',kind:'decision'},{label:'Clear-out Pass Home',state:'passHome',kind:'end'}] },
+      { cond:'10+ items or a second marketplace', steps:[{label:'See the Reseller plan',state:'paywall'}] } ] }
+  ]
+};
+
+/* ============ SHELL: PROTO engine — do not edit ============ */
+function PROTO_INIT(){
+  const $ = s => document.querySelector(s);
+  $('#stateJump').innerHTML = PROTO.states.map(s => `<option value="${s.id}">${PROTO.states.indexOf(s)+1} · ${s.label}</option>`).join('');
+  $('#stateJump').addEventListener('change', e => goto(e.target.value));
+  $('#flowSteps').innerHTML = PROTO.flow.map(id => `<li data-step="${id}"><button type="button">${(PROTO.flowLabels||{})[id] || id}</button></li>`).join('');
+  document.querySelectorAll('#flowSteps li').forEach(li => li.querySelector('button').addEventListener('click', () => goto(li.dataset.step)));
+  const node = st => st.state
+    ? `<button type="button" class="tf-node ${st.kind||''}" data-goto="${st.state}">${st.label}</button>`
+    : `<span class="tf-node system ${st.kind||''}">${st.label}</span>`;
+  const arrow = ' <span class="tf-arrow" aria-hidden="true">→</span> ';
+  $('#tfList').innerHTML = (PROTO.taskFlows||[]).map(f => `<div class="tf"><h3>${f.title}</h3><p class="who">${f.source||''}</p>` +
+    f.rows.map(r => r.cond ? `<div class="tf-row branch"><span class="cond">↳ ${r.cond}</span>${r.steps.map(node).join(arrow)}</div>`
+                           : `<div class="tf-row">${r.steps.map(node).join(arrow)}</div>`).join('') + '</div>').join('');
+  document.querySelectorAll('.tf-node[data-goto]').forEach(n => n.addEventListener('click', () => goto(n.dataset.goto)));
+  PROTO_MENU_INIT();
+}
+function PROTO_UPDATE(){
+  const $ = s => document.querySelector(s);
+  const st = currentState();
+  $('#stateJump').value = st;
+  const br = (PROTO.branches||{})[st];
+  const onFlow = PROTO.flow.includes(st) ? st : br && br.returnsTo;
+  const idx = onFlow ? PROTO.flow.indexOf(onFlow) : -1;
+  const last = PROTO.flow[PROTO.flow.length - 1];
+  document.querySelectorAll('#flowSteps li').forEach((li, i) => {
+    const cur = i === idx && PROTO.flow.includes(st);
+    li.classList.toggle('current', cur && st !== last);
+    li.classList.toggle('done', idx >= 0 && (i < idx || (st === last && i === idx)));
+    li.querySelector('button').setAttribute('aria-current', cur ? 'step' : 'false');
+  });
+  const b = $('#flowBranch');
+  b.hidden = !br;
+  b.textContent = br ? 'Branch: ' + br.label + (br.returnsTo ? ' (returns to "' + ((PROTO.flowLabels||{})[br.returnsTo] || br.returnsTo) + '")' : '') : '';
+  const [txt, sel] = (PROTO.next||{})[st] || ['', null];
+  $('#flowNext').innerHTML = txt ? 'Next: ' + txt : '';
+  document.querySelectorAll('.guide-next').forEach(el => el.classList.remove('guide-next'));
+  const el = sel && document.querySelector(sel);
+  if (el && el.offsetParent !== null) el.classList.add('guide-next');
+  document.querySelectorAll('.tf-node[data-goto]').forEach(n => n.classList.toggle('here', n.dataset.goto === st));
+  PROTO_STATUS();
+}
+function PROTO_MENU_INIT(){
+  const q = s => document.querySelector(s);
+  const setView = v => { document.body.classList.toggle('view-flows', v === 'flows');
+    document.querySelectorAll('input[name="protoView"]').forEach(r => r.checked = r.value === v); window.scrollTo(0, 0); };
+  document.querySelectorAll('input[name="protoView"]').forEach(r => r.addEventListener('change', () => setView(r.value)));
+  // a step in the task-flow map is a way into the prototype: switch back first
+  q('#taskflows').addEventListener('click', e => { if (e.target.closest('.tf-node[data-goto]')) setView('proto'); }, true);
+  q('#showLabels').addEventListener('change', e => document.body.classList.toggle('annot', e.target.checked));
+  q('#showRecord').addEventListener('change', e => document.body.classList.toggle('show-record', e.target.checked));
+  if (!q('#record')) q('#showRecordRow').remove();
+  if (!q('#pmSimulate input')) q('#pmSimulate').remove();
+  if (!q('#taskflows .tf')) q('input[name="protoView"][value="flows"]').closest('label').remove();
+  q('#protoRestart').addEventListener('click', () => goto(q('#stateJump').options[0].value));
+  q('#guideToggle').addEventListener('change', e => document.body.classList.toggle('guide', e.target.checked));
+  document.body.classList.toggle('guide', q('#guideToggle').checked);
+}
+function PROTO_STATUS(){
+  const q = s => document.querySelector(s);
+  const lis = [...document.querySelectorAll('#flowSteps li')];
+  const i = lis.findIndex(li => li.classList.contains('current'));
+  const doneAll = lis.length && lis.every(li => li.classList.contains('done'));
+  const br = q('#flowBranch');
+  const pos = !br.hidden ? br.textContent.replace(/^Branch: /, 'Branch · ')
+    : doneAll ? 'Flow complete · ' + lis[lis.length - 1].querySelector('button').textContent
+    : i >= 0 ? 'Step ' + (i + 1) + ' of ' + lis.length + ' · ' + lis[i].querySelector('button').textContent : '';
+  q('#flowPos').textContent = pos;
+  q('#protoStatus').textContent = pos;
+}
+
+/* Start */
+PROTO_INIT(); goto(PROTO.states[0].id);
+</script>
+<script>
+/* ============ SHELL: prototype menu behaviour — do not edit ============ */
+(function(){
+  const btn = document.getElementById('protoMenuBtn'), menu = document.getElementById('protoMenu');
+  const open = v => { menu.hidden = !v; btn.setAttribute('aria-expanded', String(v));
+    if (v) { const f = menu.querySelector('select, input, button'); if (f) f.focus(); } };
+  btn.addEventListener('click', () => open(menu.hidden));
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape' && !menu.hidden) { e.stopImmediatePropagation(); e.preventDefault(); open(false); btn.focus(); }
+  }, true);
+  document.addEventListener('click', e => { if (!menu.hidden && !menu.contains(e.target) && !btn.contains(e.target)) open(false); });
+  // choosing where to go closes the menu so the prototype is in view
+  menu.addEventListener('change', e => { if (e.target.id === 'stateJump' || e.target.name === 'protoView') open(false); });
+  document.getElementById('protoMenuClose').addEventListener('click', () => { open(false); btn.focus(); });
+  menu.addEventListener('click', e => { if (e.target.closest('#flowSteps button, .record-link, #protoRestart')) open(false); });
+})();
+</script>
+</body>
+</html>

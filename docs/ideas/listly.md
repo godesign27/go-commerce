@@ -1,106 +1,108 @@
-# Listly, Simple Mode (MVP 1)
+# Listly MVP 1
 
-> **Status:** Refined idea, output of an idea-refine session on 2026-11-13, updated the same day after the [strategy review](../strategy/strategy-review-2026-11.md). Supersedes the platform choice in Listly PRD v0.2 (SwiftUI, iPhone-first). Listly is now one Expo app for iOS and Android.
-> **Primary persona:** [Maya, the Closet Clearer](../personas/closet-clearer.md). **Next:** [Dre, the Part-Time Reseller](../personas/part-time-reseller.md) (paid Reseller beta, about 45 days after launch).
-> **Role of Simple mode:** the free front door. It's measured on activation and return, not revenue. Paying sellers are expected from the Reseller beta.
+> **Status:** Current direction, adopted 2026-11-13 from the [Listly recommendation](../strategy/listly-recommendation-2026-11.md), which builds on the [strategy review](../strategy/strategy-review-2026-11.md). It replaces the earlier "Simple mode first, free allowance" plan. Listly is one Expo app for iOS and Android, which supersedes the SwiftUI, iPhone-first choice in Listly PRD v0.2.
+> **Primary persona:** [Dre, the Part-Time Reseller](../personas/part-time-reseller.md) (Reseller plan). **Secondary:** [Maya, the Closet Clearer](../personas/closet-clearer.md) (Clear-out Pass).
 
 ## Problem Statement
 
-How might we help people clearing out their closets turn unwanted items into honest, paste-ready listings from their phone in under two minutes, so they finish the clear-out instead of giving up and donating?
+How might we help people who sell secondhand goods for money list a whole haul from their phone, sell it on every marketplace they use, and always know what's sold, where it is and what they made?
 
 ## Recommended Direction
 
-Ship **Listly Simple mode** first as a single **Expo app for iOS and Android**. The loop:
+**Promise:** *"List a whole haul from your phone, sell it anywhere, and always know what's sold, where it is and what you made."*
 
-1. Snap photos.
-2. Answer 2–3 plain questions (brand, size, flaws).
-3. Get a listing formatted for the marketplace you use.
-4. Tap copy and paste it into the marketplace app.
-5. Mark it sold later, on its own or as part of a **buyer bundle**.
+Turning a photo into a listing is now free inside eBay, Poshmark, Mercari, Depop and Facebook Marketplace (see the strategy review §2). So listing generation is the **way in**, not what Listly charges for. Sellers already pay $9–$69 a month for tools that help them sell across marketplaces, avoid double sales and know what they're making. Listly charges for that.
 
-Unfinished items wait in a **"Still to list" tray**, so a clear-out can happen over several sittings.
+**The loop:**
 
-Every target marketplace already turns photos into listings for free inside its own app: eBay, Poshmark, Mercari, Depop and Facebook Marketplace (with Meta AI and a standalone Seller app since July 2026). Several App Store apps also do photo-to-copy-and-paste listings. See the [strategy review](../strategy/strategy-review-2026-11.md) §2 for sources. So listing generation is the **input** to Listly, not the product. What Listly offers Maya:
+1. Photograph a haul (10–30 items) in one session.
+2. Answer by voice: brand, size, measurements, flaws. The AI never fills these in on its own.
+3. Get ready-to-paste copy for every marketplace the seller uses, from one item record.
+4. Paste it into each marketplace app and save the listing link back to Listly.
+5. When it sells, Listly shows everywhere else it's still listed until the seller confirms it's down, plus the item's bin and its net profit.
 
-- **One place for the whole clear-out:** the "Still to list" tray keeps her half-finished items, and Listly tracks what's listed and sold.
-- **It asks about flaws instead of guessing.** Whether that produces measurably more accurate listings than the native tools is still to be tested (see Key Assumptions).
-- It works for **the marketplace she actually uses**, and later for a second one, which is the path into Reseller mode.
-- Bundles help her sell several items to one buyer, but their value to closet clearers is unproven.
+The backend is one canonical item record with many marketplace listings (Supabase, row-level security, a server-side AI gateway). The existing Expo + Tamagui scaffold and the GO Mobile Design System are the foundation.
 
-That's a better-UX bet, not a new capability, and it can't stand on its own against free built-in tools. Simple mode exists to bring sellers in and to feed Reseller mode.
+### What makes it worth paying for
 
-The backend and data model are **built for Reseller mode from day one**: one canonical product record and many marketplace listings (Supabase, row-level security, a server-side AI gateway). Reseller mode then adds screens, not a migration. The existing Expo + Tamagui scaffold and the GO Mobile Design System are the foundation.
+| Feature | Why it's desirable | Can the marketplaces copy it? |
+|---|---|---|
+| **Haul mode** with voice answers | Batch listing is where resellers lose evenings. The marketplaces' own AI works item by item, inside one marketplace. | Partly: Meta's Seller app does bulk listing, but only for Facebook Marketplace. |
+| **One item, every marketplace:** copy for eBay, Poshmark, Mercari, Depop and Facebook Marketplace, one-tap copy per field | Re-typing the same item 2–4 times is the top complaint. | No. A marketplace won't format listings for its competitors. |
+| **Sold-everywhere checklist** with a link to each marketplace | Double sales cost money, ratings and goodwill. | No. |
+| **Profit tracker:** cost paid, each marketplace's fees and shipping, net profit per item, month and marketplace, CSV export for taxes | Answers "is this worth my time?" It's plain arithmetic, so it's cheap to run. | No. |
+| **Honest condition:** asks about flaws instead of guessing | Fewer returns and "not as described" disputes. | Partly. The marketplaces' tools guess condition. |
+| **A labeled AI price estimate** | Every marketplace's own tool shows one, so leaving it out is a visible gap. It's clearly labeled as a guess, never as based on sold prices. | Already does. |
 
-### Buyer bundles
+## Pricing and Trial
 
-A clear-out goes faster when one buyer takes several items. Several resale marketplaces let buyers bundle a seller's items, but the mechanics differ: Poshmark has a seller bundle discount, Mercari bundles start with the buyer, and Depop's settings are unclear in the sources. Listly can't create or accept bundles on the marketplace without API access, so it **supports bundles around the marketplace** instead.
+Every new user gets **3 free listings, no card needed**. After the third listing, Listly asks them to pick a plan. There is no free monthly allowance and no "How do you sell?" question at signup.
 
-**In MVP 1:**
+| Plan | Price | Covers |
+|---|---|---|
+| **Reseller plan** | **$12.99 a month or $99 a year** | Everything in MVP 1, up to a fair-use limit (proposed: 500 listings a month) |
+| **Clear-out Pass** | **$6.99, one time, for 30 days** | Haul mode, copy for every marketplace, mark sold, the sold-everywhere checklist and money made, up to 100 listings. Can be upgraded to the Reseller plan. |
 
-1. **Mark sold as a bundle.** From her listed items, Maya selects the ones that sold together, enters one total, and Listly marks them all sold, splitting the total across items in proportion to their list prices for her money-made counter.
-
-**On hold until interviews show bundles matter to closet clearers:**
-
-2. **Bundle-friendly listing copy.** An optional line in each description inviting bundles (for example "Bundle 2+ items for 15% off"), only for marketplaces where that's allowed and used.
-3. **Bundle discount helper.** Listly suggests a bundle discount and gives a short, marketplace-specific reminder of where to turn it on in that marketplace's app. It never claims the discount is active.
-4. **"More in your size" prompt.** When she marks an item sold, Listly shows her other listed items in the same size or brand, so she can message the buyer with a bundle offer.
-
-Bundle sales are stored as one sale linked to many products. Reseller mode reuses this as it is, because Dre gets bundle sales too.
+- **Trial format is still being tested:** "3 free listings, then pay" against a 7-day App Store trial that renews automatically (the trial test below).
+- **Price check:** $12.99 sits between Flyp (about $9) and Vendoo's Starter plan (about $14.99), which both delist automatically. Listly can't, so don't price above them until there's proof the speed and profit tracking are worth more.
+- **AI cost:** the default is a small model, with a cap on spending per user each month. The estimate is about $0.003–$0.006 per listing on a small model; on a mid-tier model, heavy use would wipe out the Clear-out Pass margin.
+- **Billing:** the Clear-out Pass goes through the app stores' billing. The Reseller plan can also be sold through a US web checkout while the current Apple ruling holds. Get a legal check before launch.
 
 ## Key Assumptions to Validate
 
-In order of risk. The [strategy review](../strategy/strategy-review-2026-11.md) §7 has the full test designs and the signals that would change the plan.
+Run these in the next 2–3 weeks, before more production code.
 
-- [ ] **Maya will use a separate app rather than the marketplace's own free AI listing.** This is the biggest risk: every target marketplace now drafts listings from a photo in its own app. *Test: clickable prototype with 8 closet clearers (and 5 resellers); each lists 3 items in Listly + paste and 3 with the marketplace's built-in AI, on their own phone. Time it, count corrections, ask which they'd use next week. Fewer than half preferring Listly means Simple mode doesn't stand on its own.*
-- [ ] **"Ask, don't fill" produces more accurate listings than the native AI.** *Test: an evaluation set of 30 real items with known flaws; score Listly's drafts against Poshmark's, Mercari's and eBay's for flaws mentioned and false claims.*
+- [ ] **Resellers will pay $12.99 a month for this without automatic delisting.** *Test: founding-member pre-sale. A landing page with the promise and both plans, posted in 3 reseller communities. Go if at least 15 people pay or reserve from about 1,000 visits.*
+- [ ] **Haul mode is faster than how they list today.** *Test: 6–8 resellers list 10 items with a clickable prototype against their current method. Go if it's faster and at least half say they'd pay $12.99.*
+- [ ] **"3 free listings, then pay" converts well enough.** *Test: split pre-sale visitors between "3 free listings" and a 7-day trial that renews automatically.*
+- [ ] **Resellers want the profit tracker.** *Test: in the same survey, ask how they track profit today and whether they'd switch for this.*
 - [ ] **The copy-and-paste handoff isn't too much friction.** *Test: on real devices, 3 items × 4 marketplace apps, timing each field. More than 60 seconds of paste overhead per listing means deep links and a clipboard queue come first.*
-- [ ] **Running costs fit a free tier.** *Test: run 50 real items through two model tiers and log tokens. The estimate is about $0.003–$0.006 per listing on a small model and $0.05–$0.08 on a mid-tier model.*
-- [ ] **She comes back for her next clear-out.** *Test: 30/60-day return rate; "Still to list" reminder open rate.*
-- [ ] **Bundles are common and valuable for closet clearers.** *Test: ask in interviews how often buyers bundle, and track the share of Listly sales marked as bundles in beta.*
-- [ ] **Some closet clearers move up to Reseller mode, or buy a credit pack.** *Test: acceptance rate of the "you're selling more" nudge; credit-pack conversion. Neither is counted toward the paying-seller target.*
+- [ ] **Sellers keep the ledger up to date by hand.** *Test: a 2-week diary study with 6–8 resellers using a shared sheet and a forward-your-sale-email address processed by hand.*
+- [ ] **"Ask, don't fill" produces more accurate listings than the native AI.** *Test: an evaluation set of 30 real items with known flaws, scored against Poshmark's, Mercari's and eBay's drafts.*
+- [ ] **Occasional sellers will buy a one-time pass.** *Test: Clear-out Pass sales in the pre-sale and in beta.*
 
 ## MVP Scope
 
 **In:**
-- Account creation with the one onboarding question that sets the mode (only Simple mode is active at launch).
-- Photo capture from the camera or library; originals kept.
-- Two or three questions asking for facts. The AI never fills in brand, size or condition on its own.
-- AI-drafted title and description with honest flaw wording.
-- **An AI price estimate, clearly labeled as a guess** and never presented as based on sold prices. Every marketplace's own AI suggests a price, and Maya expects one.
-- Formatted copy for **Depop, Poshmark, Mercari, eBay, Facebook Marketplace and a generic format**, with one-tap copy for each field.
-- Photos saved or shared to the camera roll or share sheet.
-- "Still to list" tray.
-- Mark as sold, **individually or as a bundle**, with a simple money-made counter.
-- Server-side AI gateway with no keys in the app, a small model by default, a per-user monthly cost cap, a free monthly allowance (proposed: 20 listings), and data deletion and export controls.
+- Account creation, then 3 free listings, then the paywall with both plans.
+- **Haul mode:** batch photo capture from the camera or library, with photos grouped into items; originals kept.
+- Voice or typed answers for brand, size, measurements and flaws. The AI never fills these in on its own.
+- AI-drafted title and description with honest flaw wording, plus a labeled AI price estimate.
+- Copy for **eBay, Poshmark, Mercari, Depop, Facebook Marketplace and a generic format**, with one-tap copy for each field.
+- An item ledger: where each item is listed, the listing link, price and days listed.
+- The **sold-everywhere checklist**, with a link to each marketplace. Listly never says an item is down until the seller confirms it.
+- The **profit tracker:** cost paid, marketplace fees and shipping, net profit, CSV export.
+- Mark as sold, individually or as a bundle.
+- Server-side AI gateway with no keys in the app, a small model by default, a per-user monthly cost cap, and data deletion and export controls.
 - One structured generation call plus a deterministic validator. No lead agent or specialist agents in MVP 1.
 - VoiceOver and Dynamic Type support (design system standards).
 
-**Out:** everything in the list below.
+**Next (about 30–45 days after launch):** the "fix photo" step (crop, straighten, brighten, clean background, never hiding condition evidence), bin labels, forward-your-sale-email, and a web companion from the same Expo codebase for desk work.
 
 ## Not Doing (and Why)
 
-- **Reseller mode interface** (inventory ledger, sold alarm, multi-marketplace copy): it opens as a **paid beta about 45 days after launch**, and the data model already supports it.
-- **Bundle-friendly copy, the bundle discount helper and the "more in your size" prompt:** on hold until interviews show bundles matter to closet clearers.
-- **Marketplace APIs and direct publishing:** no API access, and Maya doesn't need it.
-- **Creating, accepting or pricing bundle offers inside the marketplaces:** that needs API access or automating the marketplace apps. Listly supports bundles around the marketplace instead.
-- **Bundle price optimization or AI-negotiated offers:** too much for MVP. A fixed suggested discount is enough to learn from.
-- **Brand voice profiles and `style.md`:** Maya has no "brand." They return with Reseller mode and makers.
-- **Price suggestions based on sold data:** the data source and legal access aren't confirmed. MVP 1 ships a labeled AI guess instead.
-- **Photo cleanup (formerly SellerStudio):** it's now a Reseller-mode "fix photo" step, not a separate app. Simple mode uses the photos as taken.
-- **Etsy and Shopify formats:** those are maker and shop channels, not where closet clearers sell.
-- **Desktop or web app for Simple mode:** Maya is phone-only. A web companion (from the same Expo codebase) ships with the Reseller beta for Dre.
-- **Subscriptions:** a subscription doesn't match how rarely Maya sells. Launch free with an allowance and add an optional credit pack.
-- **Sale-email parsing, QR bin labels, stale-inventory views:** these are Reseller mode features.
+- **A free tier or free monthly allowance:** the 3 free listings are the trial.
+- **A separate Simple mode chosen at signup:** occasional sellers get the Clear-out Pass, which shows fewer screens in the same app.
+- **Automatic delisting and a browser extension:** the architecture rules out browser automation. Decide after a marketplace terms-of-service review. It's the feature competitors charge most for.
+- **Marketplace APIs and direct publishing:** Poshmark, Mercari and Depop offer no third-party listing API.
+- **Bundle discount helpers, bundle-friendly copy and "more in your size":** on hold until interviews show bundles matter. Only "mark sold as a bundle" stays.
+- **Brand-voice profiles and `style.md`:** they return with makers.
+- **SellerStudio as a separate app:** photo cleanup becomes the "fix photo" step.
+- **A sourcing scanner ("is this worth buying?"):** a strong want for resellers, but it needs reliable sold-price data. Investigate for version 2.
+- **Etsy and Shopify formats:** maker and shop channels.
 
 ## Open Questions
 
-- **Bundle support by marketplace:** confirm which target marketplaces support buyer bundles and seller bundle discounts today, and their current rules, before reviving the on-hold bundle features.
-- **Which three marketplaces matter most to closet clearers?** That decides the formatting work and the test order.
+- **Trial format:** 3 free listings or a 7-day trial that renews automatically? The trial test decides.
+- **Which marketplaces matter most to resellers?** That decides the formatting work and the test order. The working assumption is Poshmark, Mercari and eBay.
 - **Copy handoff:** copy field by field, use the share sheet, or open the marketplace app directly (deep link) with a clipboard queue? The paste-timing test decides.
-- **Credit pack at launch:** the proposal is free with a 20-listing monthly allowance plus an optional $4.99 pack, sold through the app stores' billing, and no subscription for Simple mode. Confirm the allowance and pack size after the AI cost test.
+- **Fair-use limits:** confirm 500 listings a month and 100 per Clear-out Pass after the AI cost test.
+- **US web checkout:** confirm the current Apple and Google rules with a legal check.
 - **Name clearance** for "Listly" before App Store submission (PRD open item 1).
 
 ## Success Target (90 days after launch)
 
-- **Simple mode:** activation (first listing in under 3 minutes), 5+ items in the first session, 30-day return rate, and share of sales marked as bundles. Credit-pack sales are tracked but aren't the goal.
-- **Paying sellers:** come from the **paid Reseller beta**, which opens about 45 days after launch. The target count is still to be set.
+- **Paying sellers from launch day.** Set the target number after the pre-sale reads out.
+- Trial-to-paid conversion, by trial format and by plan.
+- Activation: first listing copied within 3 minutes of installing; 10+ items in the first haul.
+- Reseller plan: listings and sales recorded per week, and retention after the first renewal.

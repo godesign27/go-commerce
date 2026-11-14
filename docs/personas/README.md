@@ -1,21 +1,23 @@
 # GO Commerce Personas
 
-Proto-personas for **Listly**, including its photo-cleanup step (formerly the separate SellerStudio app; folded into Listly's Reseller mode on 2026-11-13). They are hypotheses built from the PRDs and secondary market research and need validating with 10–15 seller interviews.
+Proto-personas for **Listly**, including its photo-cleanup step (formerly the separate SellerStudio app). They are hypotheses built from the PRDs and secondary market research and need validating with 10–15 seller interviews.
 
-| Persona | File | Listly mode | Role |
+| Persona | File | Listly plan | Role |
 |---|---|---|---|
-| Maya, the Closet Clearer | [closet-clearer.md](closet-clearer.md) | Simple | Top of the funnel; free tier; future upgrade path |
-| Dre, the Part-Time Reseller | [part-time-reseller.md](part-time-reseller.md) | Reseller | Weekly or daily use; paying core |
+| Dre, the Part-Time Reseller | [part-time-reseller.md](part-time-reseller.md) | Reseller plan ($12.99/mo or $99/yr) | **Primary.** Weekly or daily use; the paying core |
+| Maya, the Closet Clearer | [closet-clearer.md](closet-clearer.md) | Clear-out Pass ($6.99, one time, 30 days) | Secondary. Occasional, one-time purchases; may upgrade |
 
-## One app, two modes
+## One app, two plans
 
-- **One Listly app** for iOS and Android. At signup, one question ("How do you sell?") sets the starting mode.
-- **The mode is a default, not an account type.** It can be changed in settings, and the app suggests switching when behavior shows it (for example 10+ active items or a second marketplace).
-- **One data model underneath.** Every item is a canonical product record that can have many marketplace listings. Simple mode hides the inventory tools; it doesn't remove the data. Switching modes never loses anything.
+Updated 2026-11-13 after the [Listly recommendation](../strategy/listly-recommendation-2026-11.md).
+
+- **One Listly app** for iOS and Android. Every new user gets **3 free listings**, then picks a plan at the paywall. There's no free tier and no "How do you sell?" question at signup.
+- **The plan sets which screens show.** The Clear-out Pass shows haul mode, copy for every marketplace, mark sold, the sold-everywhere checklist and money made. The Reseller plan adds the ledger, the stale filter and the profit tracker. Both plans get the checklist because it prevents double sales, and occasional sellers are the most likely to make one (PRD D-2). A Clear-out Pass can be upgraded at any time, and Listly suggests it when behavior shows it (for example 10+ active items or a second marketplace).
+- **One data model underneath.** Every item is a canonical record with many marketplace listings. Changing plans never loses anything.
 
 ## Build order
 
-**Simple mode (Maya) ships first**, decided 2026-11-13, as the free front door. Reseller mode (Dre) follows as a **paid beta about 45 days after launch**, and that's where paying sellers are expected to come from (updated 2026-11-13 after the [strategy review](../strategy/strategy-review-2026-11.md)). The data model supports both from day one, so Reseller mode adds interface rather than requiring a migration.
+**Dre and Maya launch together, paid from day one**, with the Reseller plan as the headline. The "fix photo" step, bin labels, forward-your-sale-email and a web companion follow about 30–45 days after launch.
 
 ## Not yet covered
 
