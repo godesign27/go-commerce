@@ -25,9 +25,9 @@ before beta"). A check with no recorded run is marked **NOT RUN**, never Pass.
 
 | Requirement | Design response | Status |
 |---|---|---|
-| Every control has a VoiceOver/TalkBack label and role | Every control in the prototype has visible text or an `aria-label` (icon buttons: "Take photo", "Dismiss", "New haul"; Copy and Edit name their field). Chips that act as single choice are `role=radio` with `aria-checked`; tabs are `role=tab`; switches `role=switch`. **Measured:** 0 unlabelled buttons or fields across 66 states | Designed. On-device: **NOT RUN** |
+| Every control has a VoiceOver/TalkBack label and role | Every control in the prototype has visible text or an `aria-label` (icon buttons: "Take photo", "Dismiss", "New haul"; Copy and Edit name their field). Chips that act as single choice are `role=radio` with `aria-checked`; tabs are `role=tab`; switches `role=switch`. **Measured:** 0 unlabelled buttons or fields across 66 states, and again across the 29 onboarding, sign-in and setup states added 2026-11-14 (95 in all) | Designed. On-device: **NOT RUN** |
 | Text supports Dynamic Type to the largest size without truncating values or overlapping controls | Layout is single-column, wraps, and has no fixed heights on text containers; footers stack. Money figures and tags wrap rather than truncate. Risks listed in §3 (F-05) | Designed. On-device at AX5: **NOT RUN** |
-| Touch targets ≥ 44 × 44 pt | GO `size.4` (44) is the minimum on every control. **Measured, before:** v2 chips and small buttons were 32 pt (236 instances). **Fixed in v3:** chips, small buttons and text buttons have min 44 × 44. **Measured, after:** 0 controls under 44 × 44 across 66 states | Pass in the prototype (measured 2026-11-14). On-device: **NOT RUN** |
+| Touch targets ≥ 44 × 44 pt | GO `size.4` (44) is the minimum on every control. **Measured, before:** v2 chips and small buttons were 32 pt (236 instances). **Fixed in v3:** chips, small buttons and text buttons have min 44 × 44. **Measured, after:** 0 controls under 44 × 44 across 66 states; 0 across the 29 onboarding states added 2026-11-14 | Pass in the prototype (measured 2026-11-14). On-device: **NOT RUN** |
 | Status changes are announced | A single polite live region plus `role=alert` for blocking failures. The announcement list is §4 | Designed. On-device: **NOT RUN** |
 
 ## 2. WCAG 2.2 AA review
@@ -39,7 +39,7 @@ before beta"). A check with no recorded run is marked **NOT RUN**, never Pass.
 | 1.3.2 Meaningful sequence | Home, item detail | Home's Needs action is first in reading order when present (S-23), including in the "This month first" variant, where it's first **after** the variant tag. **F-07** | Designed; see F-07 |
 | 1.4.1 Use of colour | Status everywhere | GO has no status colours, so status is always text: "Still live", "You removed it", "Locked", "Not entered", "Estimate", "Stale" (DD-28, S-43 "Must not") | Pass by design |
 | 1.4.3 Contrast (minimum) | Text | **Measured** with GO's hex values (WCAG formula). `color` on `background` 14.56:1, on `surface` 13.56:1. `actionColor` on `actionBackground` 6.88:1 (pressed 9.19:1). **`borderColor` used as helper text: 4.44:1 on background and 4.13:1 on surface — fails 4.5:1 for small text (F-01).** Dark theme: `color` 17.61:1 / 13.87:1; `actionColor` on action 9.55:1; `borderColor` 6.27:1 / 4.94:1 (passes) | v2 failed; **fixed in v3** (helper text uses `color`). Proposed GO role in readiness |
-| 1.4.4 / 1.4.10 Resize and reflow | All screens | **Measured:** no horizontal overflow on any of 66 states at 375 pt width. Large-text reflow on device: **NOT RUN** | Partly measured |
+| 1.4.4 / 1.4.10 Resize and reflow | All screens | **Measured:** no horizontal overflow on any of 66 states at 375 pt width, or on the 29 onboarding states added later. Large-text reflow on device: **NOT RUN** | Partly measured |
 | 1.4.11 Non-text contrast | Field borders, chips, focus | `borderColor` on background 4.44:1 and on surface 4.13:1 (≥ 3:1). Focus ring uses `actionBackground`: 6.75:1 on background | Pass (measured) |
 | 1.4.13 Content on hover or focus | Tips | Tips are dismissible (Skip tips, Escape, tap outside), persistent until dismissed, and don't move on hover (R-36) | Designed |
 | 2.1.1 Keyboard / switch access | Everything | Every action is a native button or form control. Moving a photo has a non-drag path ("Move a photo" → "To item n", S-08). No gesture-only actions; swipe actions on rows (if added from the HIG) must have a visible equivalent | Designed |
@@ -55,7 +55,12 @@ before beta"). A check with no recorded run is marked **NOT RUN**, never Pass.
 | 3.3.1 / 3.3.3 Error identification and suggestion | Forms | Errors name the field and the fix ("Enter the sale price in dollars, like 38.00."; C-35) and sit next to the field. Required-slot prompts name the missing fact (C-12, C-13) | Designed |
 | 3.3.4 Error prevention (legal, financial, data) | Delete, purchase, revert | Delete item and delete account confirm, and say it can't be undone (C-39, C-49). Purchases go through the store's own confirmation. Changing an eBay sale back confirms (M-12) | Designed |
 | 3.3.7 Redundant entry (2.2) | Facts, Mark sold | Default bin and shipping preselect; bins used before are offered; a spoken "men's medium" fills department and size once | Designed |
-| 3.3.8 Accessible authentication (2.2) | Sign-in | Apple and Google sign-in; email path `[rule TBD — eng lead]` must support paste and password managers, or use a magic link | Open (S-02) |
+| 3.3.8 Accessible authentication (2.2) | Sign-in, sign-up | No password and no cognitive test anywhere: Apple, Google, or an email **link and 6-digit code** (DD-33). The code field uses `autocomplete="one-time-code"` and `inputmode="numeric"`, so iOS offers the code from Mail or Messages, and paste works. The link alone needs no typing | Designed (DD-33); the email rule is still `[TBD — eng lead]` (PQ-26) |
+| 1.3.5 Identify input purpose | Email, code | `autocomplete="email"` and `autocomplete="one-time-code"` | Pass by design |
+| 3.3.1 / 3.3.3 Errors on the email screens | Email, code | Checked when the seller taps Send or Continue, not while typing. The error sits under the field, the field gets `aria-invalid` and `aria-describedby`, focus returns to it, and the error is announced (C-63, C-65). **Measured in the prototype** | Pass in the prototype |
+| 2.4.3 Focus order: system prompts and sheets | Camera and mic prompts, "Where will you post these?" | Focus moves into the prompt when it opens (**measured:** first button), and into the sheet (**measured:** first marketplace chip). First-run tips wait until the sheet closes (**measured**) | Designed; real prompts are the OS's (F-08) |
+| 3.2.4 Consistent identification | Sign-in buttons | Apple, Google and email appear in the same order, with the same names, on Create an account, Sign in and Save your items | Pass by design |
+| 2.2.1 Timing: email link and resend | Email | A link that expires is a time limit the seller can't adjust, so **Send a new link** is always offered (C-66) and the code is a second route. Resend waits 30 seconds, shown as text, not announced every second (F-14) | Designed |
 | 4.1.3 Status messages | All | See §4 | Designed |
 
 ## 3. Findings
@@ -71,6 +76,11 @@ before beta"). A check with no recorded run is marked **NOT RUN**, never Pass.
 | F-07 | Low | In the "This month first" test variant (Q-09), Needs action isn't the first thing reached | If the variant wins the test, Needs action must still be announced on Home load as an alert when an item is live elsewhere | Open (depends on the test) |
 | F-08 | Low | The system permission prompt mocks are drawn by the prototype | In the app they're the OS's own dialogs; only Listly's pre-prompt (C-30) and denied states (C-05, C-06, C-23, C-31) are Listly UI | Note |
 | F-09 | Medium | The how-to video (R-37) needs captions on by default, a transcript, labelled controls, and no autoplay | Designed (C-51). Caption accuracy and audio description of on-screen steps: `[TBD — video owner, Q-05]` | Open |
+| F-11 | Low | The Apple sign-in button is Apple's own component (`System / AppleSignInButton`) | Use the platform button so its name and role come from the OS. Don't wrap it in a container that overrides the name. Check its size at the largest text size | Note |
+| F-12 | Medium | "Getting your items" is a spinner with no time limit | `aria-busy` on the screen and "Getting your items" announced (designed). If it takes over 10 seconds, show "Still getting your items…" and a Try again `[H — eng lead]`. The spinner stops under Reduce Motion (**measured** in CSS) | Open (implementation) |
+| F-13 | Medium | The photo-first sheet opens on its own when Copy listings first loads | Focus moves into it (measured). Escape or a swipe down must close it as "Show all five", never leave it half-answered `[H]` | Open (test variant only) |
+| F-14 | Low | A visible resend countdown could be announced every second | Show the count as text only; announce once when Send again becomes available | Designed |
+| F-15 | Low | Dismissing the Finish setting up or plan welcome card removes the focused control | Move focus to the next card, or to the Home heading if none is left (same rule as F-03) | Open (implementation) |
 | F-10 | Low | Reduced motion: the drafting progress bar and the guide pulse animate | Both respect `prefers-reduced-motion` in the prototype; the app must respect iOS Reduce Motion and Android "Remove animations" for the progress fill, sheets and the Undo bar's entrance | Designed |
 
 ## 4. Announcements (4.1.3, R-24 "status changes are announced")
@@ -95,6 +105,15 @@ before beta"). A check with no recorded run is marked **NOT RUN**, never Pass.
 | Filter changed | "{n} listings shown." | Polite | S-25 |
 | Limit reached | M-06 | Alert | S-22 |
 | Tip shown | "Tip {n} of {N}: {text}" | Polite | S-37 |
+| Account created | "Account created. Step 4 of 4." | Polite | S-02 |
+| Sign-in sheet cancelled | "Sign-in cancelled." (nothing on screen, C-67) | Polite | S-02 |
+| Sign-in or sign-up failed | C-56 / C-03 | Alert | S-02 |
+| Email sent / email or code error | "Email sent to {email}." / C-63, C-65 | Polite / alert | S-02 |
+| Getting your items | "Getting your items." then "Signed in. Your items are here." | Polite | S-02 |
+| Permission outcome | C-72 (one per outcome), or "Nothing was asked…" after Not now (C-70) | Polite | S-03 |
+| Access picked up after Settings | "Camera is on." / "Microphone is on." (C-73) | Polite | S-03 |
+| Restore purchases | "Checking the App Store for your purchases." then the outcome (C-83) | Polite | S-20 |
+| Setup card dismissed / defaults saved | "Find these any time in Profile." / "Selling defaults saved." | Polite | — (DD-42) |
 
 ## 5. What must be tested on devices (S-43)
 
@@ -106,5 +125,9 @@ before beta"). A check with no recorded run is marked **NOT RUN**, never Pass.
 5. Contrast of the final themes (light and dark) with GO's real values, once any new roles (colorMuted, danger,
    caution) are added.
 6. The how-to video's captions and transcript.
+7. VoiceOver and TalkBack through Flow 0 with the real system prompts: each of the four outcomes, Not now then
+   Turn on camera, and access turned on in Settings and picked up on return. Then Flow 10 (sign in on a new phone).
+8. Email sign-in: the 6-digit code offered by iOS autofill from Mail and Messages, Android's SMS/email code
+   suggestions, and paste. Sign in with Apple's own button at the largest text size.
 
 Record each run with the tool, scope, date and evidence; until then each stays **NOT RUN**.
