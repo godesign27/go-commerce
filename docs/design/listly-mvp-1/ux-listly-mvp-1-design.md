@@ -284,6 +284,67 @@ agreement, because PRD §9.4 and S-44 name GO.
 What it costs to switch instead: GO's tokens, themes and contracts would be thrown away, and S-44's
 "no one-offs" rule would have to be restated against a library the team doesn't control.
 
+## 9b. Visual composition (ui-design)
+
+Composed from GO tokens and components only. The prototype maps every GO value 1:1 into `--go-*` CSS variables
+(GO `src/tokens/index.ts`, `src/themes/index.ts`, light theme). Anything else is a **GO gap**, styled from GO
+tokens and labelled `Gap / {Name}` under Prototype controls → Component labels. The full gap list with proposed
+specs is in [design-system-readiness.md](design-system-readiness.md).
+
+### Tokens used
+
+| Role | GO token | Value (light) | Used for |
+|---|---|---|---|
+| Page background | `background` | #FCFDFD | Screen background, sheet background |
+| Raised surface | `surface` | #F0F6F4 | GoCard, photo placeholders, dividers |
+| Text | `color` | #232925 | All text; alarm and notice borders; selected chips; Undo bar background |
+| Secondary text and borders | `borderColor` | #627C72 | Field borders, helper text (GO has no helper-text role — gap), unselected chips |
+| Primary action | `actionBackground` / `actionPressed` / `actionColor` | #006840 / #005333 / #FFFFFF | GoButton, mic button, progress fill, focus ring, current tab marker, New haul tab |
+| Spacing | `space.1–5` | 4 · 8 · 12 · 16 · 24 | Screen padding 16; gaps 8–12; section gaps 12–16 |
+| Radius | `radius.1–4` | 4 · 8 · 12 · 16 | Tags 4; fields and buttons 8; cards 12; sheets and the phone frame 16 |
+| Size | `size.4` / `size.5` | 44 / 52 | Minimum touch target 44; list rows and tab bar 52 |
+| Type | `body.size.1–3`, `weight.1–3` | 14/20 · 16/24 · 20/28; 400 · 600 · 700 | Body 14; buttons and card titles 16; screen titles 20 |
+
+**Values not in GO, used and flagged:** 12 px small text (no `size.0` in GO's type scale), a 24 px welcome
+title, and 28 px money figures and a 48 px lock-screen clock (no display size). Each is commented `/* GAP */` in
+the prototype and listed as a type-scale gap.
+
+### Composition rules applied
+
+| ID | Rule | Why |
+|---|---|---|
+| VC-1 | **One GoButton per screen**, in the footer, for the primary action. Everything else is a secondary, text or destructive button (gaps) | GO has one button variant; Maya's persona: "One primary action per screen" |
+| VC-2 | Footer actions sit in a fixed bottom area (`scr-foot`) above the tab bar; content scrolls above it | Thumb reach on a phone; actions stay visible with large text |
+| VC-3 | GoCard groups one idea (an item, a plan, a marketplace row, a summary). Cards don't nest | GO contract: "group related content" |
+| VC-4 | Screen title 20/28 bold; section titles 16/24 semibold; body 14/20; helper text 12/16 in `borderColor` | GO type scale, plus the 12 px gap |
+| VC-5 | Status is a **text tag** (bordered, 12 px, semibold); "strong" tags (filled `color`) mark a settled state ("You removed it", "Sold here"); **flags** (bordered, bold) mark something missing ("Not entered") | DD-28: no status colours in GO |
+| VC-6 | The **alarm banner** (Needs action, the checklist) is a 3 px `color` border, bold title, role=alert. It's the only 3 px border in the app | The double-sale alarm "must be impossible to miss" (Dre's persona) without a warning colour |
+| VC-7 | **Undo bar** is the inverse surface (`color` background, `background` text) above the footer, so it reads as transient system feedback, distinct from content | DD-14 |
+| VC-8 | **Sheets** (move a photo, delete, M-12, M-13, reminder pre-prompt) rise from the bottom over a scrim of `color` at 45%; system prompts are centred and labelled `System /` | iOS and Android conventions (DD-29); scrim colour has no GO token — gap |
+| VC-9 | Locked items use a **dashed** border and the word "Locked"; AI-produced notes use a 3 px left rule (`ai-note`) | Distinguishes AI output and entitlement state without colour |
+| VC-10 | Item detail order: photos → name → status → where it's listed → sale → facts → bin → cost → history → more; primary action in the footer | DD-16 |
+| VC-11 | Forms: visible label above every field; helper text below; required fields say "(required)" in the label, not with an asterisk alone | R-24, S-10 ("visible labels") |
+
+### Screen-by-screen component map (summary)
+
+| Screen | GO components | Gap components |
+|---|---|---|
+| Onboarding | GoButton, GoCard | ProgressDots, TextButton, ToggleChips, SecondaryButton |
+| Capture | GoButton | ShutterButton, SecondaryButton, Thumbnail, Tag, InlineNotice, TextButton |
+| Grouping | GoButton, GoCard | AINote, Thumbnail, Chip, BottomSheet |
+| Facts | GoButton | MicButton, TextField, Select, ChoiceChips, PromptCard, InlineError, Tag |
+| Drafting | — | ProgressBar, SecondaryButton |
+| Copy listings | GoButton, GoCard | SegmentedControl, Tabs, CopyField, TextField, Thumbnail, SecondaryButton, TextButton, Tag, System / PermissionPrompt |
+| Paywall | GoButton | PlanCard, SegmentedControl, Tag, InlineError, SecondaryButton |
+| Home | GoButton, GoCard | AlarmBanner, ListRow, Tag, TabBar, CoachMark |
+| Listings and ledger | GoCard | SegmentedControl, FilterChips, SortControl, ListRow, Tag, TabBar |
+| Item detail | GoButton, GoCard | PhotoStrip, KeyValueRow, Tag, DestructiveButton, BottomSheet, Snackbar |
+| Mark sold | GoButton | ChoiceChips, TextField, RadioCards, Checkbox, Tag |
+| Checklist | GoButton, GoCard | AlarmBanner, Checkbox, SecondaryButton, Snackbar, BottomSheet |
+| Profit and add costs | GoButton, GoCard | MoneyBreakdown, InlineNotice, ListRow, Chip, TextField |
+| Profile and connections | GoButton, GoCard | SettingsGroup, Switch, ChoiceChips, TextField, DestructiveButton, InfoNote |
+| How-to | GoCard | VideoPlayer, Accordion |
+
 ## 10. Design sources
 
 | Source | Location | Notes |
