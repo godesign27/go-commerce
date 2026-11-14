@@ -673,7 +673,7 @@ const screens = {
       ${up && !pf() ? steps(3) : ''}
       ${back(up ? 'Other ways to sign up' : 'Other ways to sign in', up ? (pf() ? 'toPfAccount' : 'toObAccount') : 'toSignIn')}
       <h2 class="t">${up ? 'Continue with email' : 'Sign in with email'}</h2>
-      <p>We'll send you a link and a 6-digit code. No password needed.</p>
+      <p>Listly will email you a link and a 6-digit code. No password needed.</p>
       <div class="field" data-mf="Gap / TextField" data-mf-props="not in GO · email · error ${invalid?'on':'off'}"><label for="emailIn">Email address</label>
         <input id="emailIn" class="input" type="email" autocomplete="email" inputmode="email" value="${esc(S.email)}" ${invalid ? 'aria-invalid="true" aria-describedby="emailErr"' : ''}>
         ${invalid ? '<span class="small" id="emailErr"><b>Enter an email address like name@example.com.</b></span>' : ''}</div>
@@ -682,7 +682,7 @@ const screens = {
   obEmailSent(){ return `<div class="scr">
       ${S.emailMode==='up' && !pf() ? steps(3) : ''}
       <h2 class="t">Check your email</h2>
-      <p>We sent a link and a 6-digit code to <b>${esc(S.email || 'seller@example.com')}</b>.</p>
+      <p>Listly sent a link and a 6-digit code to <b>${esc(S.email || 'seller@example.com')}</b>.</p>
       <p class="small">Open the link on this phone, or type the code here if the email is on another device.</p>
       <div class="field" data-mf="Gap / TextField" data-mf-props="not in GO · one-time code · error ${S.codeErr?'on':'off'}"><label for="codeIn">6-digit code</label>
         <input id="codeIn" class="input" inputmode="numeric" autocomplete="one-time-code" maxlength="6" ${S.codeErr ? 'aria-invalid="true" aria-describedby="codeErr"' : ''}>
@@ -693,7 +693,7 @@ const screens = {
     <div class="scr-foot">${gobtn('codeNext','Continue','data-act="codeContinue"')}${sec('resendBtn','Send again in 30 s','disabled')}${link('Use a different email','data-act="toEmailBack"')}</div>`; },
   obEmailExpired(){ return `<div class="scr">
       <h2 class="t">That link has expired</h2>
-      <p>Sign-in links work once, for a short time. We can send a new one to <b>${esc(S.email || 'seller@example.com')}</b>.</p>
+      <p>Sign-in links work once, for a short time. Listly can send a new one to <b>${esc(S.email || 'seller@example.com')}</b>.</p>
     </div>
     <div class="scr-foot">${gobtn('newLinkBtn','Send a new link','data-act="newEmailLink"')}${link('Use a different email','data-act="toEmailBack"')}</div>`; },
 
@@ -702,7 +702,7 @@ const screens = {
       <div class="topline"><span class="brand">Listly</span></div>
       <h2 class="t">Welcome back</h2>
       <p>Sign in the way you did before, to get your items, listings and plan.</p>
-      ${fail ? notice("Couldn't sign you in.", 'Nothing changed. Check your connection and try again.', 'alert') : ''}
+      ${fail ? notice("Couldn't sign you in.", 'Your items are safe. Check your connection and try again, or use a different sign-in method.', 'alert') : ''}
     </div>
     <div class="scr-foot">${appleBtn('siApple','authApple')}${sec('siGoogle','Continue with Google','data-act="authGoogle"')}${link('Sign in with email','data-act="toEmailIn"')}${link('New to Listly? Get started','data-act="toWelcome"')}</div>`; },
   signInNoAccount(){ return `<div class="scr">

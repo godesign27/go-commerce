@@ -78,7 +78,7 @@ order, in at most three short sentences, with the action as a button, not a sent
 
 ---
 
-## 3. Everything else (C-01 to C-57)
+## 3. Everything else (C-01 to C-86)
 
 ### Onboarding (R-33, S-01 to S-03)
 
@@ -86,16 +86,53 @@ order, in at most three short sentences, with the action as a button, not a sent
 |---|---|---|
 | **C-01** | Welcome | **Title:** List a whole haul from your phone. · **Body:** Sell it on eBay, Poshmark, Mercari, Depop and Facebook Marketplace. Always know what's sold, where it is and what you made. · **Card:** Your first 3 listings are free. No card needed. Photograph a few items and see the listings before you decide. · **Actions:** Get started · I already have an account |
 | **C-02** | Step indicator and marketplaces | **Indicator:** Step {n} of 4 (announced as "Step {n} of 4"). · **Title:** Where do you sell? · **Body:** Listly drafts a listing for each marketplace you pick. You can change this later in Profile. · **None picked:** Pick at least one marketplace, or skip to draft for all five. · **Actions:** Continue · Skip — draft for all five |
-| **C-03** | Create an account | **Title:** Save your listings · **Body:** Create an account so your items, listings and sales are kept if you change phones. · **Small:** Still free: your first 3 listings need no card. · **Actions:** Continue with Apple · Continue with Google · Use email instead · **In progress:** Signing you in… · **Failed:** **Couldn't create your account.** Nothing was saved. Check your connection and try again. · **Cancelled at Apple or Google:** Sign-in was cancelled. Nothing was saved. · **Email invalid (inline):** Enter an email address like name@example.com. |
+| **C-03** | Create an account | **Title:** Save your listings · **Body:** Create an account so your items, listings and sales are kept if you change phones. · **Small:** Still free: your first 3 listings need no card. · **Actions:** Continue with Apple · Continue with Google · Use email instead · **In progress:** Signing you in… · **Failed:** **Couldn't create your account.** Nothing was saved. Check your connection and try again. · **Cancelled at Apple or Google:** nothing on screen; announced only, as C-67 (DD-34). · **Email:** C-62 to C-66. · **Apple button:** Apple's own "Continue with Apple" button, not a GoButton |
 | **C-04** | Camera and microphone + AI notice | **Title:** Camera and microphone · **Body:** Listly uses the camera to photograph your haul, and the microphone so you can say each item's brand, size, measurements, flaws and condition. · **Card title:** How your photos and answers are used · • They're sent to an AI service to group photos and draft listings. • Location data is removed from photos first. • Listly only writes facts you give it. Nothing is posted for you. · **Link:** How your data is used · **Actions:** Allow and start my first haul · Not now — I'll use my photo library and type · **Legal:** notice wording to Legal before launch (§10) |
-| **C-56** | Returning seller sign-in failed | **Couldn't sign you in.** Your items are safe. Check your connection and try again, or use a different sign-in method. |
+| **C-56** | Returning seller sign-in failed (`signInFail`) | **Couldn't sign you in.** Your items are safe. Check your connection and try again, or use a different sign-in method. |
+
+### Sign in, email, permissions and setup (R-33, R-3, R-23, R-31, R-34; S-01 to S-03, S-20; DD-31 to DD-43)
+
+Added 2026-11-14 for the onboarding design (§9c of the design doc). Usage strings (C-68, C-69) are what iOS shows
+in its own prompt, so they go in `Info.plist`; Android shows no app text in its prompt.
+
+| ID | Where | Wording |
+|---|---|---|
+| **C-58** | Sign in (`signIn`) | **Title:** Welcome back · **Body:** Sign in the way you did before, to get your items, listings and plan. · **Actions:** Continue with Apple · Continue with Google · Sign in with email · New to Listly? Get started · **Failed:** C-56 |
+| **C-59** | Session expired `[H — eng lead]` | **On Sign in:** **You've been signed out.** Sign in to see your items. Nothing was lost. |
+| **C-60** | No Listly account for this sign-in (`signInNoAccount`, DD-32) | **Title:** No Listly account for this sign-in · **Body:** There's no account for {email}. If you've used Listly before, you may have signed in another way, such as Apple instead of Google. · **Actions:** Try another way · Create a new account |
+| **C-61** | Getting your items (`signInLoading`) | **Title:** Getting your items… · **Small:** Your items, listings and plan are saved to your account. · **Announced:** Getting your items. · **Done toast:** Signed in. Your items are here. |
+| **C-62** | Email entry (`obEmail`, DD-33) | **Title (sign-up):** Continue with email · **Title (sign-in):** Sign in with email · **Body:** Listly will email you a link and a 6-digit code. No password needed. · **Label:** Email address · **Action:** Send link and code · **Back:** ‹ Other ways to sign up / ‹ Other ways to sign in |
+| **C-63** | Email not valid (`obEmailInvalid`) | **Under the field, on Send:** Enter an email address like name@example.com. |
+| **C-64** | Check your email (`obEmailSent`) | **Title:** Check your email · **Body:** Listly sent a link and a 6-digit code to {email}. · **Small:** Open the link on this phone, or type the code here if the email is on another device. · **Label:** 6-digit code · **Action:** Continue · **Help:** Not there? Check your spam folder. You can send it again in 30 seconds. · **Resend:** Send again in {s} s → Send again · **Back:** Use a different email · **Announced:** Email sent to {email}. · **Resent toast:** New link and code sent to {email}. |
+| **C-65** | Code not 6 digits | **Under the field:** Enter all 6 digits from the email. · **Wrong code `[H — eng lead]`:** That code didn't work. Check the latest email, or send a new one. |
+| **C-66** | Link expired or used (`obEmailExpired`) | **Title:** That link has expired · **Body:** Sign-in links work once, for a short time. Listly can send a new one to {email}. · **Actions:** Send a new link · Use a different email |
+| **C-67** | Apple or Google sheet cancelled (DD-34) | **Nothing shown.** **Announced only:** Sign-in cancelled. |
+| **C-68** | Camera usage string (iOS `NSCameraUsageDescription`) | Listly uses the camera to photograph the items you're selling. |
+| **C-69** | Microphone usage string (iOS `NSMicrophoneUsageDescription`) | Listly uses the microphone so you can say each item's brand, size and condition. |
+| **C-70** | Camera not asked yet (`captureNotNow`, DD-36) | **The camera isn't on yet.** Turn it on to photograph your haul here, or add photos from your library. · **Action:** Turn on camera (shows the system prompt) · **Announced after Not now:** Nothing was asked. Add photos from your library and type the answers, or turn the camera on here. |
+| **C-71** | Microphone not asked yet (facts) | **The microphone isn't on yet.** Turn it on to say the answers, or type them. · **Action:** Turn on microphone |
+| **C-72** | Toasts after the two prompts | **Camera denied:** Camera is off. Add photos from your library. You can still answer by voice. · **Microphone denied:** Microphone is off. You'll type each item's answers. · **Both denied:** Camera and microphone are off. Add photos from your library and type the answers. · **Both allowed:** no toast |
+| **C-73** | Access turned on in Settings, picked up (DD-37) | **Camera is on.** You can take photos now. · **Microphone is on.** Tap to talk. (Both also announced.) |
+| **C-74** | Camera and mic on a new phone (`newPhonePerms`, DD-38) | **Title:** Camera and microphone on this phone · **Body:** Each new phone asks again. Listly uses the camera to photograph your haul, and the microphone so you can say each item's details. · **Small:** You've already agreed to how your photos and answers are used. · **Link:** How your data is used · **Actions:** Allow and start the haul · Not now — I'll use my photo library and type |
+| **C-75** | AI notice changed (`newPhoneNotice`) | **Card title:** How your photos and answers are used has changed · the C-04 bullets · **What changed:** `[TBD — Legal]` · **Action:** Agree, allow and start the haul · **Legal:** to Legal with C-04 |
+| **C-76** | Welcome, photo-first variant (`pfWelcome`, DD-41) | **Title:** List a whole haul from your phone. · **Body:** Photograph what you're selling first. Set things up later, and only if you want to. · **Card:** as C-01 · **Actions:** Photograph my first items · I already have an account |
+| **C-77** | Save your items (`pfAccount`) | **Title:** Save your {n} items · **Body:** Create an account to draft them. Your photos and answers are kept if you change phones. · **Small:** Still free: your first 3 listings need no card. · **Actions:** as C-03 · **Failed:** **Couldn't create your account.** Your photos and answers are still here. Check your connection and try again. |
+| **C-78** | Where will you post these? (`pfMarkets`, sheet) | **Title:** Where will you post these? · **Body:** Pick where you sell. Listly shows those listings and remembers your choice. You can change it in Profile. · **Actions:** Show these listings · Show all five · **Toast:** Showing listings for {marketplaces}. Change this in Profile. |
+| **C-79** | Finish setting up (card on Home, DD-42) | **Title:** Finish setting up · **Small:** Optional. Each takes under a minute. · **Rows:** Link your shops — So Listly can open your listings on each marketplace · Set selling defaults — Who usually pays shipping, and your default bin · eBay sales, tracked for you — Coming soon · **Done row tag:** Done · **Dismiss label:** Dismiss Finish setting up · **Dismissed toast:** Find these any time in Profile. |
+| **C-80** | Selling defaults (`setupDefaults`) | **Title:** Selling defaults · **Body:** These fill in for you on each item. You can change them any time, here or in Profile. · **Shipping, usually:** Buyer pays · I pay · Free shipping · **Default bin help:** Where you usually keep new items, like "B1" or "Hall closet". Only you see it. · **Actions:** Save defaults · Not now · **Toast:** Selling defaults saved. |
+| **C-81** | Reseller plan welcome (card on Home, DD-43) | **Title:** Welcome to the Reseller plan · • **Profit:** what you made after fees, by marketplace. • **Listings by item:** every item, where it's listed and its bin. • **Stale items:** anything listed 30+ days. • Up to 500 listings a month. · **Action:** Add what you paid, so profit is right |
+| **C-82** | Clear-out Pass welcome (card on Home) | **Title:** Your Clear-out Pass is on · • It runs until {date}, for up to 100 listings. • When something sells, Listly reminds you to take it down everywhere else. • Your items and listings stay when the Pass ends. |
+| **C-83** | Restore purchases (Profile, paywall; DD-39) | **Busy:** Checking… · **Announced:** Checking the App Store for your purchases. · **Restored:** **Reseller plan restored.** Your plan is back on this account. (From a mid-haul paywall, as a toast: Reseller plan restored. Draft the rest of your haul.) · **Already active:** **Your plan is already active.** There was nothing to restore. · **None:** **No Listly purchases found for this Apple ID.** If you bought with a different Apple ID, sign in to the App Store with it and try again. · **Another account:** **This purchase belongs to another Listly account.** Sign in with that account to use it. Listly can't move a plan between accounts. · Android: "Google account" for "Apple ID", "Google Play" for "App Store" |
+| **C-84** | Apple's hidden email (Profile → Account, DD-35) | {relay address} · Apple · **Small:** Hidden by Apple — emails still reach you. |
+| **C-85** | Home, returning trial seller (`homeReturnTrial`, DD-40) | **Card title:** {n} of 3 free listings left · **Body (some left):** Your {k} drafted listings are ready to copy and post. Start a haul to use the rest. · **Body (none left):** as `homeTrial` |
+| **C-86** | Create an account from Sign in | **Toast:** Your sign-in is kept. Pick where you sell, then allow the camera. |
 
 ### Haul (R-4 to R-7, S-05 to S-13)
 
 | ID | Where | Wording |
 |---|---|---|
-| **C-05** | Camera denied (capture) | **Camera access is off.** Turn it on in Settings, or add photos from your library. · **Action:** Open Settings · **Toast after a denied prompt:** Camera and microphone are off. Add photos from your library and type the answers. |
-| **C-06** | Microphone denied (facts) | **Microphone is off.** Type the answers, or turn the microphone on in Settings. · **Prompt line:** Type the brand, size, measurements, any flaws and the condition. |
+| **C-05** | Camera denied (capture) | **Camera access is off.** Turn it on in Settings, or add photos from your library. · **Action:** Open Settings · **Toasts after the prompts:** C-72. · **Not asked yet:** C-70. · **Turned on in Settings:** C-73 |
+| **C-06** | Microphone denied (facts) | **Microphone is off.** Type the answers, or turn the microphone on in Settings. · **Action:** Open Settings · **Prompt line:** Type the brand, size, measurements, any flaws and the condition. · **Not asked yet:** C-71 |
 | **C-07** | Photo limit per haul | You've reached {max} photos for this haul. Finish this one and start another for the rest. `[max: NFR TBD — eng lead]` |
 | **C-08** | Close the haul | **Action:** Close — save for later · **Toast:** Saved. Continue this haul from Home. · **With no photos:** Haul closed. Nothing to save. |
 | **C-09** | Discard an unfinished haul | **Title:** Discard this haul? · **Body:** This deletes its {p} photos and your answers from Listly. It can't be undone. · **Actions:** Discard haul · Keep it |
@@ -210,10 +247,11 @@ order, in at most three short sentences, with the action as a button, not a sent
 | Uncertainty stated where it affects a decision (estimates, fees, grouping) | Pass: M-05, C-21, C-36, C-43 |
 | Actions observable and controllable | Pass: every AI step has Cancel, edit or restore (R-7, R-9) |
 | Irreversible actions confirmed | Pass: C-39, C-49, M-12; C-09 for discard |
-| Every failure says what happened, what's saved, and how to recover | Pass: M-03, M-04, M-06, M-10, M-11, C-03, C-23, C-26, C-47, C-48, C-49, C-53, C-54 |
+| Every failure says what happened, what's saved, and how to recover | Pass: M-03, M-04, M-06, M-10, M-11, C-03, C-23, C-26, C-47, C-48, C-49, C-53, C-54, C-56, C-60, C-63, C-65, C-66, C-77, C-83 |
+| "Listly", never "we", in the app (§1) | Pass: the email screens say "Listly sent…", not "We sent…" (C-62 to C-66) |
 | Honesty rules 1–6 (§1) | Pass, by review. Re-check whenever drafts or the estimate change |
 
-**Needs Legal before launch:** C-04 (AI notice), C-25 (auto-renewal disclosure), C-37 (trade tax line), C-43
+**Needs Legal before launch:** C-04 (AI notice), C-75 (changed-notice wording), C-83 (restore across accounts, PQ-27), C-25 (auto-renewal disclosure), C-37 (trade tax line), C-43
 (export footer), C-49 (deletion). **Needs eng lead:** the values in braces that come from the server (limits,
 reset dates, fee table), and C-24's link rule.
 

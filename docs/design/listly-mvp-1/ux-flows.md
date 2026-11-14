@@ -206,13 +206,13 @@ Item not listed anywhere yet → `itemNoListings`. Clear-out Pass → `itemDetai
 
 | Branch | What happens | State | Copy |
 |---|---|---|---|
-| No Listly account for that sign-in (DD-32) | Try another way (primary) · Create a new account → step 2, with the sign-in kept, so step 3 is skipped | `signInNoAccount` | C-60, C-87 |
-| Sign-in fails | Stays on Sign in with the error | `signInFail` | C-59 |
+| No Listly account for that sign-in (DD-32) | Try another way (primary) · Create a new account → step 2, with the sign-in kept, so step 3 is skipped | `signInNoAccount` | C-60, C-86 |
+| Sign-in fails | Stays on Sign in with the error | `signInFail` | C-56 |
 | Email | Same link-and-code screens as Flow 0, with no step dots | `obEmailSent` | C-62 to C-66 |
-| Trial seller (DD-40) | Home shows what's left, e.g. "1 of 3 free listings left"; never reset | `homeReturnTrial` | C-86 |
+| Trial seller (DD-40) | Home shows what's left, e.g. "1 of 3 free listings left"; never reset | `homeReturnTrial` | C-85 |
 | AI notice changed since they agreed (DD-38) | The full notice shows in place of the short screen; nothing is uploaded until they agree | `newPhoneNotice` | C-75 |
 | Restore purchases (DD-39) | Checking… → restored, already active, nothing found, or on another account | `profileRestored`, `profileRestoreNone`, `profileRestoreOther` | C-83 |
-| Session expired `[H — eng lead]` | Sign in, with "You've been signed out" | — (not prototyped) | C-85 |
+| Session expired `[H — eng lead]` | Sign in, with "You've been signed out" | — (not prototyped) | C-59 |
 
 ### Flow 11 — Onboarding, photo first (test variant; PQ-14, Q-11; DD-41)
 
@@ -250,7 +250,7 @@ Every screen against the six state types. "—" means the state can't occur on t
 | **Where do you sell?** (`obMarkets`) | No marketplace picked: Continue disabled, hint (C-02) | — | — | — | — | — |
 | **Create account** (`obAccount`) | — | Signing in: buttons disabled, "Signing you in…" (C-03) | Sign-up failed (`obAccountFail`, C-03) | — (cancelling the Apple or Google sheet isn't an error: nothing on screen, "Sign-in cancelled" announced, DD-34) | — | — |
 | **Email** (`obEmail`, `obEmailSent`, `obEmailExpired`) | Empty field: Continue checks on tap | Sending: button shows "Sending…" `[H]` | Not a valid address (`obEmailInvalid`, C-63); code not 6 digits (C-65); link expired (C-66); can't send `[H]` (C-03 wording) | — | — | — |
-| **Sign in** (`signIn`) | — | Signing in, then **Getting your items** (`signInLoading`, C-61) | Failed (`signInFail`, C-59); no account for it (`signInNoAccount`, C-60) | — (cancel as above) | — | Plan comes from the server (DD-39) |
+| **Sign in** (`signIn`) | — | Signing in, then **Getting your items** (`signInLoading`, C-61) | Failed (`signInFail`, C-56); no account for it (`signInNoAccount`, C-60) | — (cancel as above) | — | Plan comes from the server (DD-39) |
 | **Camera and mic on a new phone** (`newPhonePerms`) | — | — | — | Outcomes as Flow 0 | Notice changed: full notice (`newPhoneNotice`, C-75) | All plans |
 | **Camera and mic** (`obPerms`, `obCamPrompt`, `obMicPrompt`) | — | — | — | Each prompt answered separately; four outcomes plus Not now (DD-36, C-70 to C-72) | — | — |
 | **Capture** (`capture`) | 0 photos: Done disabled; "Add from library" highlighted | Uploading after Done: count and progress `[H]` | Upload interrupted (C-54, G-08); photo limit (C-07) | Camera denied (C-05): library, Open Settings; **not asked yet** (`captureNotNow`, C-70): Turn on camera; turned on in Settings → picked up (`captureCamBack`, C-73) | — | Trial with 0 free listings left can still capture `[H]` (S-05) |
