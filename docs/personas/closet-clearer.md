@@ -2,8 +2,8 @@
 
 > **Status:** Proto-persona (hypothesis). Built from the Listly PRD v0.2 and secondary market research, not from interviews with sellers. Validate it before treating it as fact. See "Research gaps" at the end.
 >
-> **App:** Listly, "Simple" mode
-> **Role in the product:** Top of the funnel. A free-tier user who drives volume and word of mouth and may later become a Part-Time Reseller.
+> **App:** Listly, Clear-out Pass ($6.99, one time, for 30 days)
+> **Role in the product:** Secondary persona. An occasional buyer who pays once per clear-out, drives word of mouth and may later move to the Reseller plan.
 
 ---
 
@@ -87,20 +87,20 @@ She does four more items. Listly keeps the rest in a "Still to list" tray with t
 1. **Photo → paste-ready listing in under 2 minutes**, without leaving the flow.
 2. **Two or three plain-language questions** to capture brand, size and flaws. Nothing made up by the AI.
 3. **One marketplace, one tap to copy.** Formatted for the app she uses.
-4. **A price suggestion** (validate the data source; see open questions).
+4. **A price suggestion.** MVP 1 shows an AI estimate clearly labeled as a guess. A suggestion based on sold prices waits until the data source is confirmed.
 5. **A "Still to list" tray** so her half-finished clear-outs survive.
 6. **A light sense of progress:** items listed, items sold, money made.
 7. **Help selling several items to one buyer.** Bundle-friendly listing copy, a reminder to turn on the marketplace's bundle discount, and a quick way to mark a bundle as sold with one total.
 
 ## Design implications
 
-- **Simple mode is the default experience for her.** Hide the inventory ledger, cross-marketplace mapping, brand profiles and bulk actions. Keep them in the data model so nothing is lost if she upgrades.
+- **The Clear-out Pass is her experience.** Show haul mode, copy for her marketplaces, mark sold, the sold-everywhere checklist and money made. Hide the ledger, the stale filter and the profit tracker. She gets the checklist because she isn't used to listing in several places, so she's the seller most likely to sell one item twice (PRD D-2). Keep everything in the data model so nothing is lost if she upgrades.
 - **Ask, don't fill.** Product Intelligence asks her the 2–3 facts that matter. It never fills in brand, size or condition on its own (PRD principle: facts before fluency).
 - **One primary action per screen.** Big camera button, big "Copy" button, minimal text. Follow the GO Mobile Design System's 44×44 touch targets and Dynamic Type support.
 - **No setup before value.** No brand-voice setup, connecting accounts or choosing marketplaces before her first listing. Ask her marketplace on first copy, then remember it.
 - **Plain language everywhere.** "Items" not "SKUs", "Sold" not "Ended", "Where it's listed" not "Channel listings".
-- **Suggest switching modes when behavior shows it.** If she reaches about 10+ active items or copies to a second marketplace, offer: *"Looks like you're selling more. Want tools to track where things are listed?"* Never switch modes without asking.
-- **Monetization:** free tier with a monthly listing allowance; optional one-off credit pack for a big clear-out. Don't put a subscription between her and her first listing.
+- **Suggest the Reseller plan when behavior shows it.** If she reaches about 10+ active items or copies to a second marketplace, offer: *"Looks like you're selling more. Want tools to track where things are listed?"* Never change plans without asking.
+- **Monetization:** 3 free listings, then a one-time **Clear-out Pass** ($6.99 for 30 days, up to 100 listings). No subscription, which doesn't match how rarely she sells.
 
 ## What success looks like for her
 
@@ -120,7 +120,7 @@ She does four more items. Listly keeps the rest in a "Still to list" tray with t
 - How many clear-outs per year, and how many items per clear-out? (Assumed 2–4 and 5–30.)
 - Which single marketplace she uses most, by age group.
 - Whether a price suggestion is the feature that brings her back, and what sold-price data Listly can legally use.
-- Whether she would ever pay, and in what form (credit pack vs. subscription).
+- Whether she will pay $6.99 for a Clear-out Pass after 3 free listings, when the marketplaces' own AI is free.
 - What share of closet clearers later become regular resellers (this drives the value of the upgrade path).
 
 **Sources behind the assumptions:** Listly PRD v0.2; ThredUp 2026 Resale Report; secondary reporting that most resale sellers are monthly or quarterly sellers and much US resale is "closet clear-out" rather than income; eBay Magical Listing adoption data.
