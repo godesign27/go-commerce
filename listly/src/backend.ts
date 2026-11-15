@@ -138,6 +138,9 @@ export function useBackend() {
   const { s, set } = useStore()
   const synced = useRef<Map<string, string>>(new Map())
   const settings = useRef('')
+  // The latest local state, so a fresh account can inherit choices made before it existed (S-01 c3).
+  const latest = useRef(s)
+  latest.current = s
 
   // Session: restore on launch, follow sign-in and sign-out.
   useEffect(() => {
@@ -146,6 +149,12 @@ export function useBackend() {
       if (!userId) return set({ userId: null, booted: true })
       const [profile, items] = await Promise.all([fetchProfile(), fetchItems()])
       synced.current = new Map(items.map((i) => [i.id, JSON.stringify(toRow(i))]))
+      // Marketplaces picked during onboarding, before the account existed, are saved to it (S-01 c3).
+      const picked = latest.current.markets
+      if (profile && !profile.markets?.length && picked.length) {
+        const { error } = await supabase.from('profiles').update({ markets: picked }).eq('id', userId)
+        if (!error) profile.markets = picked
+      }
       settings.current = ''
       set({
         userId,
