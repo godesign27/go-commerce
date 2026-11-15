@@ -6,59 +6,104 @@ import { Icon } from '@/components/ui/icon'
 import { Progress } from '@/components/ui/progress'
 import { Text } from '@/components/ui/text'
 import { marketName } from '@/src/model'
+import { serverDraft, uploadPhotos } from '@/src/backend'
 import { useStore } from '@/src/store'
 import { announce, select, success } from '@/src/ui/feedback'
 import { router } from 'expo-router'
 import { Check, Copy, Lock } from 'lucide-react-native'
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { ActivityIndicator, View } from 'react-native'
 import Animated, { FadeInDown, ZoomIn } from 'react-native-reanimated'
 
 // Flow 1 · R-7, R-1 · S-12, S-18 · M-01 · D-1. The peak moment: listings arrive one by one.
 export default function Drafting() {
-  const { s, draftAllowed } = useStore()
+  const { s, draftAllowed, markDrafted, updateItem, updateListing } = useStore()
   const items = s.haul?.items ?? []
-  const plan = useMemo(() => {
+  // A first estimate from the local trial count; the server's answer replaces it when signed in (R-1).
+  const [plan, setPlan] = useState<('done' | 'todo' | 'locked')[]>(() => {
     let budget = s.plan ? Infinity : s.freeLeft
     return items.map((it) => (it.drafted ? 'done' : budget-- > 0 ? 'todo' : 'locked'))
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+  })
   const todo = plan.filter((p) => p === 'todo').length
   const [ready, setReady] = useState(0)
   const [finished, setFinished] = useState(false)
+  const [failed, setFailed] = useState(false)
+  const [attempt, setAttempt] = useState(0)
   const cancelled = useRef(false)
   const markets = s.markets.length ? s.markets.map(marketName).join(', ') : 'all five marketplaces'
 
   useEffect(() => {
-    announce(`Drafting ${todo} ${todo === 1 ? 'listing' : 'listings'}.`)
-    const finish = () => {
-      draftAllowed()
-      success()
-      setFinished(true)
-      announce(`${todo} ${todo === 1 ? 'listing' : 'listings'} ready to post.`)
-    }
-    if (todo === 0) return finish()
-    // STAND-IN for the drafting call (P-03): one item every 0.7 s.
-    let count = 0
-    const timer = setInterval(() => {
-      if (cancelled.current) return clearInterval(timer)
-      count += 1
-      select()
-      setReady(count)
-      if (count >= todo) {
-        clearInterval(timer)
-        finish()
+    let timer: ReturnType<typeof setInterval> | undefined
+    const run = async () => {
+      let drafted: string[] | null = null
+      let freeLeft: number | undefined
+      if (s.userId) {
+        try {
+          const r = await serverDraft(items)
+          if (r) {
+            drafted = r.ids
+            freeLeft = r.freeLeft
+            setPlan(items.map((it) => (it.drafted ? 'done' : r.ids.includes(it.id) ? 'todo' : 'locked')))
+            // Photos go to the seller's private folder in the background.
+            const uid = s.userId
+            items.forEach((it) =>
+              uploadPhotos(uid, it)
+                .then((photoPaths) => {
+                  if (!photoPaths.length) return
+                  updateItem(it.id, { photoPaths })
+                  updateListing(it.id, { photoPaths })
+                })
+                .catch(() => {}),
+            )
+          }
+        } catch {
+          setFailed(true)
+          return announce("Couldn't draft these listings. Your photos and answers are saved.")
+        }
       }
-    }, 700)
-    return () => clearInterval(timer)
+      const count = drafted ? drafted.length : todo
+      announce(`Drafting ${count} ${count === 1 ? 'listing' : 'listings'}.`)
+      const finish = () => {
+        if (drafted) markDrafted(drafted, freeLeft)
+        else draftAllowed()
+        success()
+        setFinished(true)
+        announce(`${count} ${count === 1 ? 'listing' : 'listings'} ready to post.`)
+      }
+      if (count === 0) return finish()
+      // STAND-IN for the AI drafting call (P-03): one item every 0.7 s.
+      let n = 0
+      timer = setInterval(() => {
+        if (cancelled.current) return clearInterval(timer)
+        n += 1
+        select()
+        setReady(n)
+        if (n >= count) {
+          clearInterval(timer)
+          finish()
+        }
+      }, 700)
+    }
+    run()
+    return () => timer && clearInterval(timer)
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+  }, [attempt])
 
   let k = 0
   return (
     <Screen
       footer={
-        finished ? (
+        failed ? (
+          <Button
+            size="lg"
+            onPress={() => {
+              setFailed(false)
+              setAttempt((a) => a + 1)
+            }}
+          >
+            <Text>Try again</Text>
+          </Button>
+        ) : finished ? (
           <Button size="lg" onPress={() => router.replace('/haul/copy')}>
             <Icon as={Copy} size={18} />
             <Text>Copy to your marketplaces</Text>
@@ -79,8 +124,8 @@ export default function Drafting() {
       }
     >
       <View className="gap-4 pt-4">
-        <Title sub={finished ? 'Drafted only from what you told Listly.' : `For ${markets}. Usually under a minute.`}>
-          {finished ? `${todo} ${todo === 1 ? 'listing' : 'listings'} ready to post` : 'Drafting your listings…'}
+        <Title sub={failed ? 'Your photos and answers are saved. Check your connection and try again.' : finished ? 'Drafted only from what you told Listly.' : `For ${markets}. Usually under a minute.`}>
+          {failed ? "Couldn't draft these listings" : finished ? `${todo} ${todo === 1 ? 'listing' : 'listings'} ready to post` : 'Drafting your listings…'}
         </Title>
         <Progress value={todo ? (Math.min(ready, todo) / todo) * 100 : 100} accessibilityLabel={`${Math.min(ready, todo)} of ${todo} drafted`} />
       </View>

@@ -29,7 +29,7 @@ export default function Listings() {
       <ListRow
         key={it.id}
         title={it.name}
-        subtitle={it.status === 'sold' ? `Sold on ${marketName(it.sale!.on)} · ${it.sale!.date}` : it.listedOn.length ? it.listedOn.map(marketName).join(' · ') : 'Not listed yet'}
+        subtitle={it.status === 'sold' ? `Sold on ${marketName(it.sale!.on)} · ${it.sale!.date}` : !it.drafted ? 'Saved, ready to draft when you pick a plan' : it.listedOn.length ? it.listedOn.map(marketName).join(' · ') : 'Not listed yet'}
         leading={it.photos.length ? <Thumb uri={it.photos[0]} size={52} radius={8} /> : <IconBadge icon={Package} size={52} tone="muted" />}
         trailing={
           live.length ? (

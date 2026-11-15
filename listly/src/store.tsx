@@ -1,4 +1,5 @@
 import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from 'react'
+import { randomUUID } from 'expo-crypto'
 import { groupPhotos, nameFor } from './ai'
 import { emptyFacts, today, type Item, type MarketId, type Perm, type Plan } from './model'
 
@@ -29,6 +30,12 @@ export type AppState = {
   linkedShops: number
   keepUndo: boolean
   welcomePlan: Plan
+  /** Supabase user id when signed in; null = on-device only. */
+  userId: string | null
+  /** The AI notice was acknowledged on this account (S-03 c5). */
+  noticeAt: string | null
+  /** The saved session has been checked at launch. */
+  booted: boolean
 }
 
 const initial: AppState = {
@@ -48,6 +55,9 @@ const initial: AppState = {
   linkedShops: 0,
   keepUndo: false,
   welcomePlan: null,
+  userId: null,
+  noticeAt: null,
+  booted: false,
 }
 
 type Store = {
@@ -70,15 +80,16 @@ type Store = {
   deleteListing: (id: string) => void
   /** Prototype only: synthetic listings so the sold flow can be tried without photographing a haul. */
   loadSamples: () => void
+  /** Marks the given haul items drafted (the server decides which, via draft_items). */
+  markDrafted: (ids: string[], freeLeft?: number) => void
 }
 
 const Ctx = createContext<Store | null>(null)
-let seq = 0
 
 /** Synthetic sample listings (no real people or photos), for trying Listings, Mark sold, the checklist and Profit. */
 function sampleListings(): Item[] {
   const base = (name: string, brand: string, size: string, cond: string, price: string, listedOn: MarketId[], cost: number | null, days: number): Item => ({
-    id: `sample${++seq}`,
+    id: randomUUID(),
     photos: [],
     name,
     facts: { ...emptyFacts('B2'), brand, size, cond, noFlaws: true, source: 'typed' },
@@ -120,7 +131,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         setS((p) => {
           if (!p.haul) return p
           const items: Item[] = groupPhotos(p.haul.photos, p.haul.marks).map((photos, i) => ({
-            id: `it${++seq}`,
+            id: randomUUID(),
             photos,
             name: nameFor(p.listings.length + i),
             facts: emptyFacts(p.defaultBin),
@@ -160,21 +171,30 @@ export function StoreProvider({ children }: { children: ReactNode }) {
           ...p,
           listings: p.haul
             ? [
-                ...p.haul.items
-                  .filter((i) => i.drafted)
-                  .map((i) => ({ ...i, status: i.listedOn.length ? ('listed' as const) : ('ready' as const), history: [...i.history, `${today()} · Drafted`] })),
+                // Undrafted items stay saved and locked, ready to draft when a plan is picked (R-2).
+                ...p.haul.items.map((i) => ({
+                  ...i,
+                  status: i.listedOn.length ? ('listed' as const) : ('ready' as const),
+                  history: [...i.history, `${today()} · ${i.drafted ? 'Drafted' : 'Saved, waiting for a plan'}`],
+                })),
                 ...p.listings,
               ]
             : p.listings,
           haul: null,
         })),
       buy: (plan) => setS((p) => ({ ...p, plan, welcomePlan: plan })),
-      reset: () => setS(initial),
+      reset: () => setS({ ...initial, booted: true }),
       updateListing: (id, patch) =>
         setS((p) => ({ ...p, listings: p.listings.map((it) => (it.id === id ? { ...it, ...(typeof patch === 'function' ? patch(it) : patch) } : it)) })),
       setListings: (items) => setS((p) => ({ ...p, listings: items })),
       deleteListing: (id) => setS((p) => ({ ...p, listings: p.listings.filter((it) => it.id !== id) })),
       loadSamples: () => setS((p) => ({ ...p, listings: [...sampleListings(), ...p.listings] })),
+      markDrafted: (ids, freeLeft) =>
+        setS((p) => ({
+          ...p,
+          freeLeft: freeLeft ?? p.freeLeft,
+          haul: p.haul ? { ...p.haul, items: p.haul.items.map((it) => (ids.includes(it.id) ? { ...it, drafted: true } : it)) } : p.haul,
+        })),
     }),
     [s, set, patchHaul],
   )

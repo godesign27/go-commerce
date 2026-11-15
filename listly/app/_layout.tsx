@@ -8,11 +8,13 @@ import { useColorScheme } from 'nativewind'
 import { GestureHandlerRootView } from 'react-native-gesture-handler'
 import { SafeAreaProvider } from 'react-native-safe-area-context'
 import { NAV_THEME } from '@/lib/theme'
+import { useBackend } from '@/src/backend'
 import { usePermissionSync } from '@/src/permissions'
 import { StoreProvider } from '@/src/store'
 
 function Navigator() {
   usePermissionSync()
+  useBackend()
   return (
     <Stack screenOptions={{ headerShown: false }}>
       <Stack.Screen name="(onboarding)" />

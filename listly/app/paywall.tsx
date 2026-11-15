@@ -4,6 +4,7 @@ import { Card } from '@/components/ui/card'
 import { Icon } from '@/components/ui/icon'
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Text } from '@/components/ui/text'
+import { serverStartPlan } from '@/src/backend'
 import { useStore } from '@/src/store'
 import { announce, success } from '@/src/ui/feedback'
 import { router, useLocalSearchParams } from 'expo-router'
@@ -35,12 +36,12 @@ export default function Paywall() {
   // STAND-IN for StoreKit / Google Play Billing (R-3): no purchase is made in this build.
   const purchase = (plan: 'reseller' | 'pass') => {
     setBusy(plan)
-    setTimeout(() => {
+    serverStartPlan(plan).finally(() => {
       buy(plan)
       success()
       announce(plan === 'reseller' ? 'Reseller plan started.' : 'Clear-out Pass active for 30 days.')
       router.back() // back to the haul (DD-09)
-    }, 800)
+    })
   }
 
   return (

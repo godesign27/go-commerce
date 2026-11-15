@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Icon } from '@/components/ui/icon'
 import { Text } from '@/components/ui/text'
+import { acknowledgeNotice } from '@/src/backend'
 import { requestCamera, requestMic } from '@/src/permissions'
 import { useStore } from '@/src/store'
 import { announce } from '@/src/ui/feedback'
@@ -20,10 +21,11 @@ const NOTICE = [
 
 // R-33 step 4 · S-03 · R-23 · C-04, C-72 · DD-36: the explanation, then the camera prompt, then the microphone prompt.
 export default function Permissions() {
-  const { set, startHaul } = useStore()
+  const { s, set, startHaul } = useStore()
   const [busy, setBusy] = useState(false)
   const begin = () => {
-    set({ onboarded: true })
+    acknowledgeNotice(s.userId) // recorded on the account with its version (S-03 c5)
+    set({ onboarded: true, noticeAt: new Date().toISOString() })
     startHaul()
     router.replace('/haul') // onboarding ends in a new haul (R-33)
   }

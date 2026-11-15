@@ -1,17 +1,27 @@
-# Test accounts (development builds only)
+# Signing in during development
 
-There is no auth server yet, so sign-in is local to the app. These values are fake test values for
-this build. Never use a real email or a real code here.
+Sign-in is passwordless by design (DD-33): a 6-digit code by email, or Apple. There is no password.
+
+## With the backend connected (`.env.local` present)
+
+Sign-in goes through Supabase Auth (project `rrfujnkudwvicgzxztjz`). Use a real inbox you control.
+
+- **Before codes arrive**, the email templates must include the code. In the Supabase dashboard, open
+  Authentication > Emails > Templates and add `{{ .Token }}` to both **Magic link** and **Confirm signup**,
+  for example: `<p>Your Listly code: {{ .Token }}</p>`. Without it, Supabase emails a link instead.
+- Supabase's built-in email sender only delivers to members of the Supabase organization and is heavily
+  rate-limited. For anyone else, connect a sender such as Resend under Authentication > Emails > SMTP Settings.
+- A fresh account starts on the trial with 3 free listings. The trial is enforced on the server.
+- Apple sign-in needs the Apple provider enabled in Supabase with this app's bundle id. In Expo Go the bundle
+  id is `host.exp.Exponent`. Until then Apple shows the failure state.
+- Google is still a stand-in: it signs in on this device only, and nothing is saved to Supabase.
+
+## Without the backend (no `.env.local`)
+
+Everything stays on the device. These fake test values work:
 
 | Purpose | Email | Code |
 |---|---|---|
 | Email sign-up or sign-in | `test@listly.dev` | `123456` |
 
-- Sign-in is passwordless by design (DD-33): an email link or a 6-digit code. There is no password.
-- With the test email, only the code above is accepted. Any other email accepts any 6 digits, because
-  nothing is emailed in this build.
-- Apple: the simulator's Apple ID works, or it shows the failure state with "Continue without signing in".
-- Google: stubbed until the Google sign-in SDK is connected.
-
-When auth is connected (proposed: Supabase Auth with email OTP, Apple and Google, and Resend as the
-email sender), replace this file with the seed accounts the backend creates.
+Any other email accepts any 6 digits, because nothing is emailed.

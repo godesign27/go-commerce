@@ -3,6 +3,7 @@ import { Overline, Screen } from '@/components/listly/screen'
 import { Text } from '@/components/ui/text'
 import { THEME } from '@/lib/theme'
 import { marketName } from '@/src/model'
+import { signOutEverywhere } from '@/src/backend'
 import { useStore } from '@/src/store'
 import { announce } from '@/src/ui/feedback'
 import { router } from 'expo-router'
@@ -31,7 +32,7 @@ export default function Profile() {
       </Text>
       <Group title="Account" footer={s.account?.method === 'apple' && /privaterelay|Hidden/.test(email) ? 'Hidden by Apple — emails still reach you.' : undefined}>
         <ListRow title={email} subtitle={s.account ? `Signed in with ${s.account.method === 'apple' ? 'Apple' : s.account.method === 'google' ? 'Google' : 'email'}` : undefined} />
-        <ListRow title="Sign out" onPress={() => { reset(); router.replace('/welcome') }} />
+        <ListRow title="Sign out" onPress={async () => { await signOutEverywhere(); reset(); router.replace('/welcome') }} />
       </Group>
       <Group title="Plan">
         <ListRow title={s.plan === 'reseller' ? 'Reseller plan' : s.plan === 'pass' ? 'Clear-out Pass' : 'Free trial'} trailing={!s.plan ? `${s.freeLeft} of 3 left` : undefined} />

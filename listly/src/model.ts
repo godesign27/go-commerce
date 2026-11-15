@@ -50,6 +50,8 @@ export type Item = {
   /** What the seller paid. null = not entered (profit is an estimate, never a silent $0). $0 is a real cost (DD-18). */
   cost: number | null
   history: string[]
+  /** Where the photos live in Supabase Storage ({user id}/{item id}/n.jpg), once uploaded. */
+  photoPaths?: string[]
 }
 
 export type ShipBy = 'buyer' | 'me' | 'free'

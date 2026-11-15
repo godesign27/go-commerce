@@ -14,7 +14,8 @@ export default function TabsLayout() {
   const { colorScheme } = useColorScheme()
   const t = THEME[colorScheme === 'dark' ? 'dark' : 'light']
   const { s, startHaul } = useStore()
-  if (!s.onboarded) return <Redirect href="/welcome" />
+  if (!s.booted) return <View className="bg-background flex-1" />   // checking the saved session
+  if (!s.onboarded) return <Redirect href={s.userId ? '/permissions' : '/welcome'} />
   return (
     <Tabs
       screenOptions={{

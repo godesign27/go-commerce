@@ -1,3 +1,7 @@
 node_modules/
 .expo/
 dist/
+
+# local env (Supabase URL and publishable key)
+.env*.local
+.env
