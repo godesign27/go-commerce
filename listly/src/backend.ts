@@ -1,5 +1,6 @@
 import { backendConfigured, supabase } from '@/lib/supabase'
 import { useEffect, useRef } from 'react'
+import { fetchEbayConnection } from './marketplaces'
 import type { Item, MarketId, Plan } from './model'
 import { useStore, type AppState } from './store'
 
@@ -19,6 +20,7 @@ type ItemRow = {
   sale: Item['sale'] | null
   history: string[]
   photo_paths: string[]
+  external?: Item['external']
 }
 
 /** The columns the app may write (drafted and user_id are server-owned). */
@@ -50,6 +52,7 @@ const fromRow = (r: ItemRow, urls: Record<string, string>): Item => ({
   cost: r.cost === null ? null : Number(r.cost),
   history: r.history ?? [],
   photoPaths: r.photo_paths,
+  external: r.external ?? {},
   photos: r.photo_paths.map((p) => urls[p]).filter(Boolean),
 })
 
@@ -94,6 +97,12 @@ async function fetchItems(): Promise<Item[]> {
 }
 
 /** Saves items, drafts what the plan allows on the server, and returns the drafted ids and the new trial count. */
+/** Saves one item now (for example its latest price and photos, before posting it). */
+export async function saveItem(item: Item) {
+  const { error } = await supabase.from('items').upsert(toRow(item))
+  if (error) throw error
+}
+
 export async function serverDraft(items: Item[]): Promise<{ ids: string[]; freeLeft: number } | null> {
   if (!backendConfigured) return null
   const { data: session } = await supabase.auth.getSession()
@@ -147,7 +156,7 @@ export function useBackend() {
     if (!backendConfigured) return set({ booted: true })
     const load = async (userId: string | null, email?: string) => {
       if (!userId) return set({ userId: null, booted: true })
-      const [profile, items] = await Promise.all([fetchProfile(), fetchItems()])
+      const [profile, items, ebay] = await Promise.all([fetchProfile(), fetchItems(), fetchEbayConnection()])
       synced.current = new Map(items.map((i) => [i.id, JSON.stringify(toRow(i))]))
       // Marketplaces picked during onboarding, before the account existed, are saved to it (S-01 c3).
       const picked = latest.current.markets
@@ -160,6 +169,7 @@ export function useBackend() {
         userId,
         account: { method: 'email', email: email ?? '' },
         listings: items,
+        ebay,
         onboarded: !!profile?.noticeAt,
         ...(profile ?? {}),
         booted: true,

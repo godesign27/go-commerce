@@ -40,7 +40,8 @@ export default function Profile() {
         <ListRow title="Restore purchases" onPress={() => announce('Checking the App Store for your purchases.')} />
       </Group>
       <Group title="Marketplaces">
-        <ListRow title="Drafting for" subtitle={s.markets.length ? s.markets.map(marketName).join(', ') : 'All five marketplaces'} chevron onPress={() => announce('Marketplaces and connections open here.')} />
+        <ListRow title="Marketplaces and connections" subtitle={s.ebay?.status === 'connected' ? 'eBay connected' : 'Connect eBay to post directly'} chevron onPress={() => router.push('/connections')} />
+        <ListRow title="Drafting for" subtitle={s.markets.length ? s.markets.map(marketName).join(', ') : 'All five marketplaces'} />
       </Group>
       <Group title="Selling defaults">
         <ListRow title="Shipping, usually" trailing={{ buyer: 'Buyer pays', me: 'I pay', free: 'Free shipping' }[s.shipBy]} chevron onPress={() => router.push('/setup-defaults')} />

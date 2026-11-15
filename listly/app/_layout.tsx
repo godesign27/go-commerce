@@ -24,6 +24,7 @@ function Navigator() {
       <Stack.Screen name="paywall" options={{ presentation: 'modal' }} />
       <Stack.Screen name="setup-defaults" options={{ presentation: 'modal' }} />
       <Stack.Screen name="item/[id]" />
+      <Stack.Screen name="connections" options={{ presentation: 'card' }} />
       <Stack.Screen name="sold/[id]" options={{ presentation: 'modal' }} />
       <Stack.Screen name="checklist/[id]" options={{ gestureEnabled: false }} />
     </Stack>

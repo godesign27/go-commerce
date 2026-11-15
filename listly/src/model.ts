@@ -52,6 +52,8 @@ export type Item = {
   history: string[]
   /** Where the photos live in Supabase Storage ({user id}/{item id}/n.jpg), once uploaded. */
   photoPaths?: string[]
+  /** Where Listly posted it through an API (written by the server), e.g. eBay's listing link. */
+  external?: { ebay?: { listingId: string; url: string; environment?: string } }
 }
 
 export type ShipBy = 'buyer' | 'me' | 'free'

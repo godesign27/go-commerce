@@ -9,16 +9,135 @@ import { Input } from '@/components/ui/input'
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Text } from '@/components/ui/text'
 import { cn } from '@/lib/utils'
-import { draftFor } from '@/src/ai'
-import { MARKETS, type MarketId } from '@/src/model'
+import { draftFor, type DraftField } from '@/src/ai'
+import { saveItem } from '@/src/backend'
+import { postToEbay, POSTING, wholeListing } from '@/src/marketplaces'
+import { MARKETS, type Item, type MarketId } from '@/src/model'
 import { useStore } from '@/src/store'
-import { announce, success, tap } from '@/src/ui/feedback'
+import { announce, success, tap, warn } from '@/src/ui/feedback'
 import * as Clipboard from 'expo-clipboard'
+import * as Linking from 'expo-linking'
 import { router } from 'expo-router'
-import { CircleCheck, Copy, Lock } from 'lucide-react-native'
+import { CircleAlert, CircleCheck, Copy, ExternalLink, Lock, Send } from 'lucide-react-native'
 import { useState } from 'react'
-import { Pressable, ScrollView, View } from 'react-native'
+import { ActivityIndicator, Pressable, ScrollView, View } from 'react-native'
 import Animated, { FadeIn } from 'react-native-reanimated'
+
+/** How this item gets onto the selected marketplace (DD-46): post through eBay's API, or copy it whole and open the marketplace. */
+function PostPanel({ item, mkt, fields, onCopiedAll }: { item: Item; mkt: MarketId; fields: DraftField[]; onCopiedAll: () => void }) {
+  const { s, updateItem } = useStore()
+  const [busy, setBusy] = useState(false)
+  const [error, setError] = useState<string>()
+  const [askZip, setAskZip] = useState(false)
+  const [zip, setZip] = useState('')
+  const m = MARKETS.find((x) => x.id === mkt)!
+  const title = fields.find((f) => f.key === 'title')?.value ?? ''
+  const description = fields.find((f) => f.key === 'description')?.value ?? ''
+
+  if (mkt === 'ebay') {
+    const posted = item.external?.ebay
+    if (posted)
+      return (
+        <View className="bg-success-soft gap-3 rounded-xl p-4" accessibilityRole="summary">
+          <View className="flex-row items-center gap-2">
+            <Icon as={CircleCheck} size={20} className="text-success" />
+            <Text className="text-success flex-1 text-base font-semibold">Posted to eBay{posted.environment === 'sandbox' ? ' (test site)' : ''}</Text>
+          </View>
+          <Button variant="outline" size="sm" className="self-start" onPress={() => Linking.openURL(posted.url)}>
+            <Icon as={ExternalLink} size={16} />
+            <Text>View on eBay</Text>
+          </Button>
+        </View>
+      )
+    if (s.ebay?.status !== 'connected')
+      return (
+        <Card className="gap-3 px-4 py-4">
+          <Text className="text-base font-semibold">Post to eBay in one tap</Text>
+          <Text className="text-muted-foreground text-sm">Connect your eBay account once. You sign in on eBay's own page, and Listly never sees your password.</Text>
+          <Button onPress={() => router.push('/connections')}>
+            <Text>{s.ebay ? 'Connect eBay again' : 'Connect eBay'}</Text>
+          </Button>
+        </Card>
+      )
+    const post = async () => {
+      if (!item.price) return setError('Set your price below first.')
+      setBusy(true)
+      setError(undefined)
+      try {
+        await saveItem(item) // the server posts what's on screen: latest price and photos
+      } catch {
+        setBusy(false)
+        return setError('Couldn’t save this item. Check your connection and try again.')
+      }
+      const r = await postToEbay(item, title, description, askZip ? zip : undefined)
+      setBusy(false)
+      if (r.ok) {
+        success()
+        updateItem(item.id, (it) => ({ listedOn: Array.from(new Set([...it.listedOn, 'ebay' as MarketId])), external: { ...(it.external ?? {}), ebay: { listingId: r.listingId, url: r.url } } }))
+        return announce(`Posted to eBay in ${r.category}.`)
+      }
+      warn()
+      if (r.needs === 'postalCode') setAskZip(true)
+      setError(r.error)
+      announce(r.error)
+    }
+    return (
+      <Card className="gap-3 px-4 py-4">
+        <View className="flex-row items-center gap-2">
+          <Icon as={Send} size={18} className="text-primary" />
+          <Text className="flex-1 text-base font-semibold">Post this listing to eBay</Text>
+          {s.ebay.environment === 'sandbox' ? (
+            <Badge variant="secondary">
+              <Text>Test site</Text>
+            </Badge>
+          ) : null}
+        </View>
+        <Text className="text-muted-foreground text-sm">Listly sends the title, description, photos, condition and your price. eBay picks the category from the title; you can change it on eBay.</Text>
+        {askZip ? (
+          <Field label="ZIP code you ship from" helper="eBay needs it for shipping. You'll only be asked once.">
+            <Input value={zip} onChangeText={(v) => setZip(v.replace(/[^0-9-]/g, '').slice(0, 10))} accessibilityLabel="ZIP code you ship from" keyboardType="number-pad" autoComplete="postal-code" textContentType="postalCode" placeholder="e.g. 94110" />
+          </Field>
+        ) : null}
+        {error ? (
+          <View className="flex-row items-start gap-2" accessibilityRole="alert">
+            <Icon as={CircleAlert} size={16} className="text-destructive mt-0.5" />
+            <Text className="text-destructive flex-1 text-sm font-medium">{error}</Text>
+          </View>
+        ) : null}
+        <Button size="lg" disabled={busy} onPress={post}>
+          {busy ? <ActivityIndicator color="white" /> : <Text>Post to eBay</Text>}
+        </Button>
+      </Card>
+    )
+  }
+
+  // Marketplaces without an API: the whole listing in one tap, then straight to their sell page.
+  return (
+    <Card className="gap-3 px-4 py-4">
+      <Text className="text-base font-semibold">Post on {m.name}</Text>
+      <Text className="text-muted-foreground text-sm">Copy the whole listing, open {m.short}, paste it, add your photos and post. The Listly Safari extension that fills this in for you is coming next.</Text>
+      <View className="flex-row gap-2">
+        <Button
+          variant="secondary"
+          className="flex-1"
+          onPress={async () => {
+            await Clipboard.setStringAsync(wholeListing(fields, item.price))
+            tap()
+            onCopiedAll()
+            announce(`Listing copied for ${m.name}.`)
+          }}
+        >
+          <Icon as={Copy} size={16} />
+          <Text>Copy listing</Text>
+        </Button>
+        <Button className="flex-1" onPress={() => Linking.openURL(POSTING[mkt].sellUrl)}>
+          <Icon as={ExternalLink} size={16} />
+          <Text>Open {m.short}</Text>
+        </Button>
+      </View>
+    </Card>
+  )
+}
 
 // Flow 1 · R-8, R-12, R-1, R-2 · S-15, S-18 · DD-07, DD-09, DD-12 · C-16 to C-21
 export default function CopyListings() {
@@ -144,6 +263,12 @@ export default function CopyListings() {
               ))}
             </TabsList>
           </Tabs>
+          <PostPanel
+            item={item}
+            mkt={mkt}
+            fields={fields}
+            onCopiedAll={() => updateItem(item.id, (it) => ({ copied: { ...it.copied, ...Object.fromEntries(fields.filter((f) => f.value).map((f) => [`${mkt}|${f.key}`, true])) } }))}
+          />
           <View className="flex-row items-center justify-between px-1">
             <Text role="heading" className="text-muted-foreground text-xs font-semibold uppercase tracking-wider">
               {MARKETS.find((m) => m.id === mkt)?.name} listing

@@ -24,7 +24,7 @@ export default function Home() {
   }
   const unfinished = s.haul && s.haul.photos.length > 0
   const brandNew = !s.listings.length && !unfinished
-  const showSetup = s.listings.length > 0 && !s.setupDismissed && !(s.defaultsSet && s.linkedShops > 0)
+  const showSetup = s.listings.length > 0 && !s.setupDismissed && !(s.defaultsSet && s.ebay?.status === 'connected')
   const marketsLine = s.markets.length ? s.markets.map((m: MarketId) => marketName(m)).join(' · ') : 'All five marketplaces'
   const atRisk = s.listings.filter((it) => liveElsewhere(it).length > 0)
 
@@ -153,7 +153,7 @@ export default function Home() {
             Finish setting up
           </Overline>
           <ListGroup footer="Optional. Each takes under a minute.">
-            <ListRow title="Link your shops" subtitle="So Listly can open your listings" leading={<IconBadge icon={Link2} size={36} />} chevron onPress={() => announce('Marketplaces and connections open here.')} />
+            <ListRow title="Connect your marketplaces" subtitle="Post to eBay in one tap" leading={<IconBadge icon={Link2} size={36} tone={s.ebay?.status === 'connected' ? 'success' : 'accent'} />} trailing={s.ebay?.status === 'connected' ? <Badge variant="success"><Text>Done</Text></Badge> : undefined} chevron={s.ebay?.status !== 'connected'} onPress={() => router.push('/connections')} />
             <ListRow
               title="Set selling defaults"
               subtitle="Who pays shipping, and your default bin"

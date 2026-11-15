@@ -36,6 +36,8 @@ export type AppState = {
   noticeAt: string | null
   /** The saved session has been checked at launch. */
   booted: boolean
+  /** eBay connection as the server reports it (tokens never reach the app). */
+  ebay: { status: 'connected' | 'needs_reconnect'; account: string | null; environment: 'sandbox' | 'production' } | null
 }
 
 const initial: AppState = {
@@ -58,6 +60,7 @@ const initial: AppState = {
   userId: null,
   noticeAt: null,
   booted: false,
+  ebay: null,
 }
 
 type Store = {
