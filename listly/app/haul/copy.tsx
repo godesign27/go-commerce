@@ -11,16 +11,16 @@ import { Text } from '@/components/ui/text'
 import { cn } from '@/lib/utils'
 import { draftFor, type DraftField } from '@/src/ai'
 import { saveItem } from '@/src/backend'
-import { postToEbay, POSTING, wholeListing } from '@/src/marketplaces'
+import { fillOnMarketplace, postToEbay, POSTING, wholeListing } from '@/src/marketplaces'
 import { MARKETS, type Item, type MarketId } from '@/src/model'
 import { useStore } from '@/src/store'
 import { announce, success, tap, warn } from '@/src/ui/feedback'
 import * as Clipboard from 'expo-clipboard'
 import * as Linking from 'expo-linking'
 import { router } from 'expo-router'
-import { CircleAlert, CircleCheck, Copy, ExternalLink, Lock, Send } from 'lucide-react-native'
+import { CircleAlert, CircleCheck, Compass, Copy, ExternalLink, Lock, Send } from 'lucide-react-native'
 import { useState } from 'react'
-import { ActivityIndicator, Pressable, ScrollView, View } from 'react-native'
+import { ActivityIndicator, Alert as NativeAlert, Pressable, ScrollView, View } from 'react-native'
 import Animated, { FadeIn } from 'react-native-reanimated'
 
 /** How this item gets onto the selected marketplace (DD-46): post through eBay's API, or copy it whole and open the marketplace. */
@@ -111,22 +111,78 @@ function PostPanel({ item, mkt, fields, onCopiedAll }: { item: Item; mkt: Market
     )
   }
 
-  // Marketplaces without an API: the whole listing in one tap, then straight to their sell page.
+  const copyAll = async () => {
+    await Clipboard.setStringAsync(wholeListing(fields, item.price))
+    tap()
+    onCopiedAll()
+    announce(`Listing copied for ${m.name}.`)
+  }
+
+  // Poshmark, Mercari, Facebook: the Listly Safari extension fills their own sell page; the seller taps List (DD-46).
+  if (POSTING[mkt].mode === 'extension')
+    return (
+      <Card className="gap-3 px-4 py-4">
+        <View className="flex-row items-center gap-2">
+          <Icon as={Compass} size={18} className="text-primary" />
+          <Text className="flex-1 text-base font-semibold">Fill it in on {m.short}</Text>
+        </View>
+        <Text className="text-muted-foreground text-sm">
+          Opens {m.short}'s sell page in Safari and fills the title, description, price and photos. You check it and tap {mkt === 'facebook' ? 'Publish' : 'List'} yourself.
+        </Text>
+        {error ? (
+          <View className="flex-row items-start gap-2" accessibilityRole="alert">
+            <Icon as={CircleAlert} size={16} className="text-destructive mt-0.5" />
+            <Text className="text-destructive flex-1 text-sm font-medium">{error}</Text>
+          </View>
+        ) : null}
+        <Button
+          size="lg"
+          disabled={busy}
+          onPress={async () => {
+            setBusy(true)
+            setError(undefined)
+            try {
+              const r = await fillOnMarketplace(mkt, item, fields)
+              tap()
+              announce(`Opening ${m.name} in Safari${r.photos ? ` with ${r.photos} photos` : ''}.`)
+            } catch {
+              setError(`Couldn’t open ${m.name}. Try Copy listing instead.`)
+            } finally {
+              setBusy(false)
+            }
+          }}
+        >
+          {busy ? <ActivityIndicator color="white" /> : <Text>Fill on {m.short}</Text>}
+        </Button>
+        <View className="flex-row gap-2">
+          <Button variant="secondary" size="sm" className="flex-1" onPress={copyAll}>
+            <Icon as={Copy} size={16} />
+            <Text>Copy listing</Text>
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="flex-1"
+            onPress={() =>
+              NativeAlert.alert(
+                'Turn on the Listly extension',
+                `Once, on this iPhone:\n\n1. Open Settings, then Apps, then Safari, then Extensions.\n2. Tap Listly and turn it on.\n3. Allow it on ${m.short.toLowerCase()}.com.\n\nThen tap Fill on ${m.short}. Sign in to ${m.short} in Safari if it asks. Listly never sees that password.`,
+              )
+            }
+          >
+            <Text>First time?</Text>
+          </Button>
+        </View>
+      </Card>
+    )
+
+  // Depop until it approves Listly as a partner: the whole listing in one tap, then its sell page.
   return (
     <Card className="gap-3 px-4 py-4">
       <Text className="text-base font-semibold">Post on {m.name}</Text>
-      <Text className="text-muted-foreground text-sm">Copy the whole listing, open {m.short}, paste it, add your photos and post. The Listly Safari extension that fills this in for you is coming next.</Text>
+      <Text className="text-muted-foreground text-sm">Copy the whole listing, open {m.short}, paste it, add your photos and post. Direct posting to {m.short} comes once {m.short} approves Listly.</Text>
       <View className="flex-row gap-2">
-        <Button
-          variant="secondary"
-          className="flex-1"
-          onPress={async () => {
-            await Clipboard.setStringAsync(wholeListing(fields, item.price))
-            tap()
-            onCopiedAll()
-            announce(`Listing copied for ${m.name}.`)
-          }}
-        >
+        <Button variant="secondary" className="flex-1" onPress={copyAll}>
           <Icon as={Copy} size={16} />
           <Text>Copy listing</Text>
         </Button>

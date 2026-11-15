@@ -57,6 +57,54 @@ export async function postToEbay(item: Item, title: string, description: string,
   return fn<{ listingId: string; url: string; category: string }>('publish', { itemId: item.id, title, description, postalCode })
 }
 
+// ---------- Safari extension hand-off (DD-46) ----------
+
+const B64 = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_'
+/** UTF-8 → base64url, without relying on btoa or Buffer. */
+function base64url(text: string) {
+  const bytes = new TextEncoder().encode(text)
+  let out = ''
+  for (let i = 0; i < bytes.length; i += 3) {
+    const n = (bytes[i] << 16) | ((bytes[i + 1] ?? 0) << 8) | (bytes[i + 2] ?? 0)
+    out += B64[(n >> 18) & 63] + B64[(n >> 12) & 63]
+    if (i + 1 < bytes.length) out += B64[(n >> 6) & 63]
+    if (i + 2 < bytes.length) out += B64[n & 63]
+  }
+  return out
+}
+
+/**
+ * Opens the marketplace's own sell page in Safari with the listing after "#listly=". The part after "#" never
+ * reaches the marketplace's servers, and the Listly extension removes it from the address bar once read.
+ * Photos travel as short-lived private links (30 minutes) to the seller's own folder.
+ */
+export async function fillOnMarketplace(mkt: MarketId, item: Item, fields: { key: string; value: string | null }[]) {
+  let photos: string[] = []
+  if (backendConfigured && item.photoPaths?.length) {
+    const { data } = await supabase.storage.from('item-photos').createSignedUrls(item.photoPaths, 30 * 60)
+    photos = (data ?? []).map((d) => d.signedUrl).filter(Boolean) as string[]
+  }
+  const get = (k: string) => fields.find((f) => f.key === k)?.value ?? ''
+  const payload = {
+    v: 1,
+    title: get('title'),
+    description: get('description'),
+    price: item.price,
+    brand: item.facts.brand,
+    size: item.facts.size,
+    condition: item.facts.cond,
+    photos,
+  }
+  const url = `${POSTING[mkt].sellUrl}#listly=${base64url(JSON.stringify(payload))}`
+  // Prefer Safari explicitly, so an installed marketplace app doesn't intercept the link. [verify on device]
+  try {
+    await Linking.openURL(`x-safari-${url}`)
+  } catch {
+    await Linking.openURL(url)
+  }
+  return { photos: photos.length }
+}
+
 /** Everything a seller pastes, in one block: title, description, price. */
 export const wholeListing = (fields: { label: string; value: string | null }[], price: string) =>
   [

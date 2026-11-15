@@ -1,0 +1,10 @@
+{
+    "extension_name": {
+        "message": "Listly",
+        "description": "The display name for the extension."
+    },
+    "extension_description": {
+        "message": "Fills your Listly listing into Poshmark, Mercari or Facebook Marketplace. You check it and post it yourself. Listly never sees your passwords.",
+        "description": "Description of what the extension does."
+    }
+}

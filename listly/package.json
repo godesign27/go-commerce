@@ -8,7 +8,7 @@
   ],
   "scripts": {
     "start": "expo start",
-    "ios": "expo start --ios",
+    "ios": "expo run:ios",
     "typecheck": "tsc --noEmit && npm run typecheck --workspace @go-commerce/mobile-design-system",
     "validate": "npm run validate --workspace @go-commerce/mobile-design-system",
     "bundle:ios": "expo export --platform ios",
@@ -64,6 +64,7 @@
     "tamagui": "3.3.2"
   },
   "devDependencies": {
+    "@bacons/apple-targets": "^5.0.0",
     "@types/react": "^19.0.0",
     "tailwindcss": "^3.4.19",
     "typescript": "~5.9.3"
