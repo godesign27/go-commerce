@@ -5,3 +5,6 @@ dist/
 # local env (Supabase URL and publishable key)
 .env*.local
 .env
+
+# keep the env template (no secrets in it)
+!.env.example
