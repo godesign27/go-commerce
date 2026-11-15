@@ -21,6 +21,9 @@ function Navigator() {
       <Stack.Screen name="haul" options={{ presentation: 'fullScreenModal', gestureEnabled: false }} />
       <Stack.Screen name="paywall" options={{ presentation: 'modal' }} />
       <Stack.Screen name="setup-defaults" options={{ presentation: 'modal' }} />
+      <Stack.Screen name="item/[id]" />
+      <Stack.Screen name="sold/[id]" options={{ presentation: 'modal' }} />
+      <Stack.Screen name="checklist/[id]" options={{ gestureEnabled: false }} />
     </Stack>
   )
 }

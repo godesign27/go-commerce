@@ -193,6 +193,29 @@ export default function CopyListings() {
               <Text>Copy price</Text>
             </Button>
           </Card>
+          {/* S-17: record where it's live, so the sold checklist knows where to take it down. */}
+          {item.listedOn.includes(mkt) ? (
+            <View className="bg-success-soft flex-row items-center gap-3 rounded-xl p-4" accessible accessibilityLabel={`Listed on ${MARKETS.find((m) => m.id === mkt)?.name}`}>
+              <Icon as={CircleCheck} size={20} className="text-success" />
+              <Text className="text-success flex-1 text-base font-semibold">Listed on {MARKETS.find((m) => m.id === mkt)?.name}</Text>
+              <Button variant="ghost" size="sm" onPress={() => updateItem(item.id, (it) => ({ listedOn: it.listedOn.filter((m) => m !== mkt) }))}>
+                <Text>Undo</Text>
+              </Button>
+            </View>
+          ) : (
+            <Button
+              size="lg"
+              variant="outline"
+              onPress={() => {
+                success()
+                updateItem(item.id, (it) => ({ listedOn: [...it.listedOn, mkt] }))
+                announce(`Marked listed on ${MARKETS.find((m) => m.id === mkt)?.name}.`)
+              }}
+            >
+              <Icon as={CircleCheck} size={18} />
+              <Text>I posted it on {MARKETS.find((m) => m.id === mkt)?.short}</Text>
+            </Button>
+          )}
         </Animated.View>
       )}
     </Screen>

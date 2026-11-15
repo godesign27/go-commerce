@@ -10,7 +10,7 @@ import { MARKETS, type MarketId } from '@/src/model'
 export function IconBadge({ icon, size = 40, tone = 'accent' }: { icon: LucideIcon; size?: number; tone?: 'accent' | 'success' | 'muted' }) {
   return (
     <View
-      className={cn('items-center justify-center rounded-full', tone === 'success' ? 'bg-success-soft' : tone === 'muted' ? 'bg-muted' : 'bg-accent')}
+      className={cn('items-center justify-center rounded-full', tone === 'success' ? 'bg-success-soft' : tone === 'muted' ? 'bg-card border-border border' : 'bg-accent')}
       style={{ width: size, height: size }}
     >
       <Icon as={icon} size={Math.round(size * 0.48)} className={tone === 'success' ? 'text-success' : tone === 'muted' ? 'text-muted-foreground' : 'text-accent-foreground'} />

@@ -20,7 +20,7 @@ function Group({ title, footer, children }: { title: string; footer?: string; ch
 
 // R-31 · S-33 · DD-14 (Keep Undo), DD-35 (Apple's hidden email)
 export default function Profile() {
-  const { s, set, reset } = useStore()
+  const { s, set, reset, loadSamples } = useStore()
   const { colorScheme } = useColorScheme()
   const t = THEME[colorScheme === 'dark' ? 'dark' : 'light']
   const email = s.account?.email ?? 'Not signed in'
@@ -55,6 +55,16 @@ export default function Profile() {
         <ListRow title="How your data is used" chevron onPress={() => announce('Privacy details open here.')} />
         <ListRow title="Export all my data" chevron onPress={() => announce('Export opens here.')} />
         <ListRow title="Delete account and data" destructive onPress={() => announce('Delete asks you to confirm first.')} />
+      </Group>
+      <Group title="Prototype" footer="Adds 4 synthetic listings, including one sale, so you can try Mark sold, the checklist and Profit.">
+        <ListRow
+          title="Add sample listings"
+          onPress={() => {
+            loadSamples()
+            announce('4 sample listings added.')
+            router.navigate('/(tabs)/listings')
+          }}
+        />
       </Group>
       <Text className="text-muted-foreground text-center text-xs">Listly 0.1.0 · Prototype build</Text>
     </Screen>

@@ -42,7 +42,31 @@ export type Item = {
   /** `${market}|${field}` → copied, so the seller can see their progress. */
   copied: Record<string, boolean>
   listedOn: MarketId[]
+  /** ready: drafted, not posted yet. listed: live on at least one marketplace. sold: sold. */
+  status: 'ready' | 'listed' | 'sold'
+  sale?: Sale
+  /** Marketplaces the seller confirmed they took it down from after the sale (R-15). */
+  removed: MarketId[]
+  /** What the seller paid. null = not entered (profit is an estimate, never a silent $0). $0 is a real cost (DD-18). */
+  cost: number | null
+  history: string[]
 }
+
+export type ShipBy = 'buyer' | 'me' | 'free'
+
+export type Sale = {
+  on: MarketId
+  price: number
+  /** null, or amt null = shipping not entered: profit is an estimate (D-9, DD-13). */
+  ship: { by: ShipBy; amt: number | null } | null
+  date: string
+}
+
+/** Sold, but still live elsewhere: the double-sale risk the checklist exists for (R-15, D-2). */
+export const liveElsewhere = (it: Item): MarketId[] =>
+  it.status === 'sold' && it.sale ? it.listedOn.filter((m) => m !== it.sale!.on && !it.removed.includes(m)) : []
+
+export const today = () => new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
 
 export const emptyFacts = (bin: string): Facts => ({
   brand: '',

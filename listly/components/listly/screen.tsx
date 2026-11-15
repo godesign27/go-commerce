@@ -11,7 +11,8 @@ type Props = {
   /** Sticky actions above the home indicator. */
   footer?: ReactNode
   /** A back control. Its label names where it goes. */
-  back?: { label: string; onPress: () => void }
+  /** close: a modal's Cancel or Close, shown as text without a chevron (iOS convention). */
+  back?: { label: string; onPress: () => void; close?: boolean }
   navTitle?: string
   right?: ReactNode
   /** Grouped screens sit on muted, so white cards stand out. */
@@ -28,8 +29,8 @@ export function Screen({ children, footer, back, navTitle, right, tone = 'defaul
         <View className="h-11 flex-row items-center px-2">
           <View className="flex-1 flex-row">
             {back ? (
-              <Pressable accessibilityRole="button" accessibilityLabel={`Back to ${back.label}`} onPress={back.onPress} hitSlop={8} className="min-h-11 flex-row items-center pr-2 active:opacity-60">
-                <Icon as={ChevronLeft} size={26} className="text-primary" />
+              <Pressable accessibilityRole="button" accessibilityLabel={back.close ? back.label : `Back to ${back.label}`} onPress={back.onPress} hitSlop={8} className="min-h-11 flex-row items-center pr-2 active:opacity-60">
+                {back.close ? <View className="w-2" /> : <Icon as={ChevronLeft} size={26} className="text-primary" />}
                 <Text className="text-primary text-[17px]">{back.label}</Text>
               </Pressable>
             ) : null}

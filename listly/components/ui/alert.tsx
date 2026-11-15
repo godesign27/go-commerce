@@ -11,18 +11,21 @@ function Alert({
   children,
   icon,
   iconClassName,
+  textClassName,
   ...props
 }: React.ComponentProps<typeof View> & React.RefAttributes<View> & {
   icon: LucideIcon;
   variant?: 'default' | 'destructive';
   iconClassName?: string;
+  /** Listly: text styles for the title and description. Container classes (borders, backgrounds) no longer leak into the text. */
+  textClassName?: string;
 }) {
   return (
     <TextClassContext.Provider
       value={cn(
         'text-sm text-foreground',
         variant === 'destructive' && 'text-destructive',
-        className
+        textClassName
       )}>
       <View
         role="alert"

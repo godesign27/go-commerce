@@ -6,17 +6,17 @@ import { Card } from '@/components/ui/card'
 import { Icon } from '@/components/ui/icon'
 import { Text } from '@/components/ui/text'
 import { cn } from '@/lib/utils'
-import { marketName, type MarketId } from '@/src/model'
+import { liveElsewhere, marketName, type MarketId } from '@/src/model'
 import { useStore } from '@/src/store'
 import { announce, tap } from '@/src/ui/feedback'
 import { router } from 'expo-router'
-import { Camera, Link2, PartyPopper, RefreshCw, SlidersHorizontal, X } from 'lucide-react-native'
+import { Camera, Link2, Package, PartyPopper, RefreshCw, SlidersHorizontal, TriangleAlert, X } from 'lucide-react-native'
 import { Pressable, View } from 'react-native'
 import Animated, { FadeInDown } from 'react-native-reanimated'
 
 // R-29 · S-23, S-24 · DD-08, DD-42, DD-43
 export default function Home() {
-  const { s, set, startHaul } = useStore()
+  const { s, set, startHaul, loadSamples } = useStore()
   const newHaul = () => {
     tap()
     if (!s.haul) startHaul()
@@ -26,6 +26,7 @@ export default function Home() {
   const brandNew = !s.listings.length && !unfinished
   const showSetup = s.listings.length > 0 && !s.setupDismissed && !(s.defaultsSet && s.linkedShops > 0)
   const marketsLine = s.markets.length ? s.markets.map((m: MarketId) => marketName(m)).join(' · ') : 'All five marketplaces'
+  const atRisk = s.listings.filter((it) => liveElsewhere(it).length > 0)
 
   return (
     <Screen tone="grouped">
@@ -37,6 +38,28 @@ export default function Home() {
           <Text>{s.plan === 'reseller' ? 'Reseller plan' : s.plan === 'pass' ? 'Clear-out Pass' : 'Free trial'}</Text>
         </Badge>
       </View>
+
+      {/* R-29: Needs action comes first whenever a sold item is still live elsewhere. */}
+      {atRisk.length ? (
+        <Animated.View entering={FadeInDown.duration(280)}>
+          <View className="bg-card border-destructive gap-3 rounded-2xl border-2 p-4" accessibilityRole="alert">
+            <View className="flex-row items-center gap-2">
+              <Icon as={TriangleAlert} size={20} className="text-destructive" />
+              <Text role="heading" className="text-destructive text-lg font-bold">
+                Needs action
+              </Text>
+            </View>
+            {atRisk.slice(0, 3).map((it) => (
+              <Text key={it.id} className="text-base leading-6">
+                {it.name} sold on {marketName(it.sale!.on)}. It's still live on {liveElsewhere(it).map(marketName).join(' and ')}.
+              </Text>
+            ))}
+            <Button onPress={() => router.push({ pathname: '/checklist/[id]', params: { id: atRisk[0].id } })}>
+              <Text>Remove it now</Text>
+            </Button>
+          </View>
+        </Animated.View>
+      ) : null}
 
       {s.welcomePlan ? (
         <Animated.View entering={FadeInDown.duration(320)}>
@@ -77,6 +100,9 @@ export default function Home() {
             </Button>
             <Button variant="ghost" onPress={() => announce('The how-to video opens here.')}>
               <Text>Watch how Listly works (2 min)</Text>
+            </Button>
+            <Button variant="ghost" onPress={loadSamples}>
+              <Text>Try it with sample listings</Text>
             </Button>
           </Card>
         </Animated.View>
@@ -143,10 +169,26 @@ export default function Home() {
 
       {s.listings.length ? (
         <View className="gap-2">
-          <Overline>Ready to post</Overline>
+          <Overline
+            right={
+              <Button variant="link" size="sm" className="h-8 px-0" onPress={() => router.navigate('/(tabs)/listings')}>
+                <Text className="text-sm">See all</Text>
+              </Button>
+            }
+          >
+            Your items
+          </Overline>
           <ListGroup>
             {s.listings.slice(0, 6).map((it) => (
-              <ListRow key={it.id} title={it.name} subtitle={marketsLine} leading={<Thumb uri={it.photos[0]} size={44} radius={8} />} trailing={it.price ? `$${it.price}` : undefined} />
+              <ListRow
+                key={it.id}
+                title={it.name}
+                subtitle={it.status === 'sold' ? `Sold on ${marketName(it.sale!.on)}` : it.listedOn.length ? it.listedOn.map(marketName).join(' · ') : `Ready for ${marketsLine}`}
+                leading={it.photos.length ? <Thumb uri={it.photos[0]} size={44} radius={8} /> : <IconBadge icon={Package} size={44} tone="muted" />}
+                trailing={it.price ? `$${it.price}` : undefined}
+                chevron
+                onPress={() => router.push({ pathname: '/item/[id]', params: { id: it.id } })}
+              />
             ))}
           </ListGroup>
         </View>

@@ -16,7 +16,7 @@ export default function SetupDefaults() {
   const [bin, setBin] = useState(s.defaultBin)
   return (
     <Screen
-      back={{ label: 'Close', onPress: () => router.back() }}
+      back={{ label: 'Cancel', onPress: () => router.back(), close: true }}
       footer={
         <Button
           size="lg"

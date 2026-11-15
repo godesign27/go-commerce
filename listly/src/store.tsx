@@ -1,6 +1,6 @@
 import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from 'react'
 import { groupPhotos, nameFor } from './ai'
-import { emptyFacts, type Item, type MarketId, type Perm, type Plan } from './model'
+import { emptyFacts, today, type Item, type MarketId, type Perm, type Plan } from './model'
 
 type Account = { method: 'apple' | 'google' | 'email'; email: string } | null
 
@@ -64,10 +64,45 @@ type Store = {
   finishHaul: () => void
   buy: (plan: Exclude<Plan, null>) => void
   reset: () => void
+  updateListing: (id: string, patch: Partial<Item> | ((it: Item) => Partial<Item>)) => void
+  /** Replaces every listing at once. Undo uses it to restore a snapshot. */
+  setListings: (items: Item[]) => void
+  deleteListing: (id: string) => void
+  /** Prototype only: synthetic listings so the sold flow can be tried without photographing a haul. */
+  loadSamples: () => void
 }
 
 const Ctx = createContext<Store | null>(null)
 let seq = 0
+
+/** Synthetic sample listings (no real people or photos), for trying Listings, Mark sold, the checklist and Profit. */
+function sampleListings(): Item[] {
+  const base = (name: string, brand: string, size: string, cond: string, price: string, listedOn: MarketId[], cost: number | null, days: number): Item => ({
+    id: `sample${++seq}`,
+    photos: [],
+    name,
+    facts: { ...emptyFacts('B2'), brand, size, cond, noFlaws: true, source: 'typed' },
+    drafted: true,
+    price,
+    copied: {},
+    listedOn,
+    status: 'listed',
+    removed: [],
+    cost,
+    history: [`${days} days ago · Drafted`, `${days} days ago · Listed on ${listedOn.length} marketplaces`],
+  })
+  const sold = base('Corduroy jacket', 'Carhartt', 'L', 'Good', '58', ['poshmark', 'ebay', 'mercari'], 12, 9)
+  sold.status = 'sold'
+  sold.sale = { on: 'mercari', price: 55, ship: { by: 'buyer', amt: 0 }, date: 'Nov 12' }
+  sold.removed = ['poshmark', 'ebay']
+  sold.history.push('Nov 12 · Sold on Mercari for $55.00', 'Nov 12 · Removed from Poshmark and eBay')
+  return [
+    base('Denim trucker jacket', "Levi's", 'M', 'Good', '48', ['poshmark', 'ebay', 'mercari'], 9, 6),
+    base('Leather crossbody bag', 'Coach', 'One size', 'Good', '65', ['poshmark', 'ebay'], null, 12),
+    base('Band tee', 'Gildan', 'L', 'Like new', '22', ['depop', 'mercari'], 3, 34),
+    sold,
+  ]
+}
 
 export function StoreProvider({ children }: { children: ReactNode }) {
   const [s, setS] = useState<AppState>(initial)
@@ -93,6 +128,10 @@ export function StoreProvider({ children }: { children: ReactNode }) {
             price: '',
             copied: {},
             listedOn: [],
+            status: 'ready',
+            removed: [],
+            cost: null,
+            history: [],
           }))
           return { ...p, haul: { ...p.haul, items, factIdx: 0 } }
         }),
@@ -119,11 +158,23 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       finishHaul: () =>
         setS((p) => ({
           ...p,
-          listings: p.haul ? [...p.haul.items.filter((i) => i.drafted), ...p.listings] : p.listings,
+          listings: p.haul
+            ? [
+                ...p.haul.items
+                  .filter((i) => i.drafted)
+                  .map((i) => ({ ...i, status: i.listedOn.length ? ('listed' as const) : ('ready' as const), history: [...i.history, `${today()} · Drafted`] })),
+                ...p.listings,
+              ]
+            : p.listings,
           haul: null,
         })),
       buy: (plan) => setS((p) => ({ ...p, plan, welcomePlan: plan })),
       reset: () => setS(initial),
+      updateListing: (id, patch) =>
+        setS((p) => ({ ...p, listings: p.listings.map((it) => (it.id === id ? { ...it, ...(typeof patch === 'function' ? patch(it) : patch) } : it)) })),
+      setListings: (items) => setS((p) => ({ ...p, listings: items })),
+      deleteListing: (id) => setS((p) => ({ ...p, listings: p.listings.filter((it) => it.id !== id) })),
+      loadSamples: () => setS((p) => ({ ...p, listings: [...sampleListings(), ...p.listings] })),
     }),
     [s, set, patchHaul],
   )

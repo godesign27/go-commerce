@@ -32,9 +32,10 @@ export default function TabsLayout() {
         options={{
           title: 'New haul',
           tabBarAccessibilityLabel: 'New haul',
+          tabBarLabel: () => null,
           tabBarIcon: () => (
-            <View className="bg-primary -mt-4 size-[52px] items-center justify-center rounded-full shadow-lg shadow-black/20">
-              <Icon as={Plus} size={28} className="text-primary-foreground" />
+            <View className="bg-primary mt-3 size-12 items-center justify-center rounded-full shadow-md shadow-black/20">
+              <Icon as={Plus} size={26} className="text-primary-foreground" />
             </View>
           ),
         }}
