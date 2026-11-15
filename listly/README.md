@@ -25,3 +25,24 @@ replace it with server-verified App Store and Google Play purchases.
 
 Still stand-ins: speech recognition, AI grouping and drafting, purchases, Google sign-in. Each is marked
 `STAND-IN` or `PROTOTYPE` in the code.
+
+## Safari extension (development build)
+
+The Listly Safari extension (`targets/safari`, DD-46) fills Poshmark, Mercari and Facebook Marketplace sell pages. It needs a development build; Expo Go can't load it.
+
+Simulator, without an Apple developer team:
+
+```bash
+npx expo prebuild -p ios --clean
+cd ios && xcodebuild -workspace Listly.xcworkspace -scheme Listly -configuration Debug \
+  -sdk iphonesimulator -destination 'name=iPhone 17 Pro' -derivedDataPath build \
+  CODE_SIGNING_ALLOWED=NO build
+cd build/Build/Products/Debug-iphonesimulator
+codesign --force --sign - Listly.app/PlugIns/ListlySafari.appex && codesign --force --sign - Listly.app
+xcrun simctl install booted Listly.app
+npx expo start --dev-client
+```
+
+Safari won't enable an unsigned extension, so the two ad-hoc `codesign` lines matter. Then: Settings → Apps → Safari → Extensions → Listly → Allow Extension, and set each marketplace site to Allow.
+
+`patches/expo-modules-jsi+58.0.23.patch` (applied on `npm install`) works around a Swift 6 data-race error under Xcode 26.3 in one line of `JavaScriptObject.swift`. Remove it once Expo ships a fixed `expo-modules-jsi`.

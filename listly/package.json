@@ -12,7 +12,8 @@
     "typecheck": "tsc --noEmit && npm run typecheck --workspace @go-commerce/mobile-design-system",
     "validate": "npm run validate --workspace @go-commerce/mobile-design-system",
     "bundle:ios": "expo export --platform ios",
-    "web": "expo start --web"
+    "web": "expo start --web",
+    "postinstall": "patch-package"
   },
   "dependencies": {
     "@expo/metro-runtime": "~58.0.17",
@@ -32,7 +33,7 @@
     "@supabase/supabase-js": "^2.119.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
-    "expo": "~58.0.24",
+    "expo": "~58.0.25",
     "expo-apple-authentication": "~58.0.3",
     "expo-audio": "~58.0.12",
     "expo-camera": "~58.0.14",
@@ -66,6 +67,7 @@
   "devDependencies": {
     "@bacons/apple-targets": "^5.0.0",
     "@types/react": "^19.0.0",
+    "patch-package": "^8.0.1",
     "tailwindcss": "^3.4.19",
     "typescript": "~5.9.3"
   }
