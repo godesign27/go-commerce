@@ -1,18 +1,17 @@
 # Listly
 
-The Expo start screen previews the shared GO Mobile Design System. It follows system appearance and provides a button counter to demonstrate enabled and disabled states.
+The Listly mobile app (Expo, iOS first). Screens follow the detailed design in
+`docs/design/listly-mvp-1/` and use **shadcn/ui for React Native** (React Native Reusables, NativeWind,
+Lucide icons). Components live in `components/ui/` and are owned by this app: edit them, don't wrap them.
 
-From the Listly folder, run `npm ci` and `npm start`. Use `npm run web` for the browser or `npm run ios` on a Mac with an iOS simulator set up.
+From this folder: `npm ci`, then `npx expo start --ios`.
 
-```sh
-npm run validate
-npm run typecheck
-npm run bundle:ios
-```
+- `app/` — routes (Expo Router): onboarding, the haul (full screen), tabs, paywall.
+- `components/ui/` — shadcn components, tuned for touch (44 pt minimum, 48–56 pt main buttons).
+- `components/listly/` — Listly's shared pieces built on them (screen layout, list rows, chips, thumbnails).
+- `global.css` — the theme: shadcn slate neutrals, blue as the only action colour, green and red for status.
+- `src/` — app state, permissions, and the AI stand-ins (`src/ai.ts`) until the backend exists.
+- `DEV_ACCOUNTS.md` — the test sign-in for development builds.
 
-## iOS acceptance
-
-- Switch system appearance with the app open. The background, card, button, and status bar should update and retain the counter value.
-- Activate the enabled button once. The counter should increment once. The disabled button should leave it unchanged.
-- With VoiceOver, check the heading and the button labels, roles, and disabled state.
-- At the largest accessibility text size, check that labels wrap, content scrolls, and the buttons remain at least 44 × 44 points.
+Not built yet: the backend (proposed: Supabase, with Resend for email), real speech recognition, drafting
+and purchases. Each stand-in is marked `STAND-IN` in the code.

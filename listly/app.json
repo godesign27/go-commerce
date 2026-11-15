@@ -8,6 +8,43 @@
       "ios",
       "android",
       "web"
-    ]
+    ],
+    "plugins": [
+      "expo-router",
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Listly uses the camera to photograph the items you're selling.",
+          "microphonePermission": false,
+          "recordAudioAndroid": false
+        }
+      ],
+      [
+        "expo-audio",
+        {
+          "microphonePermission": "Listly uses the microphone so you can say each item's brand, size and condition."
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Listly adds the photos you pick to your haul."
+        }
+      ],
+      "expo-apple-authentication",
+      "expo-status-bar"
+    ],
+    "scheme": "listly",
+    "ios": {
+      "supportsTablet": false,
+      "usesAppleSignIn": true,
+      "bundleIdentifier": "com.gocommerce.listly"
+    },
+    "android": {
+      "package": "com.gocommerce.listly"
+    },
+    "experiments": {
+      "typedRoutes": false
+    }
   }
 }
