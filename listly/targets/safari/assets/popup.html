@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Listly</title>
+    <style>
+        :root { color-scheme: light dark; --fg: #121821; --muted: #525d6c; --bg: #ffffff; }
+        @media (prefers-color-scheme: dark) { :root { --fg: #e9edf3; --muted: #a4aebc; --bg: #141922; } }
+        body { margin: 0; padding: 16px; width: 280px; font: 15px/1.45 -apple-system, system-ui, sans-serif; color: var(--fg); background: var(--bg); }
+        h1 { font-size: 17px; margin: 0 0 8px; }
+        p { margin: 0 0 8px; color: var(--muted); }
+        strong { color: var(--fg); }
+    </style>
+</head>
+<body>
+    <h1>Listly</h1>
+    <p>In the Listly app, open a listing and tap <strong>Fill on Poshmark</strong> (or Mercari, or Facebook).</p>
+    <p>Listly fills the sell page here in Safari. <strong>You check it and tap List yourself.</strong></p>
+    <p>Listly never sees your marketplace passwords.</p>
+    <script type="module" src="popup.js"></script>
+</body>
+</html>
